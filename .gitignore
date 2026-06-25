@@ -1,0 +1,10 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+data/
+uploads/homeworks/*
+!uploads/homeworks/.gitkeep
+client/dist/
+*.db
+*.db-journal
+.env

@@ -1,0 +1,29 @@
+{
+  "name": "cosmo-crm",
+  "version": "1.0.0",
+  "description": "Self-hosted CRM and WhatsApp automation for Cosmo Chess Academy",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"node server/index.js\" \"cd client && npx vite --port 5173\"",
+    "server": "node server/index.js",
+    "seed": "node server/seed.js",
+    "client:dev": "cd client && npx vite --port 5173",
+    "client:build": "cd client && npx vite build",
+    "start": "NODE_ENV=production node server/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "uuid": "^10.0.0",
+    "whatsapp-web.js": "^1.26.0",
+    "qrcode": "^1.5.4",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
