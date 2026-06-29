@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== THEME 1: Warm Cream & Walnut ===== */
+[data-theme="warm"] {
+  --primary: #f5f0e8;
+  --secondary: #ebe4d6;
+  --accent: #8b6914;
+  --accent-light: #c9a84c;
+  --accent-rgb: 139, 105, 20;
+  --text: #2c2417;
+  --text-muted: #7a6e5d;
+  --bg-dark: #faf7f2;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f9f5ed;
+  --white: #ffffff;
+  --success: #2e7d32;
+  --hero-bg: radial-gradient(ellipse at center, #f5f0e8 0%, #ebe4d6 70%);
+  --navbar-bg: rgba(250, 247, 242, 0.95);
+  --mobile-menu-bg: rgba(250, 247, 242, 0.98);
+  --border-color: rgba(44, 36, 23, 0.1);
+  --border-color-light: rgba(44, 36, 23, 0.06);
+  --card-shadow: rgba(44, 36, 23, 0.08);
+  --btn-text: #ffffff;
+  --gradient-start: #8b6914;
+  --gradient-end: #b8943f;
+  --chess-opacity: 0.08;
+  --input-bg: rgba(44, 36, 23, 0.04);
+  --input-border: rgba(44, 36, 23, 0.12);
+  --featured-gradient: linear-gradient(180deg, rgba(139, 105, 20, 0.06), #ffffff);
+  --select-arrow: %23706050;
+}
+
+/* ===== THEME 2: Cool Slate & Blue ===== */
+[data-theme="cool"] {
+  --primary: #f0f2f5;
+  --secondary: #e4e8ed;
+  --accent: #2563eb;
+  --accent-light: #60a5fa;
+  --accent-rgb: 37, 99, 235;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --white: #ffffff;
+  --success: #16a34a;
+  --hero-bg: radial-gradient(ellipse at center, #eef2f7 0%, #dfe6ee 70%);
+  --navbar-bg: rgba(248, 250, 252, 0.95);
+  --mobile-menu-bg: rgba(248, 250, 252, 0.98);
+  --border-color: rgba(30, 41, 59, 0.1);
+  --border-color-light: rgba(30, 41, 59, 0.05);
+  --card-shadow: rgba(30, 41, 59, 0.06);
+  --btn-text: #ffffff;
+  --gradient-start: #2563eb;
+  --gradient-end: #60a5fa;
+  --chess-opacity: 0.06;
+  --input-bg: rgba(30, 41, 59, 0.04);
+  --input-border: rgba(30, 41, 59, 0.12);
+  --featured-gradient: linear-gradient(180deg, rgba(37, 99, 235, 0.05), #ffffff);
+  --select-arrow: %2364748b;
+}
+
+/* ===== THEME 3: Emerald & Marble ===== */
+[data-theme="emerald"] {
+  --primary: #f0f5f1;
+  --secondary: #e2ece5;
+  --accent: #166534;
+  --accent-light: #4ade80;
+  --accent-rgb: 22, 101, 52;
+  --text: #1a2e1f;
+  --text-muted: #5c7a63;
+  --bg-dark: #f7faf8;
+  --bg-card: #ffffff;
+  --bg-card-hover: #eef5f0;
+  --white: #ffffff;
+  --success: #15803d;
+  --hero-bg: radial-gradient(ellipse at center, #edf4ef 0%, #dce8df 70%);
+  --navbar-bg: rgba(247, 250, 248, 0.95);
+  --mobile-menu-bg: rgba(247, 250, 248, 0.98);
+  --border-color: rgba(26, 46, 31, 0.1);
+  --border-color-light: rgba(26, 46, 31, 0.05);
+  --card-shadow: rgba(26, 46, 31, 0.06);
+  --btn-text: #ffffff;
+  --gradient-start: #166534;
+  --gradient-end: #22c55e;
+  --chess-opacity: 0.07;
+  --input-bg: rgba(26, 46, 31, 0.04);
+  --input-border: rgba(26, 46, 31, 0.12);
+  --featured-gradient: linear-gradient(180deg, rgba(22, 101, 52, 0.05), #ffffff);
+  --select-arrow: %235c7a63;
+}
+
+/* ===== THEME 4: Dark Gold (Original) ===== */
+[data-theme="dark-gold"] {
+  --primary: #1a1a2e;
+  --secondary: #16213e;
+  --accent: #c9a84c;
+  --accent-light: #e8d5a3;
+  --accent-rgb: 201, 168, 76;
+  --text: #f0f0f0;
+  --text-muted: #a0a0b0;
+  --bg-dark: #0f0f1a;
+  --bg-card: #1e1e35;
+  --bg-card-hover: #282845;
+  --white: #ffffff;
+  --success: #4caf50;
+  --hero-bg: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1a 70%);
+  --navbar-bg: rgba(15, 15, 26, 0.95);
+  --mobile-menu-bg: rgba(15, 15, 26, 0.98);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color-light: rgba(255, 255, 255, 0.05);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --btn-text: #0f0f1a;
+  --gradient-start: #c9a84c;
+  --gradient-end: #e8d5a3;
+  --chess-opacity: 0.12;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --featured-gradient: linear-gradient(180deg, rgba(201, 168, 76, 0.08), #1e1e35);
+  --select-arrow: %23a0a0b0;
+}
+
+/* ===== THEME 5: Dark Blue ===== */
+[data-theme="dark-blue"] {
+  --primary: #111827;
+  --secondary: #0f172a;
+  --accent: #3b82f6;
+  --accent-light: #93c5fd;
+  --accent-rgb: 59, 130, 246;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --bg-dark: #0b1120;
+  --bg-card: #1e293b;
+  --bg-card-hover: #273548;
+  --white: #ffffff;
+  --success: #22c55e;
+  --hero-bg: radial-gradient(ellipse at center, #111827 0%, #0b1120 70%);
+  --navbar-bg: rgba(11, 17, 32, 0.95);
+  --mobile-menu-bg: rgba(11, 17, 32, 0.98);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color-light: rgba(255, 255, 255, 0.05);
+  --card-shadow: rgba(0, 0, 0, 0.35);
+  --btn-text: #ffffff;
+  --gradient-start: #3b82f6;
+  --gradient-end: #93c5fd;
+  --chess-opacity: 0.1;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --featured-gradient: linear-gradient(180deg, rgba(59, 130, 246, 0.08), #1e293b);
+  --select-arrow: %2394a3b8;
+}
+
+/* ===== THEME 6: Dark Emerald ===== */
+[data-theme="dark-emerald"] {
+  --primary: #0f1f15;
+  --secondary: #0a1a10;
+  --accent: #22c55e;
+  --accent-light: #86efac;
+  --accent-rgb: 34, 197, 94;
+  --text: #e4f0e8;
+  --text-muted: #8aab93;
+  --bg-dark: #081210;
+  --bg-card: #142a1d;
+  --bg-card-hover: #1d3828;
+  --white: #ffffff;
+  --success: #4ade80;
+  --hero-bg: radial-gradient(ellipse at center, #0f1f15 0%, #081210 70%);
+  --navbar-bg: rgba(8, 18, 16, 0.95);
+  --mobile-menu-bg: rgba(8, 18, 16, 0.98);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color-light: rgba(255, 255, 255, 0.05);
+  --card-shadow: rgba(0, 0, 0, 0.35);
+  --btn-text: #081210;
+  --gradient-start: #22c55e;
+  --gradient-end: #86efac;
+  --chess-opacity: 0.1;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --featured-gradient: linear-gradient(180deg, rgba(34, 197, 94, 0.08), #142a1d);
+  --select-arrow: %238aab93;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background 0.4s, color 0.4s;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif;
+}

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/c/Users/Deniz Jafarzade/Desktop/Chess Project\" && ls)",
+      "Bash(npx create-react-app *)",
+      "Bash(npm install *)",
+      "Bash(npm start *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(node server/seed.js)",
+      "Bash(timeout 8 node server/index.js)",
+      "Bash(curl -s http://localhost:3001/api/reports/dashboard)",
+      "Bash(npx vite *)",
+      "Bash(node server/index.js)",
+      "Bash(curl -s http://localhost:3001/api/students)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'{len\\(d\\)} students'\\); [print\\(f' {s[\\\\\"name\\\\\"]} {s[\\\\\"surname\\\\\"]} - {s[\\\\\"payment_status\\\\\"]} \\({s[\\\\\"group_name\\\\\"]}\\)'\\) for s in d[:4]]\")",
+      "Bash(pkill -f \"node server/index.js\")",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"Server: %{http_code}\" http://localhost:3001/api/reports/dashboard)",
+      "Bash(curl -s -o /dev/null -w \"Client: %{http_code}\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/api/students)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/crm/)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(pkill -f \"node server/index\")",
+      "Bash(curl -s http://localhost:3001/crm/)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 28124)",
+      "Bash(curl -s http://localhost:3001/api/whatsapp/status)",
+      "Bash(awk '{print $5}')",
+      "Bash(taskkill //F //PID 3176)",
+      "Bash(ls \"/c/Program Files/Google/Chrome/Application/chrome.exe\" 2>/dev/null && echo \"FOUND\" || echo \"NOT FOUND\")",
+      "Bash(taskkill //F //PID 5060)"
+    ]
+  }
+}
