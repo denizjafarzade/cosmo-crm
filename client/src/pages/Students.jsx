@@ -2,8 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX } from 'react-icons/fi';
 import api from '../api';
 
-const LEVELS = ['beginner', 'intermediate', 'advanced'];
-const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', coach_id: '', group_id: '', notes: '' };
+// Level keys stored in the database. 'beginner', 'intermediate', 'advanced' are the
+// original values kept as-is for backward compatibility with existing student records.
+const LEVELS = ['new_to_chess', 'beginner', 'intermediate', 'advanced', 'expert', 'not_sure'];
+const LEVEL_LABELS = {
+  new_to_chess: 'New to Chess',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  expert: 'Expert',
+  not_sure: 'Not Sure',
+};
+const levelLabel = (level) => LEVEL_LABELS[level] || level;
+const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '' };
 
 export default function Students() {
   const [students, setStudents] = useState([]);
@@ -26,12 +37,17 @@ export default function Students() {
   useEffect(() => { load(); api.getGroups().then(setGroups); api.getCoaches().then(setCoaches); }, [load]);
 
   const openAdd = () => { setForm(EMPTY); setEditId(null); setModal('add'); };
-  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '' }); setEditId(s.id); setModal('edit'); };
+  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '' }); setEditId(s.id); setModal('edit'); };
   const openPay = (s) => { setEditId(s.id); setPayForm({ amount: '', notes: '' }); setModal('pay'); };
 
   const save = async (e) => {
     e.preventDefault();
-    const data = { ...form, coach_id: form.coach_id || null, group_id: form.group_id || null };
+    const data = {
+      ...form,
+      coach_id: form.coach_id || null,
+      group_id: form.group_id || null,
+      fide_rating: form.fide_rating === '' ? null : Number(form.fide_rating),
+    };
     if (editId) await api.updateStudent(editId, data);
     else await api.createStudent(data);
     setModal(null);
@@ -67,7 +83,7 @@ export default function Students() {
         <div className="filters-bar">
           <select className="form-input" value={filters.level} onChange={e => setFilters(f => ({ ...f, level: e.target.value }))}>
             <option value="">All Levels</option>
-            {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+            {LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}
           </select>
           <select className="form-input" value={filters.group_id} onChange={e => setFilters(f => ({ ...f, group_id: e.target.value }))}>
             <option value="">All Groups</option>
@@ -89,6 +105,7 @@ export default function Students() {
                 <tr>
                   <th>Name</th>
                   <th>Level</th>
+                  <th>FIDE Rating</th>
                   <th>Group</th>
                   <th>Payment</th>
                   <th>Lessons</th>
@@ -99,7 +116,8 @@ export default function Students() {
                 {students.map(s => (
                   <tr key={s.id}>
                     <td><strong>{s.name} {s.surname}</strong><br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span></td>
-                    <td><span className="badge blue">{s.level}</span></td>
+                    <td><span className="badge blue">{levelLabel(s.level)}</span></td>
+                    <td>{s.fide_rating != null ? s.fide_rating : 'No rating'}</td>
                     <td>{s.group_name || '—'}</td>
                     <td>{paymentBadge(s)}</td>
                     <td>{s.lessons_since_payment}</td>
@@ -133,8 +151,12 @@ export default function Students() {
                   <div className="form-group"><label>Parent WhatsApp</label><input className="form-input" value={form.parent_whatsapp} onChange={e => setForm(f => ({ ...f, parent_whatsapp: e.target.value }))} placeholder="994501234567" /></div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>Level</label><select className="form-input" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>{LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</select></div>
+                  <div className="form-group"><label>Level</label><select className="form-input" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>{LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}</select></div>
                   <div className="form-group"><label>Group</label><select className="form-input" value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: e.target.value }))}><option value="">None</option>{groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+                </div>
+                <div className="form-group">
+                  <label>FIDE Rating</label>
+                  <input className="form-input" type="number" value={form.fide_rating} onChange={e => setForm(f => ({ ...f, fide_rating: e.target.value }))} placeholder="Empty = no official FIDE rating" />
                 </div>
                 <div className="form-group"><label>Coach</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">None</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
                 <div className="form-group"><label>Notes</label><textarea className="form-input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>

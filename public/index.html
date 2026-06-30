@@ -58,23 +58,65 @@
     .nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; column-gap: 1.5rem;
       background: var(--nav-bg); backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
     .nav-brand {
       display: flex; align-items: center; gap: 0.6rem;
       text-decoration: none; color: var(--text);
+      justify-self: start;
     }
     .nav-brand svg { width: 28px; height: 28px; fill: var(--accent); }
     .nav-brand span { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.2rem; }
     .nav-brand span em { color: var(--accent); font-style: normal; }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; justify-self: center; }
     .nav-links a {
       text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;
       transition: color 0.2s;
     }
     .nav-links a:hover { color: var(--primary); }
+    .nav-links a.active { color: var(--primary); }
+    .nav-utility { display: flex; align-items: center; gap: 0.9rem; justify-self: end; }
+    .lang-dropdown { position: relative; }
+    .lang-dropdown-btn {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-family: inherit; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3px;
+      padding: 0.45rem 0.7rem; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    }
+    .lang-dropdown-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .lang-dropdown.open .lang-dropdown-btn { border-color: var(--primary); color: var(--primary); background: var(--icon-bg); }
+    .lang-dropdown-icon { width: 15px; height: 15px; flex-shrink: 0; }
+    .lang-dropdown-code { line-height: 1; }
+    .lang-dropdown-caret { font-size: 0.55rem; line-height: 1; transition: transform 0.2s; }
+    .lang-dropdown.open .lang-dropdown-caret { transform: rotate(180deg); }
+
+    .lang-dropdown-menu {
+      position: absolute; top: calc(100% + 0.6rem); right: 0; z-index: 150;
+      min-width: 175px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; box-shadow: 0 14px 34px var(--card-shadow);
+      list-style: none; margin: 0; padding: 0.4rem;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+    .lang-dropdown.open .lang-dropdown-menu {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0);
+    }
+    .lang-option {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      font-family: inherit; font-size: 0.85rem; font-weight: 500; text-align: left;
+      padding: 0.55rem 0.7rem; border-radius: 8px; border: none;
+      background: transparent; color: var(--text); cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .lang-option:hover { background: var(--icon-bg); }
+    .lang-option.active { color: var(--primary); font-weight: 600; }
+    .lang-option-check { font-size: 0.8rem; color: var(--primary); opacity: 0; transition: opacity 0.15s; }
+    .lang-option.active .lang-option-check { opacity: 1; }
+    @media (max-width: 420px) {
+      .lang-dropdown-menu { min-width: 155px; right: -0.5rem; }
+    }
     .nav-cta {
       padding: 0.5rem 1.25rem; background: var(--primary); color: var(--white);
       border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
@@ -366,14 +408,27 @@
     <svg viewBox="0 0 24 24"><path d="M19 22H5a2 2 0 01-2-2V4a2 2 0 012-2h14a2 2 0 012 2v16a2 2 0 01-2 2zM12 6l-3 4h2v4h2v-4h2l-3-4z"/></svg>
     <span>Cosmo <em>Chess</em></span>
   </a>
-  <ul class="nav-links">
-    <li><a href="#levels">Levels</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#features">Why Us</a></li>
-    <li><a href="#contact">Contact</a></li>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#levels" data-i18n="nav.levels">Levels</a></li>
+    <li><a href="#about" data-i18n="nav.about">About</a></li>
+    <li><a href="#features" data-i18n="nav.whyUs">Why Us</a></li>
+    <li><a href="#testimonials" data-i18n="nav.reviews">Reviews</a></li>
+    <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
   </ul>
-  <a href="#contact" class="nav-cta">Start Learning</a>
-  <button class="mobile-menu-btn" onclick="this.previousElementSibling.previousElementSibling.style.display = this.previousElementSibling.previousElementSibling.style.display === 'flex' ? 'none' : 'flex'">&#9776;</button>
+  <div class="nav-utility">
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" type="button" aria-haspopup="true" aria-expanded="false">
+        <svg class="lang-dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="lang-dropdown-code" id="langCurrentCode">EN</span><span class="lang-dropdown-caret">▼</span>
+      </button>
+      <ul class="lang-dropdown-menu" id="langDropdownMenu" role="menu">
+        <li role="none"><button class="lang-option" type="button" role="menuitem" data-lang="en">English<span class="lang-option-check">✓</span></button></li>
+        <li role="none"><button class="lang-option" type="button" role="menuitem" data-lang="az">Azərbaycan<span class="lang-option-check">✓</span></button></li>
+        <li role="none"><button class="lang-option" type="button" role="menuitem" data-lang="ru">Русский<span class="lang-option-check">✓</span></button></li>
+      </ul>
+    </div>
+    <a href="#contact" class="nav-cta" data-i18n="common.startLearning">Start Learning</a>
+    <button class="mobile-menu-btn" onclick="var nl=document.getElementById('navLinks'); nl.style.display = nl.style.display === 'flex' ? 'none' : 'flex';">&#9776;</button>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -392,17 +447,17 @@
   </div>
   <div class="hero-content">
     <div class="hero-badge">Cosmo Chess Academy</div>
-    <h1>Master the Art of <em>Chess</em></h1>
-    <p>Professional chess training for all levels. Develop strategic thinking, build confidence, and achieve tournament success with personalized coaching.</p>
+    <h1 data-i18n="hero.title">Master the Art of <em>Chess</em></h1>
+    <p data-i18n="hero.subtitle">Professional chess training for all levels. Develop strategic thinking, build confidence, and achieve tournament success with personalized coaching.</p>
     <div class="hero-btns">
-      <a href="#contact" class="btn-hero primary">&#9823; Start Learning</a>
-      <a href="#about" class="btn-hero outline">Meet Your Coach</a>
+      <a href="#contact" class="btn-hero primary">&#9823; <span data-i18n="common.startLearning">Start Learning</span></a>
+      <a href="#about" class="btn-hero outline" data-i18n="hero.ctaSecondary">Meet Your Coach</a>
     </div>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="num">8+</div><div class="label">Years Experience</div></div>
-      <div class="hero-stat"><div class="num">200+</div><div class="label">Students Trained</div></div>
-      <div class="hero-stat"><div class="num">50+</div><div class="label">Tournament Wins</div></div>
-      <div class="hero-stat"><div class="num">4.9</div><div class="label">Parent Rating</div></div>
+      <div class="hero-stat"><div class="num">8+</div><div class="label" data-i18n="stats.experience">Years Experience</div></div>
+      <div class="hero-stat"><div class="num">200+</div><div class="label" data-i18n="stats.students">Students Trained</div></div>
+      <div class="hero-stat"><div class="num">50+</div><div class="label" data-i18n="stats.tournaments">Tournament Wins</div></div>
+      <div class="hero-stat"><div class="num">4.9</div><div class="label" data-i18n="stats.rating">Parent Rating</div></div>
     </div>
   </div>
 </section>
@@ -411,29 +466,29 @@
 <div class="section-alt" id="levels">
   <div class="section">
     <div class="section-header">
-      <span class="section-tag">Programs</span>
-      <h2>Levels We Teach</h2>
+      <span class="section-tag" data-i18n="levels.tag">Programs</span>
+      <h2 data-i18n="levels.title">Levels We Teach</h2>
       <hr class="divider" />
-      <p>Structured programs for every stage of your chess journey</p>
+      <p data-i18n="levels.subtitle">Structured programs for every stage of your chess journey</p>
     </div>
     <div class="levels-grid">
       <div class="level-card">
         <div class="level-icon">♟️</div>
-        <h3>Beginner</h3>
-        <p>Learn the rules, basic tactics, opening principles, and develop strong chess fundamentals. Perfect for complete beginners and new players.</p>
-        <span class="level-badge beginner">New to Chess – ~800</span>
+        <h3 data-i18n="levels.beginner.title">Beginner</h3>
+        <p data-i18n="levels.beginner.desc">Learn the rules, basic tactics, opening principles, and develop strong chess fundamentals. Perfect for complete beginners and new players.</p>
+        <span class="level-badge beginner" data-i18n="levels.beginner.badge">New to Chess – ~800</span>
       </div>
       <div class="level-card">
         <div class="level-icon">♞</div>
-        <h3>Intermediate</h3>
-        <p>Improve tactical vision, positional understanding, endgames, and opening repertoire while building confidence for competitive play.</p>
-        <span class="level-badge intermediate">~800–1400</span>
+        <h3 data-i18n="levels.intermediate.title">Intermediate</h3>
+        <p data-i18n="levels.intermediate.desc">Improve tactical vision, positional understanding, endgames, and opening repertoire while building confidence for competitive play.</p>
+        <span class="level-badge intermediate" data-i18n="levels.intermediate.badge">~800–1400</span>
       </div>
       <div class="level-card">
         <div class="level-icon">♛</div>
-        <h3>Advanced</h3>
-        <p>Master advanced strategy, calculation, psychological preparation, and tournament performance with personalized coaching.</p>
-        <span class="level-badge advanced">1400+</span>
+        <h3 data-i18n="levels.advanced.title">Advanced</h3>
+        <p data-i18n="levels.advanced.desc">Master advanced strategy, calculation, psychological preparation, and tournament performance with personalized coaching.</p>
+        <span class="level-badge advanced" data-i18n="levels.advanced.badge">1400+</span>
       </div>
     </div>
   </div>
@@ -443,36 +498,36 @@
 <div id="about">
   <div class="section">
     <div class="section-header">
-      <span class="section-tag">Your Coach</span>
-      <h2>About Me</h2>
+      <span class="section-tag" data-i18n="about.tag">Your Coach</span>
+      <h2 data-i18n="about.title">About Me</h2>
       <hr class="divider" />
     </div>
     <div class="about-grid">
       <div class="about-photo">
         <div class="about-photo-icon">♞</div>
-        <div class="about-photo-text">Coach Photo</div>
-        <div class="about-badge">FIDE Rated</div>
+        <div class="about-photo-text" data-i18n="about.photoText">Coach Photo</div>
+        <div class="about-badge" data-i18n="about.badge">FIDE Rated</div>
       </div>
       <div class="about-text">
-        <h3>Hi, I'm <em>Abdulla</em></h3>
-        <p>I'm a passionate chess coach dedicated to helping students of all ages unlock their potential. With years of competitive and teaching experience, I bring a structured yet engaging approach to every lesson.</p>
-        <p>At Cosmo Chess Academy, my mission is to make chess accessible and enjoyable while building skills that lead to real tournament success and personal growth.</p>
+        <h3 data-i18n="about.greeting">Hi, I'm <em>Abdulla</em></h3>
+        <p data-i18n="about.p1">I'm a passionate chess coach dedicated to helping students of all ages unlock their potential. With years of competitive and teaching experience, I bring a structured yet engaging approach to every lesson.</p>
+        <p data-i18n="about.p2">At Cosmo Chess Academy, my mission is to make chess accessible and enjoyable while building skills that lead to real tournament success and personal growth.</p>
         <div class="about-highlights">
           <div class="about-hl">
             <div class="about-hl-icon">🏆</div>
-            <div class="about-hl-text"><strong>Certified Chess Trainer</strong><span>Professional coaching certification</span></div>
+            <div class="about-hl-text"><strong data-i18n="about.hl1.title">Certified Chess Trainer</strong><span data-i18n="about.hl1.desc">Professional coaching certification</span></div>
           </div>
           <div class="about-hl">
             <div class="about-hl-icon">👥</div>
-            <div class="about-hl-text"><strong>All Ages Welcome</strong><span>Kids (5+), teenagers & adults</span></div>
+            <div class="about-hl-text"><strong data-i18n="about.hl2.title">All Ages Welcome</strong><span data-i18n="about.hl2.desc">Kids (5+), teenagers & adults</span></div>
           </div>
           <div class="about-hl">
             <div class="about-hl-icon">💻</div>
-            <div class="about-hl-text"><strong>Online & In-Person</strong><span>Flexible learning options</span></div>
+            <div class="about-hl-text"><strong data-i18n="about.hl3.title">Online & In-Person</strong><span data-i18n="about.hl3.desc">Flexible learning options</span></div>
           </div>
           <div class="about-hl">
             <div class="about-hl-icon">📚</div>
-            <div class="about-hl-text"><strong>Custom Materials</strong><span>Homework, puzzles & study plans included</span></div>
+            <div class="about-hl-text"><strong data-i18n="about.hl4.title">Custom Materials</strong><span data-i18n="about.hl4.desc">Homework, puzzles & study plans included</span></div>
           </div>
         </div>
       </div>
@@ -484,40 +539,40 @@
 <div class="section-alt" id="features">
   <div class="section">
     <div class="section-header">
-      <span class="section-tag">Why Choose Us</span>
-      <h2>What Makes Us Different</h2>
+      <span class="section-tag" data-i18n="features.tag">Why Choose Us</span>
+      <h2 data-i18n="features.title">What Makes Us Different</h2>
       <hr class="divider" />
     </div>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🎯</div>
-        <h3>Personalized Curriculum</h3>
-        <p>Every student gets a training plan tailored to their level, goals, and learning pace.</p>
+        <h3 data-i18n="features.f1.title">Personalized Curriculum</h3>
+        <p data-i18n="features.f1.desc">Every student gets a training plan tailored to their level, goals, and learning pace.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">👥</div>
-        <h3>Small Group Classes</h3>
-        <p>Interactive group lessons with 4–16 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.</p>
+        <h3 data-i18n="features.f2.title">Small Group Classes</h3>
+        <p data-i18n="features.f2.desc">Interactive group lessons with 4–16 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📝</div>
-        <h3>Weekly Homework</h3>
-        <p>Structured exercises, puzzles, and analysis tasks assigned after each lesson to reinforce what was learned.</p>
+        <h3 data-i18n="features.f3.title">Weekly Homework</h3>
+        <p data-i18n="features.f3.desc">Structured exercises, puzzles, and analysis tasks assigned after each lesson to reinforce what was learned.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🏆</div>
-        <h3>Tournament Preparation</h3>
-        <p>Focused training for competitive play — opening preparation, time management, calculation drills, and mental resilience.</p>
+        <h3 data-i18n="features.f4.title">Tournament Preparation</h3>
+        <p data-i18n="features.f4.desc">Focused training for competitive play — opening preparation, time management, calculation drills, and mental resilience.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">👨‍👩‍👧</div>
-        <h3>Parent Updates</h3>
-        <p>Regular progress reports and payment tracking so parents always know how their child is developing.</p>
+        <h3 data-i18n="features.f5.title">Parent Updates</h3>
+        <p data-i18n="features.f5.desc">Regular progress reports and payment tracking so parents always know how their child is developing.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">💬</div>
-        <h3>WhatsApp Integration</h3>
-        <p>Homework, lesson reminders, schedule updates, and all communication delivered conveniently through WhatsApp.</p>
+        <h3 data-i18n="features.f6.title">WhatsApp Integration</h3>
+        <p data-i18n="features.f6.desc">Homework, lesson reminders, schedule updates, and all communication delivered conveniently through WhatsApp.</p>
       </div>
     </div>
   </div>
@@ -527,14 +582,14 @@
 <div id="testimonials">
   <div class="section">
     <div class="section-header">
-      <span class="section-tag">Your Community</span>
-      <h2>What Our Students & Parents Say</h2>
+      <span class="section-tag" data-i18n="testimonials.tag">Your Community</span>
+      <h2 data-i18n="testimonials.title">What Our Students & Parents Say</h2>
       <hr class="divider" />
-      <p>See how students and parents have benefited from learning at Cosmo Chess Academy.</p>
+      <p data-i18n="testimonials.subtitle">See how students and parents have benefited from learning at Cosmo Chess Academy.</p>
     </div>
     <div class="testimonials-trust">
       <span class="trust-stars">★★★★★</span><span class="trust-rating">4.9/5</span>
-      <div class="trust-sub">Based on 200+ students and parents</div>
+      <div class="trust-sub" data-i18n="testimonials.trustSub">Based on 200+ students and parents</div>
     </div>
     <div class="carousel-viewport" id="carouselWrapper">
       <div class="carousel-fade-left"></div>
@@ -545,65 +600,65 @@
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"My daughter became much more confident after just a few months of lessons."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t1.text">"My daughter became much more confident after just a few months of lessons."</p>
             <div class="testimonial-author">Sarah M.</div>
-            <div class="testimonial-role">Parent of a 10-year-old</div>
+            <div class="testimonial-role" data-i18n="testimonials.t1.role">Parent of a 10-year-old</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"The lessons are structured, clear, and easy to follow."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t2.text">"The lessons are structured, clear, and easy to follow."</p>
             <div class="testimonial-author">David K.</div>
-            <div class="testimonial-role">Adult student</div>
+            <div class="testimonial-role" data-i18n="testimonials.t2.role">Adult student</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"Coach Abdulla explains difficult ideas in a simple way."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t3.text">"Coach Abdulla explains difficult ideas in a simple way."</p>
             <div class="testimonial-author">Aysel H.</div>
-            <div class="testimonial-role">Parent</div>
+            <div class="testimonial-role" data-i18n="testimonials.t3.role">Parent</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"The group lessons are motivating, but students still get personal attention."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t4.text">"The group lessons are motivating, but students still get personal attention."</p>
             <div class="testimonial-author">Michael T.</div>
-            <div class="testimonial-role">Parent</div>
+            <div class="testimonial-role" data-i18n="testimonials.t4.role">Parent</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"My rating improved and I understand my mistakes much better now."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t5.text">"My rating improved and I understand my mistakes much better now."</p>
             <div class="testimonial-author">Alex P.</div>
-            <div class="testimonial-role">Intermediate student</div>
+            <div class="testimonial-role" data-i18n="testimonials.t5.role">Intermediate student</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"The homework after each lesson helps my son stay consistent."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t6.text">"The homework after each lesson helps my son stay consistent."</p>
             <div class="testimonial-author">Nigar A.</div>
-            <div class="testimonial-role">Parent</div>
+            <div class="testimonial-role" data-i18n="testimonials.t6.role">Parent</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"The WhatsApp updates make it easy to follow the schedule and homework."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t7.text">"The WhatsApp updates make it easy to follow the schedule and homework."</p>
             <div class="testimonial-author">Kamran R.</div>
-            <div class="testimonial-role">Parent</div>
+            <div class="testimonial-role" data-i18n="testimonials.t7.role">Parent</div>
           </div>
         </div>
         <div class="carousel-slide">
           <div class="testimonial-card">
             <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"I like how every lesson has a clear goal and practical exercises."</p>
+            <p class="testimonial-text" data-i18n="testimonials.t8.text">"I like how every lesson has a clear goal and practical exercises."</p>
             <div class="testimonial-author">Leyla S.</div>
-            <div class="testimonial-role">Student</div>
+            <div class="testimonial-role" data-i18n="testimonials.t8.role">Student</div>
           </div>
         </div>
       </div>
@@ -616,59 +671,59 @@
 <div id="contact">
   <div class="section">
     <div class="section-header">
-      <span class="section-tag">Get Started</span>
-      <h2>Contact Us</h2>
+      <span class="section-tag" data-i18n="contact.tag">Get Started</span>
+      <h2 data-i18n="contact.title">Contact Us</h2>
       <hr class="divider" />
     </div>
     <div class="contact-grid">
       <div class="contact-info">
-        <h3>Ready to Begin Your Chess Journey?</h3>
-        <p>Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.</p>
+        <h3 data-i18n="contact.subtitle">Ready to Begin Your Chess Journey?</h3>
+        <p data-i18n="contact.desc">Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.</p>
         <div class="contact-item">
           <div class="contact-icon">📱</div>
-          <div class="contact-text"><strong>WhatsApp</strong><span>+994 XX XXX XX XX</span></div>
+          <div class="contact-text"><strong data-i18n="contact.whatsappLabel">WhatsApp</strong><span>+994 XX XXX XX XX</span></div>
         </div>
         <div class="contact-item">
           <div class="contact-icon">✉️</div>
-          <div class="contact-text"><strong>Email</strong><span>info@cosmochess.academy</span></div>
+          <div class="contact-text"><strong data-i18n="contact.emailLabel">Email</strong><span>info@cosmochess.academy</span></div>
         </div>
         <div class="contact-item">
           <div class="contact-icon">📍</div>
-          <div class="contact-text"><strong>Location</strong><span>Baku, Azerbaijan</span></div>
+          <div class="contact-text"><strong data-i18n="contact.locationLabel">Location</strong><span data-i18n="contact.locationValue">Baku, Azerbaijan</span></div>
         </div>
         <div class="contact-item">
           <div class="contact-icon">🕐</div>
-          <div class="contact-text"><strong>Hours</strong><span>Mon–Sat, 10:00 – 20:00</span></div>
+          <div class="contact-text"><strong data-i18n="contact.hoursLabel">Hours</strong><span data-i18n="contact.hoursValue">Mon–Sat, 10:00 – 20:00</span></div>
         </div>
       </div>
       <div class="contact-form">
-        <form onsubmit="event.preventDefault(); var d=Object.fromEntries(new FormData(this)); var noFide=document.getElementById('noFideRating').checked; var chessLevel=d.level; var fideRating=noFide?null:(d.fideRating?Number(d.fideRating):null); var hasFideRating=!noFide&&d.fideRating!==''; var msg='New inquiry:\nName: '+d.name+'\nPhone: '+d.phone+'\nChess Level: '+chessLevel+'\nFIDE Rating: '+(hasFideRating?fideRating:'N/A')+'\nMessage: '+d.message; window.open('https://wa.me/994XXXXXXXXX?text='+encodeURIComponent(msg),'_blank'); this.innerHTML='<div style=text-align:center;padding:2rem><h3>Thank you!</h3><p style=color:var(--text-muted)>We will contact you shortly via WhatsApp.</p></div>'; return false;">
+        <form id="contactForm" onsubmit="event.preventDefault(); var d=Object.fromEntries(new FormData(this)); var noFide=document.getElementById('noFideRating').checked; var chessLevel=d.level; var fideRating=noFide?null:(d.fideRating?Number(d.fideRating):null); var hasFideRating=!noFide&&d.fideRating!==''; var msg='New inquiry:\nName: '+d.name+'\nPhone: '+d.phone+'\nChess Level: '+chessLevel+'\nFIDE Rating: '+(hasFideRating?fideRating:'N/A')+'\nMessage: '+d.message; window.open('https://wa.me/994XXXXXXXXX?text='+encodeURIComponent(msg),'_blank'); window.showContactThankYou(this); return false;">
           <div class="form-row">
-            <div class="form-group"><label>Name *</label><input name="name" required placeholder="Your name" /></div>
-            <div class="form-group"><label>Phone *</label><input name="phone" required placeholder="+994 XX XXX XX XX" /></div>
+            <div class="form-group"><label data-i18n="contact.name">Name *</label><input name="name" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Your name" /></div>
+            <div class="form-group"><label data-i18n="contact.phone">Phone *</label><input name="phone" required data-i18n-placeholder="contact.phonePlaceholder" placeholder="+994 XX XXX XX XX" /></div>
           </div>
           <div class="form-group">
-            <label>Chess Level *</label>
+            <label data-i18n="contact.level">Chess Level *</label>
             <select name="level" required>
-              <option value="" disabled selected>Select your chess level</option>
-              <option value="New to Chess">New to Chess</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-              <option value="Expert">Expert</option>
-              <option value="Not Sure">Not Sure</option>
+              <option value="" disabled selected data-i18n="contact.levelPlaceholder">Select your chess level</option>
+              <option value="New to Chess" data-i18n="chessLevel.newToChess">New to Chess</option>
+              <option value="Beginner" data-i18n="chessLevel.beginner">Beginner</option>
+              <option value="Intermediate" data-i18n="chessLevel.intermediate">Intermediate</option>
+              <option value="Advanced" data-i18n="chessLevel.advanced">Advanced</option>
+              <option value="Expert" data-i18n="chessLevel.expert">Expert</option>
+              <option value="Not Sure" data-i18n="chessLevel.notSure">Not Sure</option>
             </select>
           </div>
           <div class="form-group">
-            <label>FIDE Rating (Optional)</label>
-            <input type="number" name="fideRating" id="fideRating" placeholder="e.g. 1650" min="0" max="3000" />
+            <label data-i18n="contact.fideRating">FIDE Rating (Optional)</label>
+            <input type="number" name="fideRating" id="fideRating" data-i18n-placeholder="contact.fideRatingPlaceholder" placeholder="e.g. 1650" min="0" max="3000" />
             <label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;font-weight:400;cursor:pointer;">
               <input type="checkbox" id="noFideRating" name="noFideRating" style="width:auto;accent-color:var(--primary);cursor:pointer;" onchange="var inp=document.getElementById('fideRating'); if(this.checked){inp.value='';inp.disabled=true;inp.style.opacity='0.5';}else{inp.disabled=false;inp.style.opacity='1';}">
-              I don't have an official FIDE rating
+              <span data-i18n="contact.noFideRating">I don't have an official FIDE rating</span>
             </label>
           </div>
-          <div class="form-group"><label>Message</label><textarea name="message" placeholder="Any questions or requests..."></textarea></div>
-          <button type="submit">Send & Contact via WhatsApp</button>
+          <div class="form-group"><label data-i18n="contact.message">Message</label><textarea name="message" data-i18n-placeholder="contact.messagePlaceholder" placeholder="Any questions or requests..."></textarea></div>
+          <button type="submit" data-i18n="contact.submit">Send & Contact via WhatsApp</button>
         </form>
       </div>
     </div>
@@ -680,27 +735,27 @@
   <div class="footer-inner">
     <div>
       <div class="footer-brand">Cosmo <em>Chess</em> Academy</div>
-      <p>Professional chess training for all ages. Building champions one move at a time.</p>
+      <p data-i18n="footer.tagline">Professional chess training for all ages. Building champions one move at a time.</p>
     </div>
     <div>
-      <h4>Links</h4>
+      <h4 data-i18n="footer.linksTitle">Links</h4>
       <ul>
-        <li><a href="#levels">Levels</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#features">Why Us</a></li>
-        <li><a href="#contact">Contact</a></li>
+        <li><a href="#levels" data-i18n="nav.levels">Levels</a></li>
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+        <li><a href="#features" data-i18n="nav.whyUs">Why Us</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
       </ul>
     </div>
     <div>
-      <h4>Contact</h4>
+      <h4 data-i18n="footer.contactTitle">Contact</h4>
       <ul>
         <li><a href="https://wa.me/994XXXXXXXXX">WhatsApp</a></li>
-        <li><a href="mailto:info@cosmochess.academy">Email</a></li>
-        <li><a href="#contact">Baku, Azerbaijan</a></li>
+        <li><a href="mailto:info@cosmochess.academy" data-i18n="footer.emailLink">Email</a></li>
+        <li><a href="#contact" data-i18n="contact.locationValue">Baku, Azerbaijan</a></li>
       </ul>
     </div>
   </div>
-  <div class="footer-bottom">&copy; 2026 Cosmo Chess Academy. All rights reserved.</div>
+  <div class="footer-bottom" data-i18n="footer.copyright">&copy; 2026 Cosmo Chess Academy. All rights reserved.</div>
 </footer>
 
 <!--
@@ -768,16 +823,16 @@
 </style>
 
 <div id="themeSwitcher">
-  <button class="theme-switcher-btn" id="themeToggleBtn">🎨 Themes</button>
+  <button class="theme-switcher-btn" id="themeToggleBtn" data-i18n="theme.toggleBtn">🎨 Themes</button>
   <div class="theme-panel" id="themePanel">
-    <div class="theme-panel-title">Color Theme</div>
+    <div class="theme-panel-title" data-i18n="theme.colorTheme">Color Theme</div>
     <div class="theme-grid" id="themeGrid"></div>
-    <div class="theme-panel-title">Mode</div>
+    <div class="theme-panel-title" data-i18n="theme.mode">Mode</div>
     <div class="theme-mode-toggle">
-      <button class="theme-mode-btn active" data-mode="light">☀️ Light</button>
-      <button class="theme-mode-btn" data-mode="dark">🌙 Dark</button>
+      <button class="theme-mode-btn active" data-mode="light" data-i18n="theme.light">☀️ Light</button>
+      <button class="theme-mode-btn" data-mode="dark" data-i18n="theme.dark">🌙 Dark</button>
     </div>
-    <button class="theme-reset" id="themeReset">↺ Reset to Classic Light</button>
+    <button class="theme-reset" id="themeReset" data-i18n="theme.reset">↺ Reset to Classic Light</button>
   </div>
 </div>
 <!-- THEME SWITCHER END -->
@@ -786,6 +841,477 @@
 <a href="https://wa.me/994XXXXXXXXX" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.553 4.115 1.519 5.845L.057 23.679l5.926-1.553A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-1.91 0-3.72-.53-5.3-1.53l-.38-.226-3.517.922.938-3.427-.25-.396A9.786 9.786 0 012.18 12c0-5.422 4.398-9.818 9.82-9.818 5.422 0 9.818 4.396 9.818 9.818 0 5.422-4.396 9.818-9.818 9.818z"/></svg>
 </a>
+
+<!--
+  ============================================================
+  MULTILINGUAL SUPPORT (EN / AZ / RU)
+  Translation dictionary + apply logic for the landing page.
+  See the I18N object below to add or edit translations —
+  each top-level key (en / az / ru) holds a flat map of
+  "section.key" -> translated string. Add a matching
+  data-i18n="section.key" attribute to any element to make it
+  translatable, or data-i18n-placeholder="section.key" for
+  input/textarea placeholders.
+  ============================================================
+-->
+<script id="i18n-data">
+  var I18N = {
+    en: {
+      'nav.levels': 'Levels',
+      'nav.about': 'About',
+      'nav.whyUs': 'Why Us',
+      'nav.reviews': 'Reviews',
+      'nav.contact': 'Contact',
+      'common.startLearning': 'Start Learning',
+
+      'hero.title': 'Master the Art of <em>Chess</em>',
+      'hero.subtitle': 'Professional chess training for all levels. Develop strategic thinking, build confidence, and achieve tournament success with personalized coaching.',
+      'hero.ctaSecondary': 'Meet Your Coach',
+
+      'stats.experience': 'Years Experience',
+      'stats.students': 'Students Trained',
+      'stats.tournaments': 'Tournament Wins',
+      'stats.rating': 'Parent Rating',
+
+      'levels.tag': 'Programs',
+      'levels.title': 'Levels We Teach',
+      'levels.subtitle': 'Structured programs for every stage of your chess journey',
+      'levels.beginner.title': 'Beginner',
+      'levels.beginner.desc': 'Learn the rules, basic tactics, opening principles, and develop strong chess fundamentals. Perfect for complete beginners and new players.',
+      'levels.beginner.badge': 'New to Chess – ~800',
+      'levels.intermediate.title': 'Intermediate',
+      'levels.intermediate.desc': 'Improve tactical vision, positional understanding, endgames, and opening repertoire while building confidence for competitive play.',
+      'levels.intermediate.badge': '~800–1400',
+      'levels.advanced.title': 'Advanced',
+      'levels.advanced.desc': 'Master advanced strategy, calculation, psychological preparation, and tournament performance with personalized coaching.',
+      'levels.advanced.badge': '1400+',
+
+      'about.tag': 'Your Coach',
+      'about.title': 'About Me',
+      'about.photoText': 'Coach Photo',
+      'about.badge': 'FIDE Rated',
+      'about.greeting': "Hi, I'm <em>Abdulla</em>",
+      'about.p1': "I'm a passionate chess coach dedicated to helping students of all ages unlock their potential. With years of competitive and teaching experience, I bring a structured yet engaging approach to every lesson.",
+      'about.p2': 'At Cosmo Chess Academy, my mission is to make chess accessible and enjoyable while building skills that lead to real tournament success and personal growth.',
+      'about.hl1.title': 'Certified Chess Trainer',
+      'about.hl1.desc': 'Professional coaching certification',
+      'about.hl2.title': 'All Ages Welcome',
+      'about.hl2.desc': 'Kids (5+), teenagers & adults',
+      'about.hl3.title': 'Online & In-Person',
+      'about.hl3.desc': 'Flexible learning options',
+      'about.hl4.title': 'Custom Materials',
+      'about.hl4.desc': 'Homework, puzzles & study plans included',
+
+      'features.tag': 'Why Choose Us',
+      'features.title': 'What Makes Us Different',
+      'features.f1.title': 'Personalized Curriculum',
+      'features.f1.desc': 'Every student gets a training plan tailored to their level, goals, and learning pace.',
+      'features.f2.title': 'Small Group Classes',
+      'features.f2.desc': 'Interactive group lessons with 4–16 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.',
+      'features.f3.title': 'Weekly Homework',
+      'features.f3.desc': 'Structured exercises, puzzles, and analysis tasks assigned after each lesson to reinforce what was learned.',
+      'features.f4.title': 'Tournament Preparation',
+      'features.f4.desc': 'Focused training for competitive play — opening preparation, time management, calculation drills, and mental resilience.',
+      'features.f5.title': 'Parent Updates',
+      'features.f5.desc': 'Regular progress reports and payment tracking so parents always know how their child is developing.',
+      'features.f6.title': 'WhatsApp Integration',
+      'features.f6.desc': 'Homework, lesson reminders, schedule updates, and all communication delivered conveniently through WhatsApp.',
+
+      'testimonials.tag': 'Your Community',
+      'testimonials.title': 'What Our Students & Parents Say',
+      'testimonials.subtitle': 'See how students and parents have benefited from learning at Cosmo Chess Academy.',
+      'testimonials.trustSub': 'Based on 200+ students and parents',
+      'testimonials.t1.text': '"My daughter became much more confident after just a few months of lessons."',
+      'testimonials.t1.role': 'Parent of a 10-year-old',
+      'testimonials.t2.text': '"The lessons are structured, clear, and easy to follow."',
+      'testimonials.t2.role': 'Adult student',
+      'testimonials.t3.text': '"Coach Abdulla explains difficult ideas in a simple way."',
+      'testimonials.t3.role': 'Parent',
+      'testimonials.t4.text': '"The group lessons are motivating, but students still get personal attention."',
+      'testimonials.t4.role': 'Parent',
+      'testimonials.t5.text': '"My rating improved and I understand my mistakes much better now."',
+      'testimonials.t5.role': 'Intermediate student',
+      'testimonials.t6.text': '"The homework after each lesson helps my son stay consistent."',
+      'testimonials.t6.role': 'Parent',
+      'testimonials.t7.text': '"The WhatsApp updates make it easy to follow the schedule and homework."',
+      'testimonials.t7.role': 'Parent',
+      'testimonials.t8.text': '"I like how every lesson has a clear goal and practical exercises."',
+      'testimonials.t8.role': 'Student',
+
+      'contact.tag': 'Get Started',
+      'contact.title': 'Contact Us',
+      'contact.subtitle': 'Ready to Begin Your Chess Journey?',
+      'contact.desc': "Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.",
+      'contact.whatsappLabel': 'WhatsApp',
+      'contact.emailLabel': 'Email',
+      'contact.locationLabel': 'Location',
+      'contact.locationValue': 'Baku, Azerbaijan',
+      'contact.hoursLabel': 'Hours',
+      'contact.hoursValue': 'Mon–Sat, 10:00 – 20:00',
+      'contact.name': 'Name *',
+      'contact.namePlaceholder': 'Your name',
+      'contact.phone': 'Phone *',
+      'contact.phonePlaceholder': '+994 XX XXX XX XX',
+      'contact.level': 'Chess Level *',
+      'contact.levelPlaceholder': 'Select your chess level',
+      'contact.fideRating': 'FIDE Rating (Optional)',
+      'contact.fideRatingPlaceholder': 'e.g. 1650',
+      'contact.noFideRating': "I don't have an official FIDE rating",
+      'contact.message': 'Message',
+      'contact.messagePlaceholder': 'Any questions or requests...',
+      'contact.submit': 'Send & Contact via WhatsApp',
+      'contact.thankYouTitle': 'Thank you!',
+      'contact.thankYouText': 'We will contact you shortly via WhatsApp.',
+
+      'chessLevel.newToChess': 'New to Chess',
+      'chessLevel.beginner': 'Beginner',
+      'chessLevel.intermediate': 'Intermediate',
+      'chessLevel.advanced': 'Advanced',
+      'chessLevel.expert': 'Expert',
+      'chessLevel.notSure': 'Not Sure',
+
+      'footer.tagline': 'Professional chess training for all ages. Building champions one move at a time.',
+      'footer.linksTitle': 'Links',
+      'footer.contactTitle': 'Contact',
+      'footer.emailLink': 'Email',
+      'footer.copyright': '&copy; 2026 Cosmo Chess Academy. All rights reserved.',
+
+      'theme.toggleBtn': '🎨 Themes',
+      'theme.colorTheme': 'Color Theme',
+      'theme.mode': 'Mode',
+      'theme.light': '☀️ Light',
+      'theme.dark': '🌙 Dark',
+      'theme.reset': '↺ Reset to Classic Light'
+    },
+
+    az: {
+      'nav.levels': 'Səviyyələr',
+      'nav.about': 'Haqqımızda',
+      'nav.whyUs': 'Niyə Biz',
+      'nav.reviews': 'Rəylər',
+      'nav.contact': 'Əlaqə',
+      'common.startLearning': 'Öyrənməyə Başla',
+
+      'hero.title': 'Şahmat Sənətinə <em>Yiyələnin</em>',
+      'hero.subtitle': 'Bütün səviyyələr üçün peşəkar şahmat təlimi. Strateji düşünmə bacarıqlarınızı inkişaf etdirin, özünəinam qazanın və fərdi yanaşma ilə turnirlərdə uğur əldə edin.',
+      'hero.ctaSecondary': 'Məşqçinizlə Tanış Olun',
+
+      'stats.experience': 'İl Təcrübə',
+      'stats.students': 'Təlim Keçmiş Şagird',
+      'stats.tournaments': 'Turnir Nailiyyətləri',
+      'stats.rating': 'Valideyn Məmnuniyyəti',
+
+      'levels.tag': 'Proqramlar',
+      'levels.title': 'Tədris Etdiyimiz Səviyyələr',
+      'levels.subtitle': 'Şahmat yolunuzun hər mərhələsi üçün strukturlaşdırılmış proqramlar',
+      'levels.beginner.title': 'Başlanğıc Səviyyə',
+      'levels.beginner.desc': 'Şahmatın qaydalarını, əsas taktiki üsulları və debüt prinsiplərini öyrənin, möhkəm təməl qurun. Şahmata yeni başlayanlar üçün ideal seçimdir.',
+      'levels.beginner.badge': 'Şahmata yeni başlayanlar – ~800',
+      'levels.intermediate.title': 'Orta Səviyyə',
+      'levels.intermediate.desc': 'Taktiki düşüncənizi, mövqe anlayışınızı, endşpil bacarıqlarınızı və debüt repertuarınızı inkişaf etdirərək turnirlərə daha inamla hazırlaşın.',
+      'levels.intermediate.badge': '~800–1400',
+      'levels.advanced.title': 'Yüksək Səviyyə',
+      'levels.advanced.desc': 'Fərdi yanaşma ilə mürəkkəb strategiyaları, dəqiq hesablamaları, psixoloji hazırlığı və turnir bacarıqlarını inkişaf etdirin.',
+      'levels.advanced.badge': '1400+',
+
+      'about.tag': 'Məşqçiniz',
+      'about.title': 'Mənim Haqqımda',
+      'about.photoText': 'Məşqçi Şəkli',
+      'about.badge': 'FIDE Reytinqli',
+      'about.greeting': 'Salam, mən <em>Abdullayam</em>',
+      'about.p1': 'Mən hər yaşdan olan şahmat həvəskarlarının potensialını üzə çıxarmağa kömək etməyi sevən peşəkar şahmat məşqçisiyəm. Yarış və məşqçilik sahəsində qazandığım uzun illərin təcrübəsi sayəsində hər dərsdə sistemli, eyni zamanda maraqlı və motivasiyaedici yanaşma tətbiq edirəm.',
+      'about.p2': 'Cosmo Chess Academy-də məqsədim şahmatı hər kəs üçün əlçatan və maraqlı etmək, eyni zamanda şagirdlərimin turnirlərdə uğur qazanmasına və şəxsi inkişafına dəstək olmaqdır.',
+      'about.hl1.title': 'Sertifikatlı Şahmat Təlimçisi',
+      'about.hl1.desc': 'Peşəkar məşqçilik sertifikatı',
+      'about.hl2.title': 'Hər Yaş Üçün Dərslər',
+      'about.hl2.desc': '5 yaşdan etibarən uşaqlar, yeniyetmələr və böyüklər',
+      'about.hl3.title': 'Onlayn və Əyani Dərslər',
+      'about.hl3.desc': 'Rahat tədris formatı',
+      'about.hl4.title': 'Fərdiləşdirilmiş Tədris Materialları',
+      'about.hl4.desc': 'Ev tapşırıqları, məsələlər və fərdi tədris planları',
+
+      'features.tag': 'Niyə Bizi Seçməlisiniz?',
+      'features.title': 'Bizi Fərqləndirən Xüsusiyyətlər',
+      'features.f1.title': 'Fərdiləşdirilmiş Tədris Proqramı',
+      'features.f1.desc': 'Hər bir şagirdin səviyyəsinə, məqsədlərinə və öyrənmə tempinə uyğun fərdi tədris planı hazırlanır.',
+      'features.f2.title': 'Kiçik Qrup Dərsləri',
+      'features.f2.desc': '4–16 nəfərlik qruplarda keçirilən interaktiv dərslər şagirdlərin səviyyələrinə uyğun təşkil olunur ki, hər kəs rahat şəkildə öyrənsin, məşq etsin və inkişaf etsin. Fərdi dərslər də mövcuddur.',
+      'features.f3.title': 'Həftəlik Ev Tapşırıqları',
+      'features.f3.desc': 'Hər dərsdən sonra mövzunun möhkəmləndirilməsi üçün tapşırıqlar, şahmat məsələləri və analiz çalışmaları təqdim olunur.',
+      'features.f4.title': 'Turnir Hazırlığı',
+      'features.f4.desc': 'Debüt hazırlığı, vaxtın düzgün idarə olunması, variantların hesablanması və psixoloji hazırlıq üzərində məqsədyönlü məşqlər.',
+      'features.f5.title': 'Valideynlər üçün Məlumatlandırma',
+      'features.f5.desc': 'Şagirdin inkişafı və ödəniş vəziyyəti haqqında mütəmadi məlumat təqdim olunur ki, valideynlər hər zaman məlumatlı olsunlar.',
+      'features.f6.title': 'WhatsApp İnteqrasiyası',
+      'features.f6.desc': 'Ev tapşırıqları, dərs xatırlatmaları, cədvəl yenilikləri və bütün əlaqə rahat şəkildə WhatsApp vasitəsilə həyata keçirilir.',
+
+      'testimonials.tag': 'İcmamız',
+      'testimonials.title': 'Şagirdlərimiz və Valideynlər Nə Deyir',
+      'testimonials.subtitle': 'Şagirdlərin və valideynlərin Cosmo Chess Academy-də təhsildən necə faydalandığını görün.',
+      'testimonials.trustSub': '200+ şagird və valideynin rəyi əsasında',
+      'testimonials.t1.text': '"Qızım dərslərə başladıqdan bir neçə ay sonra çox daha özünə inamlı oldu."',
+      'testimonials.t1.role': '10 yaşlı şagirdin valideyni',
+      'testimonials.t2.text': '"Dərslər strukturlaşdırılıb, aydındır və izləməsi asandır."',
+      'testimonials.t2.role': 'Yetkin şagird',
+      'testimonials.t3.text': '"Məşqçi Abdulla mürəkkəb fikirləri çox sadə şəkildə izah edir."',
+      'testimonials.t3.role': 'Valideyn',
+      'testimonials.t4.text': '"Qrup dərsləri motivasiya verir, amma şagirdlər yenə də fərdi diqqət alır."',
+      'testimonials.t4.role': 'Valideyn',
+      'testimonials.t5.text': '"Reytinqim artdı və indi səhvlərimi çox daha yaxşı başa düşürəm."',
+      'testimonials.t5.role': 'Orta səviyyəli şagird',
+      'testimonials.t6.text': '"Hər dərsdən sonrakı ev tapşırığı oğlumun davamlı olmasına kömək edir."',
+      'testimonials.t6.role': 'Valideyn',
+      'testimonials.t7.text': '"WhatsApp yenilikləri cədvəli və ev tapşırığını izləməyi asanlaşdırır."',
+      'testimonials.t7.role': 'Valideyn',
+      'testimonials.t8.text': '"Hər dərsin aydın məqsədi və praktiki məşqləri olması xoşuma gəlir."',
+      'testimonials.t8.role': 'Şagird',
+
+      'contact.tag': 'Başlayın',
+      'contact.title': 'Bizimlə Əlaqə',
+      'contact.subtitle': 'Şahmat Səyahətinizə Başlamağa Hazırsınız?',
+      'contact.desc': 'Formu doldurun və ya birbaşa bizimlə əlaqə saxlayın. Sınaq dərsini təyin etmək üçün 24 saat ərzində sizinlə əlaqə saxlayacağıq.',
+      'contact.whatsappLabel': 'WhatsApp',
+      'contact.emailLabel': 'E-poçt',
+      'contact.locationLabel': 'Ünvan',
+      'contact.locationValue': 'Bakı, Azərbaycan',
+      'contact.hoursLabel': 'İş Saatları',
+      'contact.hoursValue': 'B.e–Şən, 10:00 – 20:00',
+      'contact.name': 'Ad *',
+      'contact.namePlaceholder': 'Adınız',
+      'contact.phone': 'Telefon *',
+      'contact.phonePlaceholder': '+994 XX XXX XX XX',
+      'contact.level': 'Şahmat Səviyyəsi *',
+      'contact.levelPlaceholder': 'Şahmat səviyyənizi seçin',
+      'contact.fideRating': 'FIDE Reytinqi (İstəyə bağlı)',
+      'contact.fideRatingPlaceholder': 'məs. 1650',
+      'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
+      'contact.message': 'Mesaj',
+      'contact.messagePlaceholder': 'Hər hansı sual və ya istək...',
+      'contact.submit': 'Göndər və WhatsApp ilə Əlaqə Saxla',
+      'contact.thankYouTitle': 'Təşəkkür edirik!',
+      'contact.thankYouText': 'Tezliklə WhatsApp vasitəsilə sizinlə əlaqə saxlayacağıq.',
+
+      'chessLevel.newToChess': 'Şahmata yeni başlayan',
+      'chessLevel.beginner': 'Başlanğıc Səviyyə',
+      'chessLevel.intermediate': 'Orta Səviyyə',
+      'chessLevel.advanced': 'Yüksək Səviyyə',
+      'chessLevel.expert': 'Ekspert səviyyəsi',
+      'chessLevel.notSure': 'Əmin Deyiləm',
+
+      'footer.tagline': 'Bütün yaşlar üçün peşəkar şahmat təlimi. Hər hərəkətdə çempionlar yetişdiririk.',
+      'footer.linksTitle': 'Keçidlər',
+      'footer.contactTitle': 'Əlaqə',
+      'footer.emailLink': 'E-poçt',
+      'footer.copyright': '&copy; 2026 Cosmo Chess Academy. Bütün hüquqlar qorunur.',
+
+      'theme.toggleBtn': '🎨 Mövzular',
+      'theme.colorTheme': 'Rəng Mövzusu',
+      'theme.mode': 'Rejim',
+      'theme.light': '☀️ İşıqlı',
+      'theme.dark': '🌙 Tünd',
+      'theme.reset': '↺ Klassik İşıqlıya Qaytar'
+    },
+
+    ru: {
+      'nav.levels': 'Уровни',
+      'nav.about': 'О нас',
+      'nav.whyUs': 'Почему мы',
+      'nav.reviews': 'Отзывы',
+      'nav.contact': 'Контакты',
+      'common.startLearning': 'Начать обучение',
+
+      'hero.title': 'Освойте Искусство <em>Шахмат</em>',
+      'hero.subtitle': 'Профессиональное обучение шахматам для всех уровней. Развивайте стратегическое мышление, уверенность в себе и добивайтесь успеха на турнирах с персональным тренером.',
+      'hero.ctaSecondary': 'Познакомьтесь с тренером',
+
+      'stats.experience': 'Лет опыта',
+      'stats.students': 'Обученных учеников',
+      'stats.tournaments': 'Турнирные достижения',
+      'stats.rating': 'Оценка родителей',
+
+      'levels.tag': 'Программы',
+      'levels.title': 'Уровни обучения',
+      'levels.subtitle': 'Структурированные программы для каждого этапа вашего шахматного пути',
+      'levels.beginner.title': 'Начальный уровень',
+      'levels.beginner.desc': 'Изучите правила шахмат, базовую тактику, принципы дебюта и заложите прочную основу игры. Идеально подходит для начинающих игроков.',
+      'levels.beginner.badge': 'Новичок – ~800',
+      'levels.intermediate.title': 'Средний уровень',
+      'levels.intermediate.desc': 'Развивайте тактическое мышление, позиционное понимание, игру в эндшпиле и дебютный репертуар, чтобы уверенно выступать на соревнованиях.',
+      'levels.intermediate.badge': '~800–1400',
+      'levels.advanced.title': 'Продвинутый уровень',
+      'levels.advanced.desc': 'Освойте продвинутую стратегию, расчёт вариантов, психологическую подготовку и эффективную игру на турнирах благодаря индивидуальному подходу.',
+      'levels.advanced.badge': '1400+',
+
+      'about.tag': 'Ваш тренер',
+      'about.title': 'Обо мне',
+      'about.photoText': 'Фото тренера',
+      'about.badge': 'Рейтинг FIDE',
+      'about.greeting': 'Здравствуйте, я <em>Абдулла</em>',
+      'about.p1': 'Я профессиональный тренер по шахматам, который помогает ученикам любого возраста раскрыть свой потенциал. Благодаря многолетнему опыту участия в соревнованиях и преподавания я провожу занятия по структурированной, эффективной и увлекательной методике.',
+      'about.p2': 'В Cosmo Chess Academy моя цель — сделать шахматы доступными и интересными для каждого, помогая ученикам добиваться успехов на турнирах и развиваться как шахматистам и личностям.',
+      'about.hl1.title': 'Сертифицированный тренер по шахматам',
+      'about.hl1.desc': 'Профессиональная тренерская сертификация',
+      'about.hl2.title': 'Для всех возрастов',
+      'about.hl2.desc': 'Дети от 5 лет, подростки и взрослые',
+      'about.hl3.title': 'Онлайн и очные занятия',
+      'about.hl3.desc': 'Гибкий формат обучения',
+      'about.hl4.title': 'Индивидуальные учебные материалы',
+      'about.hl4.desc': 'Домашние задания, шахматные задачи и персональные планы обучения',
+
+      'features.tag': 'Почему выбирают нас?',
+      'features.title': 'Что отличает нас от других',
+      'features.f1.title': 'Индивидуальная программа обучения',
+      'features.f1.desc': 'Для каждого ученика составляется персональный план обучения с учетом его уровня, целей и темпа освоения материала.',
+      'features.f2.title': 'Занятия в небольших группах',
+      'features.f2.desc': 'Интерактивные занятия проходят в группах от 4 до 16 человек, сформированных по уровню подготовки. Также доступны индивидуальные занятия.',
+      'features.f3.title': 'Еженедельные домашние задания',
+      'features.f3.desc': 'После каждого урока ученики получают упражнения, шахматные задачи и задания на анализ для закрепления изученного материала.',
+      'features.f4.title': 'Подготовка к турнирам',
+      'features.f4.desc': 'Целенаправленная подготовка к соревнованиям: дебюты, управление временем, расчёт вариантов и психологическая устойчивость.',
+      'features.f5.title': 'Информирование родителей',
+      'features.f5.desc': 'Регулярные отчёты о прогрессе ученика и состоянии оплаты, чтобы родители всегда были в курсе обучения.',
+      'features.f6.title': 'Интеграция с WhatsApp',
+      'features.f6.desc': 'Домашние задания, напоминания о занятиях, обновления расписания и вся коммуникация удобно осуществляются через WhatsApp.',
+
+      'testimonials.tag': 'Наше сообщество',
+      'testimonials.title': 'Что говорят наши ученики и родители',
+      'testimonials.subtitle': 'Узнайте, как обучение в Cosmo Chess Academy помогло ученикам и родителям.',
+      'testimonials.trustSub': 'На основе отзывов 200+ учеников и родителей',
+      'testimonials.t1.text': '«Моя дочь стала намного увереннее в себе уже через несколько месяцев занятий».',
+      'testimonials.t1.role': 'Родитель 10-летнего ученика',
+      'testimonials.t2.text': '«Уроки структурированы, понятны и легко усваиваются».',
+      'testimonials.t2.role': 'Взрослый ученик',
+      'testimonials.t3.text': '«Тренер Абдулла объясняет сложные идеи очень простым языком».',
+      'testimonials.t3.role': 'Родитель',
+      'testimonials.t4.text': '«Групповые занятия мотивируют, но при этом ученики получают индивидуальное внимание».',
+      'testimonials.t4.role': 'Родитель',
+      'testimonials.t5.text': '«Мой рейтинг вырос, и теперь я гораздо лучше понимаю свои ошибки».',
+      'testimonials.t5.role': 'Ученик среднего уровня',
+      'testimonials.t6.text': '«Домашние задания после каждого урока помогают сыну заниматься регулярно».',
+      'testimonials.t6.role': 'Родитель',
+      'testimonials.t7.text': '«Обновления в WhatsApp облегчают отслеживание расписания и домашних заданий».',
+      'testimonials.t7.role': 'Родитель',
+      'testimonials.t8.text': '«Мне нравится, что у каждого урока есть чёткая цель и практические упражнения».',
+      'testimonials.t8.role': 'Ученик',
+
+      'contact.tag': 'Начните сейчас',
+      'contact.title': 'Связаться с нами',
+      'contact.subtitle': 'Готовы начать свой шахматный путь?',
+      'contact.desc': 'Заполните форму или свяжитесь с нами напрямую. Мы ответим в течение 24 часов, чтобы назначить пробный урок.',
+      'contact.whatsappLabel': 'WhatsApp',
+      'contact.emailLabel': 'Email',
+      'contact.locationLabel': 'Адрес',
+      'contact.locationValue': 'Баку, Азербайджан',
+      'contact.hoursLabel': 'Часы работы',
+      'contact.hoursValue': 'Пн–Сб, 10:00 – 20:00',
+      'contact.name': 'Имя *',
+      'contact.namePlaceholder': 'Ваше имя',
+      'contact.phone': 'Телефон *',
+      'contact.phonePlaceholder': '+994 XX XXX XX XX',
+      'contact.level': 'Уровень шахмат *',
+      'contact.levelPlaceholder': 'Выберите ваш уровень',
+      'contact.fideRating': 'Рейтинг FIDE (необязательно)',
+      'contact.fideRatingPlaceholder': 'напр. 1650',
+      'contact.noFideRating': 'У меня нет официального рейтинга FIDE',
+      'contact.message': 'Сообщение',
+      'contact.messagePlaceholder': 'Любые вопросы или пожелания...',
+      'contact.submit': 'Отправить и связаться через WhatsApp',
+      'contact.thankYouTitle': 'Спасибо!',
+      'contact.thankYouText': 'Мы свяжемся с вами в ближайшее время через WhatsApp.',
+
+      'chessLevel.newToChess': 'Новичок',
+      'chessLevel.beginner': 'Начальный уровень',
+      'chessLevel.intermediate': 'Средний уровень',
+      'chessLevel.advanced': 'Продвинутый уровень',
+      'chessLevel.expert': 'Эксперт',
+      'chessLevel.notSure': 'Не уверен(а)',
+
+      'footer.tagline': 'Профессиональное обучение шахматам для всех возрастов. Воспитываем чемпионов ход за ходом.',
+      'footer.linksTitle': 'Ссылки',
+      'footer.contactTitle': 'Контакты',
+      'footer.emailLink': 'Email',
+      'footer.copyright': '&copy; 2026 Cosmo Chess Academy. Все права защищены.',
+
+      'theme.toggleBtn': '🎨 Темы',
+      'theme.colorTheme': 'Цветовая тема',
+      'theme.mode': 'Режим',
+      'theme.light': '☀️ Светлая',
+      'theme.dark': '🌙 Тёмная',
+      'theme.reset': '↺ Сбросить на классическую светлую'
+    }
+  };
+
+  var LANG_NAMES = { en: 'English', az: 'Azərbaycan', ru: 'Русский' };
+
+  function applyTranslations(lang) {
+    if (!I18N[lang]) lang = 'en';
+    var dict = I18N[lang];
+    document.documentElement.setAttribute('lang', lang);
+
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (dict[key] != null) el.innerHTML = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
+    });
+    document.querySelectorAll('.lang-option').forEach(function (opt) {
+      opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+    });
+    var currentCode = document.getElementById('langCurrentCode');
+    if (currentCode) currentCode.textContent = lang.toUpperCase();
+
+    window.__cosmoLang = lang;
+    try { localStorage.setItem('cosmo-lang', lang); } catch (e) {}
+  }
+
+  // Called from the contact form's inline onsubmit handler to show a
+  // translated thank-you message instead of a hardcoded English one.
+  window.showContactThankYou = function (form) {
+    var dict = I18N[window.__cosmoLang] || I18N.en;
+    form.innerHTML = '<div style="text-align:center;padding:2rem"><h3>' + dict['contact.thankYouTitle'] +
+      '</h3><p style="color:var(--text-muted)">' + dict['contact.thankYouText'] + '</p></div>';
+  };
+
+  // Compact language dropdown: toggle open/close, select language, close on outside click.
+  var langDropdown = document.getElementById('langDropdown');
+  var langDropdownBtn = document.getElementById('langDropdownBtn');
+
+  function openLangDropdown() {
+    langDropdown.classList.add('open');
+    langDropdownBtn.setAttribute('aria-expanded', 'true');
+  }
+  function closeLangDropdown() {
+    langDropdown.classList.remove('open');
+    langDropdownBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  langDropdownBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (langDropdown.classList.contains('open')) closeLangDropdown();
+    else openLangDropdown();
+  });
+
+  document.querySelectorAll('.lang-option').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      applyTranslations(btn.getAttribute('data-lang'));
+      closeLangDropdown();
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    if (langDropdown && !langDropdown.contains(e.target)) closeLangDropdown();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLangDropdown();
+  });
+
+  var savedLang = 'en';
+  try { savedLang = localStorage.getItem('cosmo-lang') || 'en'; } catch (e) {}
+  applyTranslations(savedLang);
+</script>
 
 <script>
 (function(){
@@ -1253,5 +1779,35 @@
 })();
 </script>
 <!-- THEME SWITCHER JS END -->
+
+<script>
+(function(){
+  var navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+  var sections = [];
+  navLinks.forEach(function(link){
+    var id = link.getAttribute('href').slice(1);
+    var section = document.getElementById(id);
+    if (section) sections.push({ id: id, link: link, el: section });
+  });
+  if (!sections.length) return;
+
+  function setActive(id) {
+    navLinks.forEach(function(link){
+      link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+    });
+  }
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        var match = sections.find(function(s){ return s.el === entry.target; });
+        if (match) setActive(match.id);
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+
+  sections.forEach(function(s){ observer.observe(s.el); });
+})();
+</script>
 </body>
 </html>

@@ -31,28 +31,36 @@ r.get('/:id', (req, res) => {
   res.json(row);
 });
 
+// Normalizes a fide_rating input into a number or null. Empty string/undefined/null => null.
+function parseFideRating(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 r.post('/', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes } = req.body;
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', coach_id || null, group_id || null, notes || '');
+  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '');
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
 r.put('/:id', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes, active } = req.body;
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active } = req.body;
   db.prepare(`UPDATE students SET
     name = COALESCE(?, name),
     surname = COALESCE(?, surname),
     whatsapp_number = COALESCE(?, whatsapp_number),
     parent_whatsapp = COALESCE(?, parent_whatsapp),
     level = COALESCE(?, level),
+    fide_rating = ?,
     coach_id = COALESCE(?, coach_id),
     group_id = COALESCE(?, group_id),
     notes = COALESCE(?, notes),
     active = COALESCE(?, active),
     updated_at = datetime('now')
-    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null, req.params.id);
+    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, parseFideRating(fide_rating), coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null, req.params.id);
   res.json({ ok: true });
 });
 
