@@ -3,3 +3,11 @@ node_modules/
 .DS_Store
 build/
 dist/
+.wwebjs_auth/
+.wwebjs_cache/
+data/
+uploads/homeworks/*
+!uploads/homeworks/.gitkeep
+client/dist/
+*.db
+*.db-journal
