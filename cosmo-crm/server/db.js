@@ -29,8 +29,6 @@ db.exec(`
     auto_increment_lessons INTEGER DEFAULT 0,
     reminder_minutes_before INTEGER DEFAULT 60,
     reminder_target TEXT DEFAULT 'group',
-    homework_start_from INTEGER DEFAULT 1,
-    homework_enabled INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
@@ -41,13 +39,12 @@ db.exec(`
     surname TEXT NOT NULL DEFAULT '',
     whatsapp_number TEXT,
     parent_whatsapp TEXT,
-    level TEXT CHECK(level IN ('beginner','intermediate','advanced')) DEFAULT 'beginner',
+    level TEXT CHECK(level IN ('new_to_chess','beginner','intermediate','advanced','expert','not_sure')) DEFAULT 'beginner',
+    fide_rating INTEGER,
     coach_id INTEGER REFERENCES coaches(id) ON DELETE SET NULL,
     group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL,
     lessons_since_payment INTEGER DEFAULT 0,
-    payment_status TEXT CHECK(payment_status IN ('paid','due','overdue','delayed')) DEFAULT 'paid',
-    payment_amount REAL DEFAULT 0,
-    payment_delay_until TEXT,
+    payment_status TEXT CHECK(payment_status IN ('paid','due','overdue')) DEFAULT 'paid',
     notes TEXT DEFAULT '',
     active INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now')),
@@ -75,23 +72,15 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS homeworks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    homework_number INTEGER NOT NULL UNIQUE,
-    type TEXT NOT NULL DEFAULT 'file' CHECK(type IN ('file','image','text','link')),
-    content TEXT DEFAULT '',
-    filename TEXT,
-    original_name TEXT,
-    file_path TEXT,
-    caption TEXT DEFAULT '',
-    created_at TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS homework_sends (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    homework_id INTEGER NOT NULL REFERENCES homeworks(id) ON DELETE CASCADE,
     group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     lesson_number INTEGER NOT NULL,
-    sent_at TEXT DEFAULT (datetime('now')),
-    UNIQUE(homework_id, group_id)
+    filename TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    sent INTEGER DEFAULT 0,
+    sent_at TEXT,
+    order_index INTEGER NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
   );
 
   CREATE TABLE IF NOT EXISTS scheduled_sends (
@@ -158,10 +147,63 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_students_payment ON students(payment_status);
   CREATE INDEX IF NOT EXISTS idx_lessons_group ON lessons(group_id);
   CREATE INDEX IF NOT EXISTS idx_lessons_student ON lessons(student_id);
-  CREATE INDEX IF NOT EXISTS idx_homeworks_number ON homeworks(homework_number);
-  CREATE INDEX IF NOT EXISTS idx_homework_sends_group ON homework_sends(group_id);
+  CREATE INDEX IF NOT EXISTS idx_homeworks_group ON homeworks(group_id);
   CREATE INDEX IF NOT EXISTS idx_scheduled_sends_time ON scheduled_sends(scheduled_at, sent);
   CREATE INDEX IF NOT EXISTS idx_send_log_created ON send_log(created_at);
+`);
+
+// --- Migration: widen students.level CHECK constraint and add fide_rating column ---
+// Needed for databases created before the "New to Chess / Expert / Not Sure" levels
+// and the FIDE Rating field were introduced. SQLite can't ALTER a CHECK constraint,
+// so the table is rebuilt when an old schema is detected.
+function columnExists(table, column) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === column);
+}
+
+const studentsTableDef = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='students'").get();
+const needsLevelMigration = studentsTableDef && !studentsTableDef.sql.includes("'expert'");
+
+if (needsLevelMigration) {
+  const hadFideRating = columnExists('students', 'fide_rating');
+  const migrate = db.transaction(() => {
+    db.exec('ALTER TABLE students RENAME TO students_old');
+    db.exec(`
+      CREATE TABLE students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        surname TEXT NOT NULL DEFAULT '',
+        whatsapp_number TEXT,
+        parent_whatsapp TEXT,
+        level TEXT CHECK(level IN ('new_to_chess','beginner','intermediate','advanced','expert','not_sure')) DEFAULT 'beginner',
+        fide_rating INTEGER,
+        coach_id INTEGER REFERENCES coaches(id) ON DELETE SET NULL,
+        group_id INTEGER REFERENCES groups(id) ON DELETE SET NULL,
+        lessons_since_payment INTEGER DEFAULT 0,
+        payment_status TEXT CHECK(payment_status IN ('paid','due','overdue')) DEFAULT 'paid',
+        notes TEXT DEFAULT '',
+        active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+    db.exec(`
+      INSERT INTO students (id, name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, lessons_since_payment, payment_status, notes, active, created_at, updated_at)
+      SELECT id, name, surname, whatsapp_number, parent_whatsapp, level, ${hadFideRating ? 'fide_rating' : 'NULL'}, coach_id, group_id, lessons_since_payment, payment_status, notes, active, created_at, updated_at
+      FROM students_old
+    `);
+    db.exec('DROP TABLE students_old');
+  });
+  migrate();
+} else if (!columnExists('students', 'fide_rating')) {
+  db.exec('ALTER TABLE students ADD COLUMN fide_rating INTEGER');
+}
+
+// Indexes on students reference the table by name and survive a rebuild fine,
+// but recreate them defensively in case this is the first run after migration.
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_students_group ON students(group_id);
+  CREATE INDEX IF NOT EXISTS idx_students_coach ON students(coach_id);
+  CREATE INDEX IF NOT EXISTS idx_students_payment ON students(payment_status);
 `);
 
 // Insert default settings if not present
@@ -175,7 +217,6 @@ const defaults = {
   weekly_report_day: '1',
   weekly_report_time: '09:00',
   excused_absence_limit_per_month: '1',
-  payment_instructions: 'Please transfer to:\nDeniz\nBank: ...\nIBAN: ...\nAmount: ... AZN',
 };
 
 const insertDefaults = db.transaction(() => {

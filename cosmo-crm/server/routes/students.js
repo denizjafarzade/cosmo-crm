@@ -31,32 +31,36 @@ r.get('/:id', (req, res) => {
   res.json(row);
 });
 
+// Normalizes a fide_rating input into a number or null. Empty string/undefined/null => null.
+function parseFideRating(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 r.post('/', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes, payment_amount } = req.body;
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, coach_id, group_id, notes, payment_amount)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', coach_id || null, group_id || null, notes || '', payment_amount || 0);
+  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '');
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
 r.put('/:id', (req, res) => {
-  const body = req.body;
-  // Build dynamic SET clause — supports explicit null for group_id/coach_id
-  const fields = [];
-  const values = [];
-  const allowed = ['name', 'surname', 'whatsapp_number', 'parent_whatsapp', 'level', 'notes', 'payment_amount'];
-  for (const f of allowed) {
-    if (f in body) { fields.push(`${f} = ?`); values.push(body[f]); }
-  }
-  // Nullable foreign keys — allow explicit null
-  for (const f of ['coach_id', 'group_id']) {
-    if (f in body) { fields.push(`${f} = ?`); values.push(body[f]); }
-  }
-  if ('active' in body) { fields.push('active = ?'); values.push(body.active ? 1 : 0); }
-  if (fields.length === 0) return res.json({ ok: true });
-  fields.push("updated_at = datetime('now')");
-  values.push(req.params.id);
-  db.prepare(`UPDATE students SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active } = req.body;
+  db.prepare(`UPDATE students SET
+    name = COALESCE(?, name),
+    surname = COALESCE(?, surname),
+    whatsapp_number = COALESCE(?, whatsapp_number),
+    parent_whatsapp = COALESCE(?, parent_whatsapp),
+    level = COALESCE(?, level),
+    fide_rating = ?,
+    coach_id = COALESCE(?, coach_id),
+    group_id = COALESCE(?, group_id),
+    notes = COALESCE(?, notes),
+    active = COALESCE(?, active),
+    updated_at = datetime('now')
+    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, parseFideRating(fide_rating), coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null, req.params.id);
   res.json({ ok: true });
 });
 
@@ -98,30 +102,15 @@ r.post('/:id/pay', (req, res) => {
   const studentId = req.params.id;
   const student = db.prepare('SELECT lessons_since_payment FROM students WHERE id = ?').get(studentId);
   if (!student) return res.status(404).json({ error: 'Not found' });
-  const cycle = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
-  const remaining = Math.max(0, student.lessons_since_payment - cycle);
 
   db.prepare(`INSERT INTO payments (student_id, amount, lessons_covered, confirmed_at, notes) VALUES (?, ?, ?, datetime('now'), ?)`)
-    .run(studentId, amount || 0, cycle, notes || '');
-  db.prepare(`UPDATE students SET lessons_since_payment = ?, payment_status = ?, payment_delay_until = NULL, updated_at = datetime('now') WHERE id = ?`)
-    .run(remaining, remaining >= cycle ? 'due' : 'paid', studentId);
+    .run(studentId, amount || 0, student.lessons_since_payment, notes || '');
+  db.prepare(`UPDATE students SET lessons_since_payment = 0, payment_status = 'paid', updated_at = datetime('now') WHERE id = ?`)
+    .run(studentId);
+  // Clear pending reminders
   db.prepare('DELETE FROM payment_reminders WHERE student_id = ?').run(studentId);
 
   res.json({ ok: true });
-});
-
-// Delay payment — student asked for X more days
-r.post('/:id/delay', (req, res) => {
-  const { days } = req.body;
-  if (!days || days < 1) return res.status(400).json({ error: 'Days required (minimum 1)' });
-  const studentId = req.params.id;
-  const delayUntil = new Date();
-  delayUntil.setDate(delayUntil.getDate() + parseInt(days));
-  db.prepare(`UPDATE students SET payment_status = 'delayed', payment_delay_until = ?, updated_at = datetime('now') WHERE id = ?`)
-    .run(delayUntil.toISOString(), studentId);
-  // Clear existing reminders so they don't keep firing
-  db.prepare('DELETE FROM payment_reminders WHERE student_id = ?').run(studentId);
-  res.json({ ok: true, delay_until: delayUntil.toISOString() });
 });
 
 module.exports = r;
