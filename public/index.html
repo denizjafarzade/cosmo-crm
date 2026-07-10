@@ -396,11 +396,21 @@
     }
 
     /* ===== LESSON FORMATS ===== */
-    .formats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .formats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; max-width: 760px; margin: 0 auto; }
+    .formats-online-note {
+      text-align: center; margin-bottom: 2rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .formats-online-note .online-badge {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.4rem 1.1rem; border-radius: 50px;
+      background: var(--icon-bg); color: var(--primary);
+      font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border);
+    }
     .format-list { list-style: none; margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .format-list li { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
     .format-list li::before { content: '✓'; color: var(--primary); font-weight: 700; flex-shrink: 0; }
-    @media (max-width: 900px) { .formats-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+    @media (max-width: 640px) { .formats-grid { grid-template-columns: 1fr; max-width: 480px; } }
 
     /* ===== HOW IT WORKS ===== */
     .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; position: relative; }
@@ -431,111 +441,203 @@
     }
     @media (max-width: 560px) { .steps-grid { grid-template-columns: 1fr; } }
 
-    /* ===== ACHIEVEMENTS ===== */
-    .ach-viewport { position: relative; }
-    .ach-viewport:hover .carousel-btn-inline { opacity: 0.6; transform: translateY(-50%) scale(1); }
-    .ach-track {
-      display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory;
-      padding: 0.25rem 0.25rem 1rem; scrollbar-width: none; -ms-overflow-style: none;
-    }
-    .ach-track::-webkit-scrollbar { display: none; }
-    .ach-card {
-      flex: 0 0 calc((100% - 3rem) / 3); scroll-snap-align: start;
+    /* ===== NEWS CARDS ===== */
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .news-card {
       background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit;
     }
-    .ach-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--card-shadow); }
-    .ach-photo {
-      aspect-ratio: 4/3; background: linear-gradient(135deg, var(--icon-bg), var(--bg));
+    .news-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--card-shadow); }
+    .news-card-img {
+      aspect-ratio: 16/9; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, var(--icon-bg), var(--bg));
       border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+      display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
     }
-    .ach-body { padding: 1.25rem 1.5rem 1.5rem; }
-    .ach-tag {
-      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px;
-      background: var(--icon-bg); color: var(--primary);
-      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
-      margin-bottom: 0.6rem;
+    .news-card-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .news-card-body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .news-card-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .news-card-cat {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
     }
-    .ach-body h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
-    .ach-body p { color: var(--text-muted); font-size: 0.85rem; }
-    @media (max-width: 900px) { .ach-card { flex-basis: calc((100% - 1.5rem) / 2); } }
-    @media (max-width: 560px) { .ach-card { flex-basis: 100%; } }
+    .news-card-date { font-size: 0.75rem; color: var(--text-muted); }
+    .news-card h3 { font-size: 1rem; line-height: 1.4; margin-bottom: 0.5rem; }
+    .news-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; flex: 1; }
+    .news-view-all { text-align: center; margin-top: 2rem; }
+    @media (max-width: 900px) { .news-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .news-grid { grid-template-columns: 1fr; } }
 
     /* ===== GALLERY ===== */
-    .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 140px; grid-auto-flow: dense; gap: 1rem; }
+    .gallery-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.75rem; }
+    .gallery-filter-btn {
+      padding: 0.35rem 1rem; border-radius: 50px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .gallery-filter-btn.active, .gallery-filter-btn:hover { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .gallery-item {
-      position: relative; border-radius: 14px; overflow: hidden;
+      aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; position: relative;
       border: 1px solid var(--border); cursor: pointer;
       background: linear-gradient(135deg, var(--icon-bg), var(--bg));
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.2s, box-shadow 0.2s; padding: 0; font-family: inherit;
     }
     .gallery-item:hover { transform: translateY(-3px); box-shadow: 0 12px 30px var(--card-shadow); }
-    .gallery-item.tall { grid-row: span 2; }
-    .gallery-item.wide { grid-column: span 2; }
+    .gallery-item:hover .gallery-hover { opacity: 1; }
+    .gallery-item.hidden { display: none; }
+    .gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
     .gallery-emoji { font-size: 2.5rem; opacity: 0.45; }
-    .gallery-label {
-      position: absolute; bottom: 0.6rem; left: 0.7rem;
-      font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 0.18rem 0.6rem; border-radius: 20px;
+    .gallery-hover {
+      position: absolute; inset: 0; background: rgba(15,23,42,0.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
     }
-    @media (max-width: 768px) {
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 120px; }
-      .gallery-item.wide { grid-column: span 2; }
-    }
+    .gallery-hover-label { font-size: 0.8rem; font-weight: 600; color: #fff; text-align: center; padding: 0 0.75rem; }
+    @media (max-width: 768px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .gallery-grid { grid-template-columns: 1fr; } }
 
     /* ===== LIGHTBOX ===== */
     .lightbox {
-      position: fixed; inset: 0; z-index: 300; padding: 2rem;
-      background: rgba(15, 23, 42, 0.85);
+      position: fixed; inset: 0; z-index: 300; padding: 1.5rem;
+      background: rgba(15, 23, 42, 0.92);
       display: flex; align-items: center; justify-content: center;
       opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s;
     }
     .lightbox.open { opacity: 1; visibility: visible; }
     .lightbox-content {
-      position: relative; width: min(720px, 100%); aspect-ratio: 16/10;
-      background: linear-gradient(135deg, var(--icon-bg), var(--surface));
-      border: 1px solid var(--border); border-radius: 20px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
+      position: relative; width: min(680px, 100%);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;
       transform: scale(0.96); transition: transform 0.25s ease;
     }
     .lightbox.open .lightbox-content { transform: scale(1); }
-    .lightbox-emoji { font-size: 4.5rem; opacity: 0.5; }
-    .lightbox-caption { font-weight: 600; color: var(--text); }
-    .lightbox-note { font-size: 0.85rem; color: var(--text-muted); }
     .lightbox-close {
-      position: absolute; top: 1rem; right: 1rem; width: 38px; height: 38px;
-      border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
-      color: var(--text-muted); font-size: 1.1rem; cursor: pointer;
+      position: absolute; top: 0.7rem; right: 0.7rem; z-index: 10;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.35); background: rgba(15,23,42,0.65);
+      color: #fff; font-size: 0.9rem; cursor: pointer;
       display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
-    .lightbox-close:hover { border-color: var(--primary); color: var(--primary); }
+    .lightbox-close:hover { background: rgba(15,23,42,0.95); border-color: rgba(255,255,255,0.65); }
+    .lightbox-media-wrap { position: relative; flex-shrink: 0; }
+    .lightbox-media {
+      aspect-ratio: 4/3; overflow: hidden;
+      background: linear-gradient(135deg, var(--icon-bg), var(--bg));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lightbox-media-emoji { font-size: 4rem; opacity: 0.4; }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.3); background: rgba(15,23,42,0.65);
+      color: #fff; font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .lightbox-nav:hover { background: rgba(15,23,42,0.95); border-color: rgba(255,255,255,0.65); }
+    .lightbox-prev { left: 0.7rem; }
+    .lightbox-next { right: 0.7rem; }
+    .lightbox-info { padding: 0.9rem 1.25rem 1.1rem; }
+    .lightbox-caption { font-weight: 600; color: var(--text); font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .lightbox-note { font-size: 0.8rem; color: var(--text-muted); }
 
     /* ===== PRICING ===== */
-    .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: stretch; }
+    .pricing-online-note {
+      text-align: center; margin-bottom: 2.25rem;
+      font-size: 0.85rem; color: var(--text-muted);
+    }
+    .pricing-online-note strong { color: var(--text); font-weight: 600; }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+      max-width: 860px; margin: 0 auto;
+    }
     .price-card {
       position: relative; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 2rem 1.5rem; text-align: center;
+      border-radius: 16px; padding: 1.75rem; text-align: left;
       display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
     }
     .price-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--card-shadow); }
-    .price-card.featured { border-color: var(--primary); }
-    .price-popular {
-      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: var(--primary); color: var(--white); white-space: nowrap;
-      padding: 0.25rem 0.85rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.5px; text-transform: uppercase;
+    .price-card.featured {
+      border-color: var(--accent); background: var(--surface);
     }
-    .price-card .feature-icon { margin: 0 auto 1rem; }
-    .price-card h3 { font-size: 1.15rem; margin-bottom: 0.25rem; }
-    .price-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; }
-    .price-card .format-list { text-align: left; margin: 0 auto 1.5rem; }
-    .price-card .btn-hero { margin-top: auto; justify-content: center; }
+    .price-popular-inline {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.6rem; display: block;
+    }
+    .price-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 0.5rem; display: block;
+    }
+    .price-card h3 { font-size: 1.15rem; margin-bottom: 0.85rem; color: var(--text); }
+    .price-freq-line {
+      font-size: 0.9rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 0.2rem;
+    }
+    .price-month-line { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .price-divider { border: none; border-top: 1px solid var(--border); margin: 0 0 1.25rem; }
+    .price-benefits { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
+    .price-benefits li {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      font-size: 0.875rem; color: var(--text-muted); line-height: 1.45;
+    }
+    .price-benefits li::before {
+      content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; font-size: 0.8rem; margin-top: 0.1rem;
+    }
+    .price-val {
+      font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700;
+      color: var(--text); margin: 1.35rem 0 1rem; line-height: 1;
+    }
+    .price-val em { font-style: normal; font-size: 0.9rem; font-weight: 400; color: var(--text-muted); font-family: 'Inter', sans-serif; }
+    .price-card .btn-price {
+      display: block; text-align: center; padding: 0.65rem 1.25rem;
+      background: var(--primary); color: var(--white); border-radius: 50px;
+      text-decoration: none; font-weight: 600; font-size: 0.875rem; transition: background 0.2s;
+    }
+    .price-card .btn-price:hover { background: var(--primary-light); }
+    .price-card.featured .btn-price { background: var(--accent); color: #1E293B; }
+    .price-card.featured .btn-price:hover { background: #b8902e; }
     .pricing-note { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 1.5rem; }
-    @media (max-width: 1000px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; max-width: 440px; } }
+
+    /* ===== TOURNAMENT CARD ===== */
+    .tourn-wrap {
+      max-width: 860px; margin: 2rem auto 0; padding: 0;
+    }
+    .tourn-card {
+      background: var(--surface); border: 1px solid var(--accent);
+      border-radius: 16px; padding: 1.75rem 2rem;
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tourn-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px var(--card-shadow); }
+    .tourn-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.45rem; display: block;
+    }
+    .tourn-card h3 { font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--text); }
+    .tourn-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; max-width: 480px; margin-bottom: 0.9rem; }
+    .tourn-details { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .tourn-detail {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.8rem; color: var(--text-muted); font-weight: 500;
+    }
+    .tourn-detail-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0;
+    }
+    .btn-tourn {
+      padding: 0.7rem 1.5rem; border-radius: 50px; font-size: 0.875rem; font-weight: 600;
+      text-decoration: none; background: var(--accent); color: #1E293B;
+      white-space: nowrap; transition: all 0.2s; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0;
+    }
+    .btn-tourn:hover { background: #b8902e; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(201,168,76,0.35); }
+    @media (max-width: 640px) {
+      .tourn-card { grid-template-columns: 1fr; gap: 1.25rem; padding: 1.5rem; }
+      .btn-tourn { width: 100%; justify-content: center; }
+      .tourn-wrap { margin-top: 1.5rem; }
+    }
 
     /* ===== FAQ ===== */
     .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -680,15 +782,18 @@
       <hr class="divider" />
       <p data-i18n="formats.subtitle">Choose the learning style that fits your schedule and goals.</p>
     </div>
+    <div class="formats-online-note reveal">
+      <span class="online-badge">💻 <span data-i18n="formats.onlineNote">All individual and group lessons are held online</span></span>
+    </div>
     <div class="formats-grid reveal">
       <div class="feature-card">
         <div class="feature-icon">👤</div>
         <h3 data-i18n="formats.individual.title">Individual Lessons</h3>
         <ul class="format-list">
           <li data-i18n="formats.individual.f1">One-on-one coaching</li>
-          <li data-i18n="formats.individual.f2">Personalized curriculum</li>
+          <li data-i18n="formats.individual.f2">Personalized learning plan</li>
           <li data-i18n="formats.individual.f3">Flexible scheduling</li>
-          <li data-i18n="formats.individual.f4">Fast progress</li>
+          <li data-i18n="formats.individual.f4">Full coach attention</li>
         </ul>
       </div>
       <div class="feature-card">
@@ -696,19 +801,9 @@
         <h3 data-i18n="formats.group.title">Group Lessons</h3>
         <ul class="format-list">
           <li data-i18n="formats.group.f1">Small interactive groups</li>
-          <li data-i18n="formats.group.f2">Learn with peers</li>
-          <li data-i18n="formats.group.f3">Friendly atmosphere</li>
+          <li data-i18n="formats.group.f2">Learn with students at a similar level</li>
+          <li data-i18n="formats.group.f3">Friendly and motivating atmosphere</li>
           <li data-i18n="formats.group.f4">Affordable option</li>
-        </ul>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">💻</div>
-        <h3 data-i18n="formats.online.title">Online Lessons</h3>
-        <ul class="format-list">
-          <li data-i18n="formats.online.f1">Learn from anywhere</li>
-          <li data-i18n="formats.online.f2">Interactive online sessions</li>
-          <li data-i18n="formats.online.f3">Digital chess boards</li>
-          <li data-i18n="formats.online.f4">Flexible timing</li>
         </ul>
       </div>
     </div>
@@ -807,7 +902,7 @@
       <div class="feature-card">
         <div class="feature-icon">👥</div>
         <h3 data-i18n="features.f2.title">Small Group Classes</h3>
-        <p data-i18n="features.f2.desc">Interactive group lessons with 4–16 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.</p>
+        <p data-i18n="features.f2.desc">Interactive group lessons with 4–10 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📝</div>
@@ -833,68 +928,18 @@
   </div>
 </div>
 
-<!-- ACHIEVEMENTS -->
-<div id="achievements">
+<!-- NEWS & ACHIEVEMENTS -->
+<div id="news">
   <div class="section">
     <div class="section-header reveal">
-      <span class="section-tag" data-i18n="ach.tag">Results</span>
-      <h2 data-i18n="ach.title">Student Achievements</h2>
+      <span class="section-tag" data-i18n="news.tag">Academy News</span>
+      <h2 data-i18n="news.title">Latest from the Academy</h2>
       <hr class="divider" />
-      <p data-i18n="ach.subtitle">Milestones earned by our students — children, teenagers, and adults.</p>
+      <p data-i18n="news.subtitle">Achievements, announcements, and stories from our students.</p>
     </div>
-    <div class="ach-viewport reveal" id="achViewport">
-      <button class="carousel-btn-inline left" id="achPrev" aria-label="Previous achievements">&#8592;</button>
-      <button class="carousel-btn-inline right" id="achNext" aria-label="Next achievements">&#8594;</button>
-      <div class="ach-track" id="achTrack">
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Tournament photo placeholder">🏆</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c1.tag">FIDE Progress</span>
-            <h3 data-i18n="ach.c1.title">+240 FIDE Rating</h3>
-            <p data-i18n="ach.c1.desc">Rating growth achieved in one season of training.</p>
-          </div>
-        </div>
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Medal photo placeholder">🥇</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c2.tag">Medal</span>
-            <h3 data-i18n="ach.c2.title">National Champion</h3>
-            <p data-i18n="ach.c2.desc">Gold at the national youth championship.</p>
-          </div>
-        </div>
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Tournament photo placeholder">♟</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c3.tag">Tournament</span>
-            <h3 data-i18n="ach.c3.title">Regional Tournament Winner</h3>
-            <p data-i18n="ach.c3.desc">First place at a regional open tournament.</p>
-          </div>
-        </div>
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Trophy photo placeholder">🏅</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c4.tag">Trophy</span>
-            <h3 data-i18n="ach.c4.title">School Chess Champion</h3>
-            <p data-i18n="ach.c4.desc">Top result at the inter-school championship.</p>
-          </div>
-        </div>
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Certificate photo placeholder">📜</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c5.tag">Certificate</span>
-            <h3 data-i18n="ach.c5.title">Certificate of Excellence</h3>
-            <p data-i18n="ach.c5.desc">Awarded for outstanding progress and dedication.</p>
-          </div>
-        </div>
-        <div class="ach-card">
-          <div class="ach-photo" role="img" aria-label="Rating certificate placeholder">📈</div>
-          <div class="ach-body">
-            <span class="ach-tag" data-i18n="ach.c6.tag">FIDE Progress</span>
-            <h3 data-i18n="ach.c6.title">First FIDE Rating</h3>
-            <p data-i18n="ach.c6.desc">An adult student earned an official rating within a year.</p>
-          </div>
-        </div>
-      </div>
+    <div class="news-grid reveal" id="newsGrid"></div>
+    <div class="news-view-all reveal">
+      <a href="news.html" class="btn-hero outline" data-i18n="news.viewAll">View All News</a>
     </div>
   </div>
 </div>
@@ -903,45 +948,19 @@
 <div class="section-alt" id="gallery">
   <div class="section">
     <div class="section-header reveal">
-      <span class="section-tag" data-i18n="gallery.tag">Moments</span>
-      <h2 data-i18n="gallery.title">Gallery</h2>
+      <span class="section-tag" data-i18n="gallery.tag">Gallery</span>
+      <h2 data-i18n="gallery.title">Academy Life</h2>
       <hr class="divider" />
-      <p data-i18n="gallery.subtitle">Training sessions, tournaments, award ceremonies, and chess camps.</p>
+      <p data-i18n="gallery.subtitle">Moments from training sessions, tournaments, and events.</p>
     </div>
-    <div class="gallery-grid reveal" id="galleryGrid">
-      <button class="gallery-item tall" data-emoji="♞" type="button">
-        <span class="gallery-emoji" aria-hidden="true">♞</span>
-        <span class="gallery-label" data-i18n="gallery.cat1">Training Sessions</span>
-      </button>
-      <button class="gallery-item" data-emoji="⏱" type="button">
-        <span class="gallery-emoji" aria-hidden="true">⏱</span>
-        <span class="gallery-label" data-i18n="gallery.cat2">Tournaments</span>
-      </button>
-      <button class="gallery-item wide" data-emoji="🏆" type="button">
-        <span class="gallery-emoji" aria-hidden="true">🏆</span>
-        <span class="gallery-label" data-i18n="gallery.cat3">Award Ceremonies</span>
-      </button>
-      <button class="gallery-item" data-emoji="⛺" type="button">
-        <span class="gallery-emoji" aria-hidden="true">⛺</span>
-        <span class="gallery-label" data-i18n="gallery.cat4">Chess Camps</span>
-      </button>
-      <button class="gallery-item wide" data-emoji="♟" type="button">
-        <span class="gallery-emoji" aria-hidden="true">♟</span>
-        <span class="gallery-label" data-i18n="gallery.cat1">Training Sessions</span>
-      </button>
-      <button class="gallery-item" data-emoji="🥇" type="button">
-        <span class="gallery-emoji" aria-hidden="true">🥇</span>
-        <span class="gallery-label" data-i18n="gallery.cat3">Award Ceremonies</span>
-      </button>
-      <button class="gallery-item tall" data-emoji="♜" type="button">
-        <span class="gallery-emoji" aria-hidden="true">♜</span>
-        <span class="gallery-label" data-i18n="gallery.cat2">Tournaments</span>
-      </button>
-      <button class="gallery-item" data-emoji="🌲" type="button">
-        <span class="gallery-emoji" aria-hidden="true">🌲</span>
-        <span class="gallery-label" data-i18n="gallery.cat4">Chess Camps</span>
-      </button>
+    <div class="gallery-filters reveal" id="galleryFilters">
+      <button class="gallery-filter-btn active" data-filter="all" data-i18n="gallery.filterAll">All</button>
+      <button class="gallery-filter-btn" data-filter="training" data-i18n="gallery.cat1">Training</button>
+      <button class="gallery-filter-btn" data-filter="tournaments" data-i18n="gallery.cat2">Tournaments</button>
+      <button class="gallery-filter-btn" data-filter="awards" data-i18n="gallery.cat3">Awards</button>
+      <button class="gallery-filter-btn" data-filter="camps" data-i18n="gallery.cat4">Camps</button>
     </div>
+    <div class="gallery-grid reveal" id="galleryGrid"></div>
   </div>
 </div>
 
@@ -1034,6 +1053,15 @@
   </div>
 </div>
 
+<!--
+  PACKAGE PRICES — edit pricing.pX.price in the I18N object below (all 3 languages).
+  Replace ₼XX with the actual price. "/ month" is rendered separately via pricing.perMonth.
+  Keys:
+    pricing.p1.price  — Adult Individual
+    pricing.p2.price  — Children's Standard
+    pricing.p3.price  — Children's Intensive
+    pricing.p4.price  — Group Lessons
+-->
 <!-- PRICING -->
 <div class="section-alt" id="pricing">
   <div class="section">
@@ -1043,54 +1071,98 @@
       <hr class="divider" />
       <p data-i18n="pricing.subtitle">Simple, flexible packages for every schedule and goal.</p>
     </div>
+
+    <p class="pricing-online-note reveal" data-i18n="pricing.onlineNote">All lessons are held online. Contact us to find the right package.</p>
+
     <div class="pricing-grid reveal">
+
+      <!-- Adult Individual: 2 lessons/week only -->
       <div class="price-card">
-        <div class="feature-icon">📅</div>
-        <h3 data-i18n="pricing.p1.title">2 Lessons / Week</h3>
-        <p class="price-sub" data-i18n="pricing.p1.sub">8 lessons per month</p>
-        <ul class="format-list">
-          <li data-i18n="pricing.p1.f1">Steady, consistent progress</li>
-          <li data-i18n="pricing.p1.f2">Weekly homework included</li>
-          <li data-i18n="pricing.p1.f3">Progress tracking</li>
+        <span class="price-label" data-i18n="pricing.badgeAdults">For Adults</span>
+        <h3 data-i18n="pricing.p1.title">Adult Individual</h3>
+        <div class="price-freq-line" data-i18n="pricing.p1.freq">2 lessons per week</div>
+        <div class="price-month-line" data-i18n="pricing.p1.sub">8 lessons per month</div>
+        <hr class="price-divider" />
+        <ul class="price-benefits">
+          <li data-i18n="pricing.p1.f1">One-on-one coaching</li>
+          <li data-i18n="pricing.p1.f2">Personalized learning plan</li>
+          <li data-i18n="pricing.p1.f3">Flexible scheduling</li>
         </ul>
-        <a href="#contact" class="btn-hero primary" data-i18n="pricing.contactUs">Contact Us</a>
+        <div class="price-val" data-i18n="pricing.p1.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
+        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
       </div>
+
+      <!-- Children Standard: 2 lessons/week -->
+      <div class="price-card">
+        <span class="price-label" data-i18n="pricing.badgeChildren">For Children</span>
+        <h3 data-i18n="pricing.p2.title">Children's Standard</h3>
+        <div class="price-freq-line" data-i18n="pricing.p2.freq">2 lessons per week</div>
+        <div class="price-month-line" data-i18n="pricing.p2.sub">8 lessons per month</div>
+        <hr class="price-divider" />
+        <ul class="price-benefits">
+          <li data-i18n="pricing.p2.f1">Personalized coaching</li>
+          <li data-i18n="pricing.p2.f2">Weekly homework</li>
+          <li data-i18n="pricing.p2.f3">Parent progress updates</li>
+        </ul>
+        <div class="price-val" data-i18n="pricing.p2.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
+        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
+      </div>
+
+      <!-- Children Intensive: 3 lessons/week — featured -->
       <div class="price-card featured">
-        <span class="price-popular" data-i18n="pricing.popular">Most Popular</span>
-        <div class="feature-icon">🚀</div>
-        <h3 data-i18n="pricing.p2.title">3 Lessons / Week</h3>
-        <p class="price-sub" data-i18n="pricing.p2.sub">12 lessons per month</p>
-        <ul class="format-list">
-          <li data-i18n="pricing.p2.f1">Faster improvement</li>
-          <li data-i18n="pricing.p2.f2">Weekly homework included</li>
-          <li data-i18n="pricing.p2.f3">Priority scheduling</li>
+        <span class="price-popular-inline" data-i18n="pricing.popular">★ Most Popular</span>
+        <span class="price-label" data-i18n="pricing.badgeChildren">For Children</span>
+        <h3 data-i18n="pricing.p3.title">Children's Intensive</h3>
+        <div class="price-freq-line" data-i18n="pricing.p3.freq">3 lessons per week</div>
+        <div class="price-month-line" data-i18n="pricing.p3.sub">12 lessons per month</div>
+        <hr class="price-divider" />
+        <ul class="price-benefits">
+          <li data-i18n="pricing.p3.f1">Faster improvement</li>
+          <li data-i18n="pricing.p3.f2">Weekly homework</li>
+          <li data-i18n="pricing.p3.f3">Tournament preparation</li>
         </ul>
-        <a href="#contact" class="btn-hero primary" data-i18n="pricing.contactUs">Contact Us</a>
+        <div class="price-val" data-i18n="pricing.p3.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
+        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
       </div>
+
+      <!-- Group Lessons: 2 lessons/week, 4–10 students -->
       <div class="price-card">
-        <div class="feature-icon">👤</div>
-        <h3 data-i18n="pricing.p3.title">Individual Lessons</h3>
-        <p class="price-sub" data-i18n="pricing.p3.sub">One-on-one coaching</p>
-        <ul class="format-list">
-          <li data-i18n="pricing.p3.f1">Full coach attention</li>
-          <li data-i18n="pricing.p3.f2">Fully personalized plan</li>
-          <li data-i18n="pricing.p3.f3">Flexible scheduling</li>
-        </ul>
-        <a href="#contact" class="btn-hero primary" data-i18n="pricing.contactUs">Contact Us</a>
-      </div>
-      <div class="price-card">
-        <div class="feature-icon">👥</div>
+        <span class="price-label" data-i18n="pricing.badgeGroup">Small Groups</span>
         <h3 data-i18n="pricing.p4.title">Group Lessons</h3>
-        <p class="price-sub" data-i18n="pricing.p4.sub">Learn together</p>
-        <ul class="format-list">
-          <li data-i18n="pricing.p4.f1">Small groups by level</li>
-          <li data-i18n="pricing.p4.f2">Learn with peers</li>
+        <div class="price-freq-line" data-i18n="pricing.p4.freq">2 lessons per week</div>
+        <div class="price-month-line" data-i18n="pricing.p4.sub">8 lessons per month</div>
+        <hr class="price-divider" />
+        <ul class="price-benefits">
+          <li data-i18n="pricing.p4.f1">4–10 students per group</li>
+          <li data-i18n="pricing.p4.f2">Groups matched by level</li>
           <li data-i18n="pricing.p4.f3">Most affordable option</li>
         </ul>
-        <a href="#contact" class="btn-hero primary" data-i18n="pricing.contactUs">Contact Us</a>
+        <div class="price-val" data-i18n="pricing.p4.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
+        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
+      </div>
+
+    </div>
+    <p class="pricing-note reveal" data-i18n="pricing.note">Contact us for current pricing and availability — we'll help you pick the right package.</p>
+
+    <!-- SUNDAY TOURNAMENT CARD -->
+    <div class="tourn-wrap reveal" id="tournament">
+      <div class="tourn-card">
+        <div>
+          <span class="tourn-label" data-i18n="tournament.tag">Free Trial Experience</span>
+          <h3 data-i18n="tournament.title">Free Online Tournament Every Sunday</h3>
+          <p data-i18n="tournament.desc">Join a free online tournament, meet other students, and experience our learning environment before choosing a package.</p>
+          <div class="tourn-details">
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill2">Every Sunday</span></span>
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill1">Online</span></span>
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill3">Free to join</span></span>
+          </div>
+        </div>
+        <a href="https://wa.me/994XXXXXXXXX" class="btn-tourn" target="_blank" rel="noopener noreferrer">
+          ♟ <span data-i18n="tournament.cta">Join Free Tournament</span>
+        </a>
       </div>
     </div>
-    <p class="pricing-note" data-i18n="pricing.note">Contact us for current pricing and availability — we'll help you pick the right package.</p>
+
   </div>
 </div>
 
@@ -1326,9 +1398,15 @@
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Gallery image">
   <div class="lightbox-content">
     <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close">✕</button>
-    <div class="lightbox-emoji" id="lightboxEmoji" aria-hidden="true">♞</div>
-    <div class="lightbox-caption" id="lightboxCaption">Training Sessions</div>
-    <div class="lightbox-note" data-i18n="gallery.placeholder">Photo coming soon</div>
+    <div class="lightbox-media-wrap">
+      <div class="lightbox-media" id="lightboxMedia"></div>
+      <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Previous">&#8592;</button>
+      <button class="lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="Next">&#8594;</button>
+    </div>
+    <div class="lightbox-info">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+      <div class="lightbox-note" id="lightboxNote"></div>
+    </div>
   </div>
 </div>
 
@@ -1349,6 +1427,7 @@
   input/textarea placeholders.
   ============================================================
 -->
+<script src="/news-data.js"></script>
 <script id="i18n-data">
   var I18N = {
     en: {
@@ -1389,21 +1468,17 @@
       'formats.tag': 'Learning Options',
       'formats.title': 'Lesson Formats',
       'formats.subtitle': 'Choose the learning style that fits your schedule and goals.',
+      'formats.onlineNote': 'All individual and group lessons are held online',
       'formats.individual.title': 'Individual Lessons',
       'formats.individual.f1': 'One-on-one coaching',
-      'formats.individual.f2': 'Personalized curriculum',
+      'formats.individual.f2': 'Personalized learning plan',
       'formats.individual.f3': 'Flexible scheduling',
-      'formats.individual.f4': 'Fast progress',
+      'formats.individual.f4': 'Full coach attention',
       'formats.group.title': 'Group Lessons',
       'formats.group.f1': 'Small interactive groups',
-      'formats.group.f2': 'Learn with peers',
-      'formats.group.f3': 'Friendly atmosphere',
+      'formats.group.f2': 'Learn with students at a similar level',
+      'formats.group.f3': 'Friendly and motivating atmosphere',
       'formats.group.f4': 'Affordable option',
-      'formats.online.title': 'Online Lessons',
-      'formats.online.f1': 'Learn from anywhere',
-      'formats.online.f2': 'Interactive online sessions',
-      'formats.online.f3': 'Digital chess boards',
-      'formats.online.f4': 'Flexible timing',
 
       'how.tag': 'Getting Started',
       'how.title': 'How It Works',
@@ -1417,63 +1492,68 @@
       'how.s4.title': 'Start Learning',
       'how.s4.desc': 'Begin your personalized chess journey.',
 
-      'ach.tag': 'Results',
-      'ach.title': 'Student Achievements',
-      'ach.subtitle': 'Milestones earned by our students — children, teenagers, and adults.',
-      'ach.c1.tag': 'FIDE Progress',
-      'ach.c1.title': '+240 FIDE Rating',
-      'ach.c1.desc': 'Rating growth achieved in one season of training.',
-      'ach.c2.tag': 'Medal',
-      'ach.c2.title': 'National Champion',
-      'ach.c2.desc': 'Gold at the national youth championship.',
-      'ach.c3.tag': 'Tournament',
-      'ach.c3.title': 'Regional Tournament Winner',
-      'ach.c3.desc': 'First place at a regional open tournament.',
-      'ach.c4.tag': 'Trophy',
-      'ach.c4.title': 'School Chess Champion',
-      'ach.c4.desc': 'Top result at the inter-school championship.',
-      'ach.c5.tag': 'Certificate',
-      'ach.c5.title': 'Certificate of Excellence',
-      'ach.c5.desc': 'Awarded for outstanding progress and dedication.',
-      'ach.c6.tag': 'FIDE Progress',
-      'ach.c6.title': 'First FIDE Rating',
-      'ach.c6.desc': 'An adult student earned an official rating within a year.',
+      'news.tag': 'Academy News',
+      'news.title': 'Latest from the Academy',
+      'news.subtitle': 'Achievements, announcements, and stories from our students.',
+      'news.viewAll': 'View All News',
 
-      'gallery.tag': 'Moments',
-      'gallery.title': 'Gallery',
-      'gallery.subtitle': 'Training sessions, tournaments, award ceremonies, and chess camps.',
-      'gallery.cat1': 'Training Sessions',
+      'gallery.tag': 'Gallery',
+      'gallery.title': 'Academy Life',
+      'gallery.subtitle': 'Moments from training sessions, tournaments, and events.',
+      'gallery.filterAll': 'All',
+      'gallery.cat1': 'Training',
       'gallery.cat2': 'Tournaments',
-      'gallery.cat3': 'Award Ceremonies',
-      'gallery.cat4': 'Chess Camps',
+      'gallery.cat3': 'Awards',
+      'gallery.cat4': 'Camps',
       'gallery.placeholder': 'Photo coming soon',
 
       'pricing.tag': 'Packages',
       'pricing.title': 'Lesson Packages',
       'pricing.subtitle': 'Simple, flexible packages for every schedule and goal.',
-      'pricing.popular': 'Most Popular',
+      'pricing.onlineNote': 'All lessons are held online. Contact us to find the right package.',
+      'pricing.popular': '★ Most Popular',
       'pricing.contactUs': 'Contact Us',
-      'pricing.p1.title': '2 Lessons / Week',
+      'pricing.badgeAdults': 'For Adults',
+      'pricing.badgeChildren': 'For Children',
+      'pricing.badgeGroup': 'Small Groups',
+      'pricing.perMonth': '/ month',
+      'pricing.p1.title': 'Adult Individual',
+      'pricing.p1.freq': '2 lessons per week',
       'pricing.p1.sub': '8 lessons per month',
-      'pricing.p1.f1': 'Steady, consistent progress',
-      'pricing.p1.f2': 'Weekly homework included',
-      'pricing.p1.f3': 'Progress tracking',
-      'pricing.p2.title': '3 Lessons / Week',
-      'pricing.p2.sub': '12 lessons per month',
-      'pricing.p2.f1': 'Faster improvement',
-      'pricing.p2.f2': 'Weekly homework included',
-      'pricing.p2.f3': 'Priority scheduling',
-      'pricing.p3.title': 'Individual Lessons',
-      'pricing.p3.sub': 'One-on-one coaching',
-      'pricing.p3.f1': 'Full coach attention',
-      'pricing.p3.f2': 'Fully personalized plan',
-      'pricing.p3.f3': 'Flexible scheduling',
+      'pricing.p1.f1': 'One-on-one coaching',
+      'pricing.p1.f2': 'Personalized learning plan',
+      'pricing.p1.f3': 'Flexible scheduling',
+      'pricing.p1.price': '₼XX',
+      'pricing.p2.title': "Children's Standard",
+      'pricing.p2.freq': '2 lessons per week',
+      'pricing.p2.sub': '8 lessons per month',
+      'pricing.p2.f1': 'Personalized coaching',
+      'pricing.p2.f2': 'Weekly homework',
+      'pricing.p2.f3': 'Parent progress updates',
+      'pricing.p2.price': '₼XX',
+      'pricing.p3.title': "Children's Intensive",
+      'pricing.p3.freq': '3 lessons per week',
+      'pricing.p3.sub': '12 lessons per month',
+      'pricing.p3.f1': 'Faster improvement',
+      'pricing.p3.f2': 'Weekly homework',
+      'pricing.p3.f3': 'Tournament preparation',
+      'pricing.p3.price': '₼XX',
       'pricing.p4.title': 'Group Lessons',
-      'pricing.p4.sub': 'Learn together',
-      'pricing.p4.f1': 'Small groups by level',
-      'pricing.p4.f2': 'Learn with peers',
+      'pricing.p4.freq': '2 lessons per week',
+      'pricing.p4.sub': '8 lessons per month',
+      'pricing.p4.f1': '4–10 students per group',
+      'pricing.p4.f2': 'Groups matched by level',
       'pricing.p4.f3': 'Most affordable option',
+      'pricing.p4.price': '₼XX',
       'pricing.note': "Contact us for current pricing and availability — we'll help you pick the right package.",
+
+      'tournament.tag': 'Free Trial Experience',
+      'tournament.title': 'Free Online Tournament Every Sunday',
+      'tournament.desc': 'Join a free online tournament, meet other students, and experience our learning environment.',
+      'tournament.pill1': 'Online',
+      'tournament.pill2': 'Every Sunday',
+      'tournament.pill3': 'Free to join',
+      'tournament.cta': 'Join Free Tournament',
 
       'faq.tag': 'Questions',
       'faq.title': 'Frequently Asked Questions',
@@ -1487,7 +1567,7 @@
       'faq.q4': 'What is the lesson duration?',
       'faq.a4': "A typical lesson lasts 60 minutes. Duration can be adjusted to the student's age, level, and format.",
       'faq.q5': 'How do I register?',
-      'faq.a5': "Send us a message on WhatsApp or fill out the contact form. We'll reply within 24 hours to arrange a free assessment.",
+      'faq.a5': "Send us a message on WhatsApp or fill out the contact form. We'll reply within 24 hours.",
       'faq.q6': 'How are students placed into levels?',
       'faq.a6': 'Every new student receives a free assessment. Based on skill — not age — we place you in Beginner, Intermediate, Advanced, or Competitive.',
 
@@ -1512,7 +1592,7 @@
       'features.f1.title': 'Personalized Curriculum',
       'features.f1.desc': 'Every student gets a training plan tailored to their level, goals, and learning pace.',
       'features.f2.title': 'Small Group Classes',
-      'features.f2.desc': 'Interactive group lessons with 4–16 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.',
+      'features.f2.desc': 'Interactive group lessons with 4–10 students, organized by level so everyone can learn, practice, and improve together. Private one-on-one sessions are also available.',
       'features.f3.title': 'Weekly Homework',
       'features.f3.desc': 'Structured exercises, puzzles, and analysis tasks assigned after each lesson to reinforce what was learned.',
       'features.f4.title': 'Tournament Preparation',
@@ -1546,7 +1626,7 @@
       'contact.tag': 'Get Started',
       'contact.title': 'Contact Us',
       'contact.subtitle': 'Ready to Begin Your Chess Journey?',
-      'contact.desc': "Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.",
+      'contact.desc': "Fill out the form or reach out directly. We'll get back to you within 24 hours.",
       'contact.whatsappLabel': 'WhatsApp',
       'contact.emailLabel': 'Email',
       'contact.locationLabel': 'Location',
@@ -1595,10 +1675,10 @@
       'nav.whyUs': 'Niyə Biz',
       'nav.reviews': 'Rəylər',
       'nav.contact': 'Əlaqə',
-      'common.startLearning': 'Öyrənməyə Başla',
+      'common.startLearning': 'Dərslərə başlayın',
 
       'hero.title': 'Şahmat Sənətinə <em>Yiyələnin</em>',
-      'hero.subtitle': 'Uşaqlar, yeniyetmələr və böyüklər üçün fərdi şahmat təlimi — tam yeni başlayanlardan turnir oyunçularına qədər. Peşəkar məşqçi ilə strateji düşüncənizi, özünəinamınızı və yarış bacarıqlarınızı inkişaf etdirin.',
+      'hero.subtitle': 'Uşaqlar, yeniyetmələr və böyüklər üçün fərdi şahmat dərsləri — şahmata yeni başlayanlardan turnir oyunçularına qədər. Peşəkar hazırlıq ilə strateji düşüncənizi, özünəinamınızı və yarış bacarıqlarınızı inkişaf etdirin.',
       'hero.ctaSecondary': 'Məşqçinizlə Tanış Olun',
       'nav.pricing': 'Qiymətlər',
       'nav.faq': 'Suallar',
@@ -1610,187 +1690,188 @@
 
       'levels.tag': 'Proqramlar',
       'levels.title': 'Tədris Etdiyimiz Səviyyələr',
-      'levels.subtitle': 'Şahmat yolunuzun hər mərhələsi üçün strukturlaşdırılmış proqramlar',
+      'levels.subtitle': 'Şahmat səyahətinizin hər mərhələsi üçün sistemli tədris proqramları',
       'levels.beginner.title': 'Başlanğıc Səviyyə',
-      'levels.beginner.desc': 'Şahmatın qaydalarını, əsas taktiki üsulları və debüt prinsiplərini öyrənin, möhkəm təməl qurun. Şahmata yeni başlayanlar üçün ideal seçimdir.',
+      'levels.beginner.desc': 'Şahmat qaydalarını, əsas taktiki üsulları və debüt prinsiplərini öyrənin, möhkəm şahmat təməli formalaşdırın. Şahmata yeni başlayanlar üçün ideal seçimdir.',
       'levels.beginner.badge': 'Şahmata yeni başlayanlar – ~800',
       'levels.intermediate.title': 'Orta Səviyyə',
-      'levels.intermediate.desc': 'Taktiki düşüncənizi, mövqe anlayışınızı, endşpil bacarıqlarınızı və debüt repertuarınızı inkişaf etdirərək turnirlərə daha inamla hazırlaşın.',
+      'levels.intermediate.desc': 'Taktiki görmə qabiliyyətinizi, mövqe anlayışınızı, endşpil və debüt biliklərinizi inkişaf etdirərək turnirlərdə daha inamlı oynayın.',
       'levels.intermediate.badge': '~800–1400',
       'levels.advanced.title': 'Yüksək Səviyyə',
-      'levels.advanced.desc': 'Fərdi yanaşma ilə mürəkkəb strategiyaları, dəqiq hesablamaları, psixoloji hazırlığı və turnir bacarıqlarını inkişaf etdirin.',
+      'levels.advanced.desc': 'Fərdi təlim proqramı ilə çətin strategiyaları, variantların hesablanmasını, psixoloji hazırlığı və turnir oyununu təkmilləşdirin.',
       'levels.advanced.badge': '1400+',
       'levels.competitive.title': 'Yarış Səviyyəsi',
-      'levels.competitive.desc': 'Reytinqli turnirlərə və FIDE yarışlarına hazırlaşan oyunçular üçün — dərin debüt hazırlığı, partiya analizi və fərdi turnir planı.',
-      'levels.competitive.badge': 'Turnir və FIDE oyunçuları',
+      'levels.competitive.desc': 'Reytinqli turnirlərə və FIDE yarışlarına hazırlaşan oyunçular üçün — daha dərin debüt hazırlığı, partiyaların təhlili və fərdi turnir planı.',
+      'levels.competitive.badge': 'Turnir və FIDE yarışlarına hazırlaşan oyunçular',
 
-      'formats.tag': 'Tədris Seçimləri',
+      'formats.tag': 'Tədris imkanları',
       'formats.title': 'Dərs Formatları',
-      'formats.subtitle': 'Cədvəlinizə və məqsədlərinizə uyğun tədris formatını seçin.',
+      'formats.subtitle': 'Cədvəlinizə və məqsədlərinizə uyğun dərs formatını seçin.',
+      'formats.onlineNote': 'Bütün fərdi və qrup dərsləri <em>onlayn</em> keçirilir',
       'formats.individual.title': 'Fərdi Dərslər',
-      'formats.individual.f1': 'Məşqçi ilə birəbir dərslər',
-      'formats.individual.f2': 'Fərdiləşdirilmiş tədris planı',
-      'formats.individual.f3': 'Çevik cədvəl',
-      'formats.individual.f4': 'Sürətli inkişaf',
+      'formats.individual.f1': 'Məşqçi ilə fərdi dərslər',
+      'formats.individual.f2': 'Fərdi tədris planı',
+      'formats.individual.f3': 'Uyğunlaşdırıla bilən dərs cədvəli',
+      'formats.individual.f4': 'Məşqçinin bütün diqqəti sizə yönəlir',
       'formats.group.title': 'Qrup Dərsləri',
-      'formats.group.f1': 'Kiçik interaktiv qruplar',
-      'formats.group.f2': 'Həmyaşıdlarla birgə öyrənmə',
-      'formats.group.f3': 'Səmimi mühit',
-      'formats.group.f4': 'Sərfəli seçim',
-      'formats.online.title': 'Onlayn Dərslər',
-      'formats.online.f1': 'İstənilən yerdən öyrənin',
-      'formats.online.f2': 'İnteraktiv onlayn dərslər',
-      'formats.online.f3': 'Rəqəmsal şahmat taxtaları',
-      'formats.online.f4': 'Çevik vaxt seçimi',
+      'formats.group.f1': 'Kiçik və interaktiv qruplar',
+      'formats.group.f2': 'Eyni səviyyədə olan şagirdlərlə birlikdə öyrənin',
+      'formats.group.f3': 'Səmimi və motivasiyaedici mühit',
+      'formats.group.f4': 'Daha sərfəli seçim',
 
-      'how.tag': 'Necə Başlamalı',
-      'how.title': 'Necə İşləyir',
-      'how.subtitle': 'İlk mesajdan ilk dərsə qədər dörd sadə addım.',
+      'how.tag': 'İlk addımlar',
+      'how.title': 'Tədris prosesi necə işləyir?',
+      'how.subtitle': 'İlk müraciətdən ilk dərsə qədər cəmi dörd sadə addım.',
       'how.s1.title': 'Bizimlə Əlaqə Saxlayın',
-      'how.s1.desc': 'WhatsApp və ya əlaqə forması vasitəsilə müraciət edin.',
-      'how.s2.title': 'Pulsuz Qiymətləndirmə',
-      'how.s2.desc': 'Hazırkı şahmat səviyyənizi və məqsədlərinizi müəyyən edirik.',
-      'how.s3.title': 'Formatınızı Seçin',
+      'how.s1.desc': 'WhatsApp və ya əlaqə forması vasitəsilə bizə müraciət edin.',
+      'how.s2.title': 'Ödənişsiz səviyyə qiymətləndirilməsi',
+      'how.s2.desc': 'Hazırkı şahmat səviyyənizi və məqsədlərinizi qiymətləndiririk.',
+      'how.s3.title': 'Dərs formatını seçin',
       'how.s3.desc': 'Fərdi və ya qrup dərslərini seçin.',
-      'how.s4.title': 'Öyrənməyə Başlayın',
-      'how.s4.desc': 'Fərdi şahmat səyahətinizə başlayın.',
+      'how.s4.title': 'Dərslərə başlayın',
+      'how.s4.desc': 'Şahmat səyahətinizə başlayın.',
 
-      'ach.tag': 'Nəticələr',
-      'ach.title': 'Şagird Nailiyyətləri',
-      'ach.subtitle': 'Şagirdlərimizin — uşaqların, yeniyetmələrin və böyüklərin qazandığı uğurlar.',
-      'ach.c1.tag': 'FIDE İnkişafı',
-      'ach.c1.title': '+240 FIDE Reytinqi',
-      'ach.c1.desc': 'Bir mövsümlük təlim nəticəsində reytinq artımı.',
-      'ach.c2.tag': 'Medal',
-      'ach.c2.title': 'Milli Çempion',
-      'ach.c2.desc': 'Gənclər arasında milli çempionatda qızıl medal.',
-      'ach.c3.tag': 'Turnir',
-      'ach.c3.title': 'Regional Turnir Qalibi',
-      'ach.c3.desc': 'Regional açıq turnirdə birinci yer.',
-      'ach.c4.tag': 'Kubok',
-      'ach.c4.title': 'Məktəb Şahmat Çempionu',
-      'ach.c4.desc': 'Məktəblərarası çempionatda ən yaxşı nəticə.',
-      'ach.c5.tag': 'Sertifikat',
-      'ach.c5.title': 'Fərqlənmə Sertifikatı',
-      'ach.c5.desc': 'Yüksək inkişaf və zəhmətə görə təqdim olunub.',
-      'ach.c6.tag': 'FIDE İnkişafı',
-      'ach.c6.title': 'İlk FIDE Reytinqi',
-      'ach.c6.desc': 'Yetkin şagirdimiz bir il ərzində rəsmi reytinq qazandı.',
+      'news.tag': 'Akademiya Xəbərləri',
+      'news.title': 'Akademiyadan Son Xəbərlər',
+      'news.subtitle': 'Şagirdlərimizin nailiyyətləri, elanlar və maraqlı hekayələr.',
+      'news.viewAll': 'Bütün xəbərlərə baxın',
 
-      'gallery.tag': 'Anlar',
-      'gallery.title': 'Qalereya',
-      'gallery.subtitle': 'Məşqlər, turnirlər, mükafatlandırma mərasimləri və şahmat düşərgələri.',
-      'gallery.cat1': 'Məşq Dərsləri',
+      'gallery.tag': 'Qalereya',
+      'gallery.title': 'Akademiya Həyatı',
+      'gallery.subtitle': 'Məşqlərdən, turnirlərdən və tədbirlərdən yaddaqalan anlar.',
+      'gallery.filterAll': 'Hamısı',
+      'gallery.cat1': 'Məşqlər',
       'gallery.cat2': 'Turnirlər',
       'gallery.cat3': 'Mükafatlandırma',
-      'gallery.cat4': 'Şahmat Düşərgələri',
+      'gallery.cat4': 'Düşərgələr',
       'gallery.placeholder': 'Şəkil tezliklə əlavə olunacaq',
 
       'pricing.tag': 'Paketlər',
       'pricing.title': 'Dərs Paketləri',
-      'pricing.subtitle': 'Hər cədvələ və məqsədə uyğun sadə, çevik paketlər.',
-      'pricing.popular': 'Ən Populyar',
+      'pricing.subtitle': 'Müxtəlif cədvəllərə və məqsədlərə uyğun sadə və uyğunlaşdırıla bilən paketlər.',
+      'pricing.onlineNote': 'Bütün dərslər onlayn keçirilir. Sizə uyğun paketi seçmək üçün bizimlə əlaqə saxlaya bilərsiniz.',
+      'pricing.popular': '★ Ən Populyar',
       'pricing.contactUs': 'Əlaqə Saxlayın',
-      'pricing.p1.title': 'Həftədə 2 Dərs',
+      'pricing.badgeAdults': 'Böyüklər üçün',
+      'pricing.badgeChildren': 'Uşaqlar üçün',
+      'pricing.badgeGroup': 'Kiçik Qruplar',
+      'pricing.perMonth': '/ ay',
+      'pricing.p1.title': 'Böyüklər üçün fərdi dərslər',
+      'pricing.p1.freq': 'Həftədə 2 dərs',
       'pricing.p1.sub': 'Ayda 8 dərs',
-      'pricing.p1.f1': 'Sabit və davamlı inkişaf',
-      'pricing.p1.f2': 'Həftəlik ev tapşırıqları daxildir',
-      'pricing.p1.f3': 'İnkişafın izlənməsi',
-      'pricing.p2.title': 'Həftədə 3 Dərs',
-      'pricing.p2.sub': 'Ayda 12 dərs',
-      'pricing.p2.f1': 'Daha sürətli inkişaf',
-      'pricing.p2.f2': 'Həftəlik ev tapşırıqları daxildir',
-      'pricing.p2.f3': 'Prioritet cədvəl seçimi',
-      'pricing.p3.title': 'Fərdi Dərslər',
-      'pricing.p3.sub': 'Birəbir təlim',
-      'pricing.p3.f1': 'Məşqçinin tam diqqəti',
-      'pricing.p3.f2': 'Tam fərdiləşdirilmiş plan',
-      'pricing.p3.f3': 'Çevik cədvəl',
+      'pricing.p1.f1': 'Məşqçi ilə fərdi dərslər',
+      'pricing.p1.f2': 'Fərdi tədris planı',
+      'pricing.p1.f3': 'Çevik dərs cədvəli',
+      'pricing.p1.price': '₼XX',
+      'pricing.p2.title': 'Uşaqlar üçün standart paket',
+      'pricing.p2.freq': 'Həftədə 2 dərs',
+      'pricing.p2.sub': 'Ayda 8 dərs',
+      'pricing.p2.f1': 'Fərdi yanaşma',
+      'pricing.p2.f2': 'Həftəlik ev tapşırıqları',
+      'pricing.p2.f3': 'Valideynlər üçün inkişaf hesabatları',
+      'pricing.p2.price': '₼XX',
+      'pricing.p3.title': 'Uşaqlar üçün intensiv paket',
+      'pricing.p3.freq': 'Həftədə 3 dərs',
+      'pricing.p3.sub': 'Ayda 12 dərs',
+      'pricing.p3.f1': 'Daha sürətli inkişaf',
+      'pricing.p3.f2': 'Həftəlik ev tapşırıqları',
+      'pricing.p3.f3': 'Turnir hazırlığı',
+      'pricing.p3.price': '₼XX',
       'pricing.p4.title': 'Qrup Dərsləri',
-      'pricing.p4.sub': 'Birlikdə öyrənin',
-      'pricing.p4.f1': 'Səviyyəyə görə kiçik qruplar',
-      'pricing.p4.f2': 'Həmyaşıdlarla birgə öyrənmə',
+      'pricing.p4.freq': 'Həftədə 2 dərs',
+      'pricing.p4.sub': 'Ayda 8 dərs',
+      'pricing.p4.f1': 'Hər qrupda 4–10 şagird',
+      'pricing.p4.f2': 'Səviyyələrə uyğun formalaşdırılmış qruplar',
       'pricing.p4.f3': 'Ən sərfəli seçim',
-      'pricing.note': 'Aktual qiymətlər və mövcud yerlər üçün bizimlə əlaqə saxlayın — sizə uyğun paketi seçməkdə kömək edəcəyik.',
+      'pricing.p4.price': '₼XX',
+      'pricing.note': 'Aktual qiymətlər və mövcud yerlər haqqında məlumat almaq üçün bizimlə əlaqə saxlayın — sizə uyğun paketi seçməyə kömək edəcəyik.',
+
+      'tournament.tag': 'Ödənişsiz tanışlıq imkanı',
+      'tournament.title': 'Hər Bazar Günü Ödənişsiz Onlayn Turnir',
+      'tournament.desc': 'Ödənişsiz onlayn turnirə qoşulun, digər şagirdlərlə tanış olun və tədris mühitimizlə yaxından tanış olun.',
+      'tournament.pill1': 'Onlayn',
+      'tournament.pill2': 'Hər Bazar Günü',
+      'tournament.pill3': 'İştirak pulsuzdur',
+      'tournament.cta': 'Turnirə qoşulun',
 
       'faq.tag': 'Suallar',
       'faq.title': 'Tez-tez Verilən Suallar',
-      'faq.subtitle': 'Başlamazdan əvvəl bilməli olduğunuz hər şey.',
+      'faq.subtitle': 'Dərslərə başlamazdan əvvəl bilməli olduğunuz hər şey.',
       'faq.q1': 'Əvvəlcədən şahmat təcrübəsi lazımdırmı?',
       'faq.a1': 'Xeyr. Həm tam yeni başlayanları, həm də təcrübəli oyunçuları qəbul edirik — proqram məhz sizin səviyyənizdən başlayır.',
       'faq.q2': 'Dərslər onlayn keçirilirmi?',
       'faq.a2': 'Bəli. Rəqəmsal şahmat taxtaları ilə interaktiv onlayn dərslər təklif edirik — istənilən yerdən öyrənə bilərsiniz.',
-      'faq.q3': 'Böyüklər qoşula bilərmi?',
+      'faq.q3': 'Böyüklər də dərslərə qoşula bilərmi?',
       'faq.a3': 'Əlbəttə. Akademiyada uşaqlar, yeniyetmələr və böyüklər təhsil alır — bir çox şagirdimiz şahmata yetkin yaşda başlayıb.',
       'faq.q4': 'Dərsin müddəti nə qədərdir?',
       'faq.a4': 'Standart dərs 60 dəqiqə davam edir. Müddət şagirdin yaşına, səviyyəsinə və formatına uyğun tənzimlənə bilər.',
       'faq.q5': 'Necə qeydiyyatdan keçə bilərəm?',
-      'faq.a5': 'WhatsApp vasitəsilə mesaj göndərin və ya əlaqə formasını doldurun. Pulsuz qiymətləndirmə təyin etmək üçün 24 saat ərzində cavab verəcəyik.',
+      'faq.a5': 'WhatsApp vasitəsilə mesaj göndərin və ya əlaqə formasını doldurun. Sizinlə 24 saat ərzində əlaqə saxlayacayıq.',
       'faq.q6': 'Şagirdlər səviyyələrə necə bölünür?',
       'faq.a6': 'Hər yeni şagird pulsuz qiymətləndirmədən keçir. Yaşa görə deyil, bacarığa görə Başlanğıc, Orta, Yüksək və ya Yarış səviyyəsinə yerləşdirilirsiniz.',
 
       'about.tag': 'Məşqçiniz',
-      'about.title': 'Mənim Haqqımda',
-      'about.photoText': 'Məşqçi Şəkli',
-      'about.badge': 'FIDE Reytinqli',
+      'about.title': 'Haqqımda',
+      'about.photoText': 'Məşqçinin fotosu',
+      'about.badge': 'FIDE reytinqinə malik',
       'about.greeting': 'Salam, mən <em>Abdullayam</em>',
-      'about.p1': 'Mən hər yaşdan olan şahmat həvəskarlarının potensialını üzə çıxarmağa kömək etməyi sevən peşəkar şahmat məşqçisiyəm. Yarış və məşqçilik sahəsində qazandığım uzun illərin təcrübəsi sayəsində hər dərsdə sistemli, eyni zamanda maraqlı və motivasiyaedici yanaşma tətbiq edirəm.',
-      'about.p2': 'Cosmo Chess Academy-də məqsədim şahmatı hər kəs üçün əlçatan və maraqlı etmək, eyni zamanda şagirdlərimin turnirlərdə uğur qazanmasına və şəxsi inkişafına dəstək olmaqdır.',
-      'about.hl1.title': 'Sertifikatlı Şahmat Təlimçisi',
-      'about.hl1.desc': 'Peşəkar məşqçilik sertifikatı',
-      'about.hl2.title': 'Hər Yaş Üçün Dərslər',
+      'about.p1': 'Mən hər yaşdan olan şagirdlərin öz potensialını üzə çıxarmasına kömək edən, işinə həvəslə yanaşan şahmat məşqçisiyəm. Uzun illərin yarış və tədris təcrübəsi sayəsində hər dərsi sistemli, maraqlı və motivasiyaedici şəkildə keçirirəm.',
+      'about.p2': 'Cosmo Chess Academy-də məqsədim şahmatı hər kəs üçün əlçatan və maraqlı etmək, eyni zamanda şagirdlərdə turnir uğurlarına və şəxsi inkişafa aparan bacarıqları formalaşdırmaqdır.',
+      'about.hl1.title': 'Sertifikatlı şahmat məşqçisi',
+      'about.hl1.desc': 'Peşəkar məşqçi sertifikatı',
+      'about.hl2.title': 'Bütün yaş qrupları üçün',
       'about.hl2.desc': '5 yaşdan etibarən uşaqlar, yeniyetmələr və böyüklər',
       'about.hl3.title': 'Onlayn və Əyani Dərslər',
-      'about.hl3.desc': 'Rahat tədris formatı',
-      'about.hl4.title': 'Fərdiləşdirilmiş Tədris Materialları',
-      'about.hl4.desc': 'Ev tapşırıqları, məsələlər və fərdi tədris planları',
+      'about.hl3.desc': 'Çevik tədris imkanları',
+      'about.hl4.title': 'Fərdi tədris materialları',
+      'about.hl4.desc': 'Ev tapşırıqları, şahmat məsələləri və tədris planları daxildir',
 
       'features.tag': 'Niyə Bizi Seçməlisiniz?',
       'features.title': 'Bizi Fərqləndirən Xüsusiyyətlər',
-      'features.f1.title': 'Fərdiləşdirilmiş Tədris Proqramı',
-      'features.f1.desc': 'Hər bir şagirdin səviyyəsinə, məqsədlərinə və öyrənmə tempinə uyğun fərdi tədris planı hazırlanır.',
+      'features.f1.title': 'Fərdi tədris proqramı',
+      'features.f1.desc': 'Hər bir şagird üçün onun səviyyəsinə, məqsədlərinə və öyrənmə tempinə uyğun fərdi tədris planı hazırlanır.',
       'features.f2.title': 'Kiçik Qrup Dərsləri',
-      'features.f2.desc': '4–16 nəfərlik qruplarda keçirilən interaktiv dərslər şagirdlərin səviyyələrinə uyğun təşkil olunur ki, hər kəs rahat şəkildə öyrənsin, məşq etsin və inkişaf etsin. Fərdi dərslər də mövcuddur.',
+      'features.f2.desc': '4–10 şagirddən ibarət interaktiv qruplar səviyyələrə uyğun formalaşdırılır. Beləliklə, hər kəs birlikdə öyrənə, məşq edə və inkişaf edə bilir. Fərdi dərslər də mövcuddur.',
       'features.f3.title': 'Həftəlik Ev Tapşırıqları',
-      'features.f3.desc': 'Hər dərsdən sonra mövzunun möhkəmləndirilməsi üçün tapşırıqlar, şahmat məsələləri və analiz çalışmaları təqdim olunur.',
+      'features.f3.desc': 'Hər dərsdən sonra öyrənilən mövzuları möhkəmləndirmək üçün sistemli çalışmalar, şahmat məsələləri və təhlil tapşırıqları verilir.',
       'features.f4.title': 'Turnir Hazırlığı',
-      'features.f4.desc': 'Debüt hazırlığı, vaxtın düzgün idarə olunması, variantların hesablanması və psixoloji hazırlıq üzərində məqsədyönlü məşqlər.',
+      'features.f4.desc': 'Turnir oyunları üçün məqsədyönlü hazırlıq — debüt hazırlığı, vaxtın idarə edilməsi, variantların hesablanması üzrə məşqlər və psixoloji dayanıqlılıq.',
       'features.f5.title': 'İnkişaf Hesabatları',
-      'features.f5.desc': 'Şagirdlər və valideynlər üçün mütəmadi inkişaf hesabatları təqdim olunur ki, hər kəs təlimin gedişindən xəbərdar olsun.',
-      'features.f6.title': 'WhatsApp İnteqrasiyası',
-      'features.f6.desc': 'Ev tapşırıqları, dərs xatırlatmaları, cədvəl yenilikləri və bütün əlaqə rahat şəkildə WhatsApp vasitəsilə həyata keçirilir.',
+      'features.f5.desc': 'Şagirdlər və valideynlər üçün müntəzəm inkişaf hesabatları təqdim olunur ki, hər kəs tədris prosesinin gedişindən xəbərdar olsun.',
+      'features.f6.title': 'WhatsApp üzərindən əlaqə',
+      'features.f6.desc': 'Ev tapşırıqları, dərs xatırlatmaları, cədvəldəki dəyişikliklər və bütün digər məlumatlar rahat şəkildə WhatsApp vasitəsilə göndərilir.',
 
       'testimonials.tag': 'İcmamız',
-      'testimonials.title': 'Şagirdlərimiz və Valideynlər Nə Deyir',
-      'testimonials.subtitle': 'Şagirdlərin və valideynlərin Cosmo Chess Academy-də təhsildən necə faydalandığını görün.',
+      'testimonials.title': 'Şagirdlərimiz və valideynlərimiz nə deyir?',
+      'testimonials.subtitle': 'Cosmo Chess Academy-də təhsilin şagirdlərimizə və valideynlərə necə fayda verdiyini öyrənin.',
       'testimonials.trustSub': '200+ şagird və valideynin rəyi əsasında',
-      'testimonials.t1.text': '"Qızım dərslərə başladıqdan bir neçə ay sonra çox daha özünə inamlı oldu."',
+      'testimonials.t1.text': '"Qızım cəmi bir neçə aylıq dərsdən sonra özünə daha çox inanmağa başladı."',
       'testimonials.t1.role': '10 yaşlı şagirdin valideyni',
-      'testimonials.t2.text': '"Dərslər strukturlaşdırılıb, aydındır və izləməsi asandır."',
+      'testimonials.t2.text': '"Dərslər sistemli, aydın və asan başa düşüləndir."',
       'testimonials.t2.role': 'Yetkin şagird',
-      'testimonials.t3.text': '"Məşqçi Abdulla mürəkkəb fikirləri çox sadə şəkildə izah edir."',
+      'testimonials.t3.text': '"Məşqçi Abdulla mürəkkəb fikirləri sadə və anlaşıqlı şəkildə izah edir."',
       'testimonials.t3.role': 'Valideyn',
-      'testimonials.t4.text': '"Qrup dərsləri motivasiya verir, amma şagirdlər yenə də fərdi diqqət alır."',
+      'testimonials.t4.text': '"Qrup dərsləri çox motivasiyaedicidir və bununla yanaşı, hər bir şagirdə fərdi diqqət göstərilir."',
       'testimonials.t4.role': 'Valideyn',
-      'testimonials.t5.text': '"Reytinqim artdı və indi səhvlərimi çox daha yaxşı başa düşürəm."',
+      'testimonials.t5.text': '"Reytinqim yüksəlib və indi səhvlərimi daha yaxşı anlayıram."',
       'testimonials.t5.role': 'Orta səviyyəli şagird',
-      'testimonials.t6.text': '"Hər dərsdən sonrakı ev tapşırığı oğlumun davamlı olmasına kömək edir."',
+      'testimonials.t6.text': '"Hər dərsdən sonra verilən ev tapşırıqları oğlumun müntəzəm məşq etməsinə kömək edir."',
       'testimonials.t6.role': 'Valideyn',
-      'testimonials.t7.text': '"WhatsApp yenilikləri cədvəli və ev tapşırığını izləməyi asanlaşdırır."',
+      'testimonials.t7.text': '"WhatsApp vasitəsilə göndərilən məlumatlar dərs cədvəlini və ev tapşırıqlarını izləməyi asanlaşdırır."',
       'testimonials.t7.role': 'Valideyn',
-      'testimonials.t8.text': '"Hər dərsin aydın məqsədi və praktiki məşqləri olması xoşuma gəlir."',
+      'testimonials.t8.text': '"Hər dərsin aydın məqsədinin və praktiki çalışmalarının olması xoşuma gəlir."',
       'testimonials.t8.role': 'Şagird',
 
-      'contact.tag': 'Başlayın',
-      'contact.title': 'Bizimlə Əlaqə',
-      'contact.subtitle': 'Şahmat Səyahətinizə Başlamağa Hazırsınız?',
-      'contact.desc': 'Formu doldurun və ya birbaşa bizimlə əlaqə saxlayın. Sınaq dərsini təyin etmək üçün 24 saat ərzində sizinlə əlaqə saxlayacağıq.',
+      'contact.tag': 'İlk addımı atın',
+      'contact.title': 'Bizimlə əlaqə saxlayın',
+      'contact.subtitle': 'Şahmat yolunuza başlamağa hazırsınız?',
+      'contact.desc': 'Formanı doldurun və ya birbaşa bizimlə əlaqə saxlayın. 24 saat ərzində sizinlə əlaqə saxlayacağıq.',
       'contact.whatsappLabel': 'WhatsApp',
       'contact.emailLabel': 'E-poçt',
       'contact.locationLabel': 'Ünvan',
       'contact.locationValue': 'Bakı, Azərbaycan',
-      'contact.hoursLabel': 'İş Saatları',
-      'contact.hoursValue': 'B.e–Şən, 10:00 – 20:00',
+      'contact.hoursLabel': 'İş saatları',
+      'contact.hoursValue': 'Bazar ertəsi–Şənbə, 10:00–20:00',
       'contact.name': 'Ad *',
       'contact.namePlaceholder': 'Adınız',
       'contact.phone': 'Telefon *',
@@ -1798,11 +1879,11 @@
       'contact.level': 'Şahmat Səviyyəsi *',
       'contact.levelPlaceholder': 'Şahmat səviyyənizi seçin',
       'contact.fideRating': 'FIDE Reytinqi (İstəyə bağlı)',
-      'contact.fideRatingPlaceholder': 'məs. 1650',
+      'contact.fideRatingPlaceholder': 'məsələn, 1650',
       'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
       'contact.message': 'Mesaj',
-      'contact.messagePlaceholder': 'Hər hansı sual və ya istək...',
-      'contact.submit': 'Göndər və WhatsApp ilə Əlaqə Saxla',
+      'contact.messagePlaceholder': 'Suallarınızı və ya istəklərinizi qeyd edin...',
+      'contact.submit': 'Göndərin və WhatsApp vasitəsilə əlaqə saxlayın',
       'contact.thankYouTitle': 'Təşəkkür edirik!',
       'contact.thankYouText': 'Tezliklə WhatsApp vasitəsilə sizinlə əlaqə saxlayacağıq.',
 
@@ -1813,7 +1894,7 @@
       'chessLevel.expert': 'Ekspert səviyyəsi',
       'chessLevel.notSure': 'Əmin Deyiləm',
 
-      'footer.tagline': 'Bütün yaşlar üçün peşəkar şahmat təlimi. Hər hərəkətdə çempionlar yetişdiririk.',
+      'footer.tagline': 'Bütün yaş qrupları üçün peşəkar şahmat təlimi. Gələcəyin çempionlarını hər gedişdə inkişaf etdiririk.',
       'footer.linksTitle': 'Keçidlər',
       'footer.contactTitle': 'Əlaqə',
       'footer.emailLink': 'E-poçt',
@@ -1836,7 +1917,7 @@
       'common.startLearning': 'Начать обучение',
 
       'hero.title': 'Освойте Искусство <em>Шахмат</em>',
-      'hero.subtitle': 'Персональные занятия шахматами для детей, подростков и взрослых — от новичков до турнирных игроков. Развивайте стратегическое мышление, уверенность и соревновательные навыки с опытным тренером.',
+      'hero.subtitle': 'Индивидуальные занятия шахматами для детей, подростков и взрослых — от начинающих до турнирных игроков. Развивайте стратегическое мышление, уверенность и соревновательные навыки под руководством опытного тренера.',
       'hero.ctaSecondary': 'Познакомьтесь с тренером',
       'nav.pricing': 'Цены',
       'nav.faq': 'Вопросы',
@@ -1848,113 +1929,114 @@
 
       'levels.tag': 'Программы',
       'levels.title': 'Уровни обучения',
-      'levels.subtitle': 'Структурированные программы для каждого этапа вашего шахматного пути',
+      'levels.subtitle': 'Структурированные программы для каждого этапа вашего шахматного развития',
       'levels.beginner.title': 'Начальный уровень',
-      'levels.beginner.desc': 'Изучите правила шахмат, базовую тактику, принципы дебюта и заложите прочную основу игры. Идеально подходит для начинающих игроков.',
+      'levels.beginner.desc': 'Изучите правила шахмат, базовые тактические приёмы и принципы дебюта, а также заложите прочную шахматную основу. Идеально подходит для начинающих игроков.',
       'levels.beginner.badge': 'Новичок – ~800',
       'levels.intermediate.title': 'Средний уровень',
-      'levels.intermediate.desc': 'Развивайте тактическое мышление, позиционное понимание, игру в эндшпиле и дебютный репертуар, чтобы уверенно выступать на соревнованиях.',
+      'levels.intermediate.desc': 'Развивайте тактическое видение, позиционное понимание, навыки игры в эндшпиле и дебютный репертуар, чтобы увереннее выступать на соревнованиях.',
       'levels.intermediate.badge': '~800–1400',
       'levels.advanced.title': 'Продвинутый уровень',
-      'levels.advanced.desc': 'Освойте продвинутую стратегию, расчёт вариантов, психологическую подготовку и эффективную игру на турнирах благодаря индивидуальному подходу.',
+      'levels.advanced.desc': 'Совершенствуйте продвинутую стратегию, расчёт вариантов, психологическую подготовку и турнирную игру благодаря индивидуальной программе обучения.',
       'levels.advanced.badge': '1400+',
       'levels.competitive.title': 'Соревновательный уровень',
-      'levels.competitive.desc': 'Для игроков, готовящихся к рейтинговым турнирам и соревнованиям FIDE: глубокая дебютная подготовка, анализ партий и персональный турнирный план.',
-      'levels.competitive.badge': 'Турнирные игроки и FIDE',
+      'levels.competitive.desc': 'Для игроков, готовящихся к рейтинговым турнирам и соревнованиям FIDE: углублённая дебютная подготовка, анализ партий и индивидуальный турнирный план.',
+      'levels.competitive.badge': 'Игроки, участвующие в турнирах и соревнованиях FIDE',
 
-      'formats.tag': 'Форматы обучения',
+      'formats.tag': 'Варианты обучения',
       'formats.title': 'Форматы занятий',
-      'formats.subtitle': 'Выберите формат обучения, который подходит вашему графику и целям.',
+      'formats.subtitle': 'Выберите формат занятий, который соответствует вашему расписанию и целям.',
+      'formats.onlineNote': 'Все индивидуальные и групповые занятия проводятся онлайн',
       'formats.individual.title': 'Индивидуальные занятия',
       'formats.individual.f1': 'Занятия один на один с тренером',
-      'formats.individual.f2': 'Персональная программа',
+      'formats.individual.f2': 'Персональный план обучения',
       'formats.individual.f3': 'Гибкое расписание',
-      'formats.individual.f4': 'Быстрый прогресс',
+      'formats.individual.f4': 'Полное внимание тренера',
       'formats.group.title': 'Групповые занятия',
       'formats.group.f1': 'Небольшие интерактивные группы',
-      'formats.group.f2': 'Обучение вместе со сверстниками',
-      'formats.group.f3': 'Дружеская атмосфера',
-      'formats.group.f4': 'Доступная цена',
-      'formats.online.title': 'Онлайн-занятия',
-      'formats.online.f1': 'Учитесь откуда угодно',
-      'formats.online.f2': 'Интерактивные онлайн-уроки',
-      'formats.online.f3': 'Цифровые шахматные доски',
-      'formats.online.f4': 'Гибкое время занятий',
+      'formats.group.f2': 'Обучайтесь вместе с учениками схожего уровня',
+      'formats.group.f3': 'Дружелюбная и мотивирующая атмосфера',
+      'formats.group.f4': 'Более доступный вариант',
 
-      'how.tag': 'С чего начать',
-      'how.title': 'Как это работает',
-      'how.subtitle': 'От первого сообщения до первого урока — четыре простых шага.',
+      'how.tag': 'Начало обучения',
+      'how.title': 'Как проходит начало обучения?',
+      'how.subtitle': 'От первого обращения до первого занятия — всего четыре простых шага.',
       'how.s1.title': 'Свяжитесь с нами',
-      'how.s1.desc': 'Напишите нам в WhatsApp или заполните форму.',
-      'how.s2.title': 'Бесплатная оценка',
-      'how.s2.desc': 'Мы определим ваш текущий уровень игры и цели.',
-      'how.s3.title': 'Выберите формат',
-      'how.s3.desc': 'Индивидуальные или групповые занятия.',
+      'how.s1.desc': 'Напишите нам в WhatsApp или заполните контактную форму.',
+      'how.s2.title': 'Бесплатная оценка уровня',
+      'how.s2.desc': 'Мы оцениваем ваш текущий уровень игры и определяем цели обучения.',
+      'how.s3.title': 'Выберите формат занятий',
+      'how.s3.desc': 'Выберите индивидуальные или групповые занятия.',
       'how.s4.title': 'Начните обучение',
-      'how.s4.desc': 'Начните свой персональный шахматный путь.',
+      'how.s4.desc': 'Начните свой индивидуальный путь развития в шахматах.',
 
-      'ach.tag': 'Результаты',
-      'ach.title': 'Достижения учеников',
-      'ach.subtitle': 'Успехи наших учеников — детей, подростков и взрослых.',
-      'ach.c1.tag': 'Прогресс FIDE',
-      'ach.c1.title': '+240 к рейтингу FIDE',
-      'ach.c1.desc': 'Рост рейтинга за один сезон занятий.',
-      'ach.c2.tag': 'Медаль',
-      'ach.c2.title': 'Чемпион страны',
-      'ach.c2.desc': 'Золото национального юношеского первенства.',
-      'ach.c3.tag': 'Турнир',
-      'ach.c3.title': 'Победитель регионального турнира',
-      'ach.c3.desc': 'Первое место на региональном открытом турнире.',
-      'ach.c4.tag': 'Кубок',
-      'ach.c4.title': 'Чемпион школы по шахматам',
-      'ach.c4.desc': 'Лучший результат на межшкольном первенстве.',
-      'ach.c5.tag': 'Сертификат',
-      'ach.c5.title': 'Сертификат отличия',
-      'ach.c5.desc': 'За выдающийся прогресс и усердие.',
-      'ach.c6.tag': 'Прогресс FIDE',
-      'ach.c6.title': 'Первый рейтинг FIDE',
-      'ach.c6.desc': 'Взрослый ученик получил официальный рейтинг за год занятий.',
+      'news.tag': 'Новости академии',
+      'news.title': 'Последние новости академии',
+      'news.subtitle': 'Достижения наших учеников, объявления и интересные истории.',
+      'news.viewAll': 'Смотреть все новости',
 
-      'gallery.tag': 'Моменты',
-      'gallery.title': 'Галерея',
-      'gallery.subtitle': 'Тренировки, турниры, церемонии награждения и шахматные лагеря.',
-      'gallery.cat1': 'Тренировки',
+      'gallery.tag': 'Галерея',
+      'gallery.title': 'Жизнь академии',
+      'gallery.subtitle': 'Яркие моменты с занятий, турниров и мероприятий.',
+      'gallery.filterAll': 'Все',
+      'gallery.cat1': 'Занятия',
       'gallery.cat2': 'Турниры',
       'gallery.cat3': 'Награждения',
-      'gallery.cat4': 'Шахматные лагеря',
+      'gallery.cat4': 'Лагеря',
       'gallery.placeholder': 'Фото скоро появится',
 
       'pricing.tag': 'Пакеты',
       'pricing.title': 'Пакеты занятий',
-      'pricing.subtitle': 'Простые и гибкие пакеты для любого графика и цели.',
-      'pricing.popular': 'Самый популярный',
+      'pricing.subtitle': 'Простые и гибкие пакеты для разных графиков и целей.',
+      'pricing.onlineNote': 'Все занятия проходят онлайн. Свяжитесь с нами, чтобы подобрать подходящий пакет.',
+      'pricing.popular': '★ Самый популярный',
       'pricing.contactUs': 'Связаться с нами',
-      'pricing.p1.title': '2 занятия в неделю',
+      'pricing.badgeAdults': 'Для взрослых',
+      'pricing.badgeChildren': 'Для детей',
+      'pricing.badgeGroup': 'Малые группы',
+      'pricing.perMonth': '/ месяц',
+      'pricing.p1.title': 'Индивидуальные занятия для взрослых',
+      'pricing.p1.freq': '2 занятия в неделю',
       'pricing.p1.sub': '8 занятий в месяц',
-      'pricing.p1.f1': 'Стабильный, последовательный прогресс',
-      'pricing.p1.f2': 'Еженедельные домашние задания',
-      'pricing.p1.f3': 'Отслеживание прогресса',
-      'pricing.p2.title': '3 занятия в неделю',
-      'pricing.p2.sub': '12 занятий в месяц',
-      'pricing.p2.f1': 'Более быстрый прогресс',
+      'pricing.p1.f1': 'Индивидуальные занятия с тренером',
+      'pricing.p1.f2': 'Персональный план обучения',
+      'pricing.p1.f3': 'Гибкое расписание',
+      'pricing.p1.price': '₼XX',
+      'pricing.p2.title': 'Стандартный пакет для детей',
+      'pricing.p2.freq': '2 занятия в неделю',
+      'pricing.p2.sub': '8 занятий в месяц',
+      'pricing.p2.f1': 'Индивидуальный подход',
       'pricing.p2.f2': 'Еженедельные домашние задания',
-      'pricing.p2.f3': 'Приоритетное расписание',
-      'pricing.p3.title': 'Индивидуальные занятия',
-      'pricing.p3.sub': 'Один на один с тренером',
-      'pricing.p3.f1': 'Полное внимание тренера',
-      'pricing.p3.f2': 'Полностью персональная программа',
-      'pricing.p3.f3': 'Гибкое расписание',
+      'pricing.p2.f3': 'Отчёты о прогрессе для родителей',
+      'pricing.p2.price': '₼XX',
+      'pricing.p3.title': 'Интенсивный пакет для детей',
+      'pricing.p3.freq': '3 занятия в неделю',
+      'pricing.p3.sub': '12 занятий в месяц',
+      'pricing.p3.f1': 'Более быстрый прогресс',
+      'pricing.p3.f2': 'Еженедельные домашние задания',
+      'pricing.p3.f3': 'Подготовка к турнирам',
+      'pricing.p3.price': '₼XX',
       'pricing.p4.title': 'Групповые занятия',
-      'pricing.p4.sub': 'Учитесь вместе',
-      'pricing.p4.f1': 'Небольшие группы по уровню',
-      'pricing.p4.f2': 'Обучение со сверстниками',
+      'pricing.p4.freq': '2 занятия в неделю',
+      'pricing.p4.sub': '8 занятий в месяц',
+      'pricing.p4.f1': '4–10 учеников в группе',
+      'pricing.p4.f2': 'Группы, сформированные по уровню',
       'pricing.p4.f3': 'Самый доступный вариант',
-      'pricing.note': 'Свяжитесь с нами, чтобы узнать актуальные цены и наличие мест — мы поможем выбрать подходящий пакет.',
+      'pricing.p4.price': '₼XX',
+      'pricing.note': 'Свяжитесь с нами, чтобы узнать актуальные цены и наличие мест, — мы поможем подобрать подходящий пакет.',
+
+      'tournament.tag': 'Бесплатная возможность познакомиться с академией',
+      'tournament.title': 'Бесплатный онлайн-турнир каждое воскресенье',
+      'tournament.desc': 'Примите участие в бесплатном онлайн-турнире, познакомьтесь с другими учениками и оцените нашу учебную атмосферу перед выбором пакета.',
+      'tournament.pill1': 'Онлайн',
+      'tournament.pill2': 'Каждое воскресенье',
+      'tournament.pill3': 'Участие бесплатное',
+      'tournament.cta': 'Принять участие бесплатно',
 
       'faq.tag': 'Вопросы',
       'faq.title': 'Часто задаваемые вопросы',
       'faq.subtitle': 'Всё, что нужно знать перед началом занятий.',
-      'faq.q1': 'Нужен ли опыт игры в шахматы?',
+      'faq.q1': 'Нужен ли предварительный опыт игры в шахматы?',
       'faq.a1': 'Нет. Мы принимаем как абсолютных новичков, так и опытных игроков — программа начинается именно с вашего уровня.',
       'faq.q2': 'Проводятся ли занятия онлайн?',
       'faq.a2': 'Да. Мы проводим интерактивные онлайн-уроки с цифровыми шахматными досками — учиться можно откуда угодно.',
@@ -1963,68 +2045,68 @@
       'faq.q4': 'Сколько длится занятие?',
       'faq.a4': 'Стандартное занятие длится 60 минут. Продолжительность подбирается с учётом возраста, уровня и формата.',
       'faq.q5': 'Как записаться?',
-      'faq.a5': 'Напишите нам в WhatsApp или заполните форму. Мы ответим в течение 24 часов и назначим бесплатную оценку уровня.',
+      'faq.a5': 'Напишите нам в WhatsApp или заполните форму. Мы ответим в течение 24 часов.',
       'faq.q6': 'Как ученики распределяются по уровням?',
       'faq.a6': 'Каждый новый ученик проходит бесплатную оценку. По навыкам — а не по возрасту — мы определяем уровень: начальный, средний, продвинутый или соревновательный.',
 
       'about.tag': 'Ваш тренер',
       'about.title': 'Обо мне',
       'about.photoText': 'Фото тренера',
-      'about.badge': 'Рейтинг FIDE',
-      'about.greeting': 'Здравствуйте, я <em>Абдулла</em>',
-      'about.p1': 'Я профессиональный тренер по шахматам, который помогает ученикам любого возраста раскрыть свой потенциал. Благодаря многолетнему опыту участия в соревнованиях и преподавания я провожу занятия по структурированной, эффективной и увлекательной методике.',
-      'about.p2': 'В Cosmo Chess Academy моя цель — сделать шахматы доступными и интересными для каждого, помогая ученикам добиваться успехов на турнирах и развиваться как шахматистам и личностям.',
-      'about.hl1.title': 'Сертифицированный тренер по шахматам',
+      'about.badge': 'Имеет рейтинг FIDE',
+      'about.greeting': 'Здравствуйте, меня зовут <em>Абдулла</em>',
+      'about.p1': 'Я увлечённый шахматный тренер, который помогает ученикам любого возраста раскрывать свой потенциал. Благодаря многолетнему соревновательному и преподавательскому опыту я провожу каждое занятие структурированно, интересно и мотивирующе.',
+      'about.p2': 'Моя цель в Cosmo Chess Academy — сделать шахматы доступными и увлекательными, одновременно развивая у учеников навыки, которые помогают добиваться турнирных успехов и личностного роста.',
+      'about.hl1.title': 'Сертифицированный шахматный тренер',
       'about.hl1.desc': 'Профессиональная тренерская сертификация',
       'about.hl2.title': 'Для всех возрастов',
       'about.hl2.desc': 'Дети от 5 лет, подростки и взрослые',
       'about.hl3.title': 'Онлайн и очные занятия',
-      'about.hl3.desc': 'Гибкий формат обучения',
+      'about.hl3.desc': 'Гибкие форматы обучения',
       'about.hl4.title': 'Индивидуальные учебные материалы',
-      'about.hl4.desc': 'Домашние задания, шахматные задачи и персональные планы обучения',
+      'about.hl4.desc': 'Домашние задания, шахматные задачи и учебные планы включены',
 
       'features.tag': 'Почему выбирают нас?',
       'features.title': 'Что отличает нас от других',
       'features.f1.title': 'Индивидуальная программа обучения',
-      'features.f1.desc': 'Для каждого ученика составляется персональный план обучения с учетом его уровня, целей и темпа освоения материала.',
+      'features.f1.desc': 'Для каждого ученика составляется индивидуальный план обучения с учётом его уровня, целей и темпа освоения материала.',
       'features.f2.title': 'Занятия в небольших группах',
-      'features.f2.desc': 'Интерактивные занятия проходят в группах от 4 до 16 человек, сформированных по уровню подготовки. Также доступны индивидуальные занятия.',
+      'features.f2.desc': 'Интерактивные занятия проходят в группах по 4–10 человек, сформированных по уровню подготовки. Это позволяет ученикам вместе учиться, практиковаться и развиваться. Также доступны индивидуальные занятия.',
       'features.f3.title': 'Еженедельные домашние задания',
-      'features.f3.desc': 'После каждого урока ученики получают упражнения, шахматные задачи и задания на анализ для закрепления изученного материала.',
+      'features.f3.desc': 'После каждого занятия ученики получают структурированные упражнения, шахматные задачи и задания на анализ для закрепления изученного материала.',
       'features.f4.title': 'Подготовка к турнирам',
-      'features.f4.desc': 'Целенаправленная подготовка к соревнованиям: дебюты, управление временем, расчёт вариантов и психологическая устойчивость.',
+      'features.f4.desc': 'Целенаправленная подготовка к соревнованиям: дебютная подготовка, управление временем, тренировка расчёта вариантов и психологическая устойчивость.',
       'features.f5.title': 'Отчёты о прогрессе',
-      'features.f5.desc': 'Регулярные отчёты о прогрессе для учеников и родителей, чтобы все всегда были в курсе обучения.',
-      'features.f6.title': 'Интеграция с WhatsApp',
-      'features.f6.desc': 'Домашние задания, напоминания о занятиях, обновления расписания и вся коммуникация удобно осуществляются через WhatsApp.',
+      'features.f5.desc': 'Ученики и родители регулярно получают отчёты о прогрессе, чтобы всегда быть в курсе результатов обучения.',
+      'features.f6.title': 'Связь через WhatsApp',
+      'features.f6.desc': 'Домашние задания, напоминания о занятиях, изменения в расписании и вся необходимая информация удобно отправляются через WhatsApp.',
 
       'testimonials.tag': 'Наше сообщество',
       'testimonials.title': 'Что говорят наши ученики и родители',
-      'testimonials.subtitle': 'Узнайте, как обучение в Cosmo Chess Academy помогло ученикам и родителям.',
-      'testimonials.trustSub': 'На основе отзывов 200+ учеников и родителей',
-      'testimonials.t1.text': '«Моя дочь стала намного увереннее в себе уже через несколько месяцев занятий».',
+      'testimonials.subtitle': 'Узнайте, какую пользу обучение в Cosmo Chess Academy принесло нашим ученикам и их родителям.',
+      'testimonials.trustSub': 'На основе отзывов более 200 учеников и родителей',
+      'testimonials.t1.text': '«Всего через несколько месяцев занятий моя дочь стала намного увереннее в себе».',
       'testimonials.t1.role': 'Родитель 10-летнего ученика',
-      'testimonials.t2.text': '«Уроки структурированы, понятны и легко усваиваются».',
+      'testimonials.t2.text': '«Занятия структурированы, понятны и их легко воспринимать».',
       'testimonials.t2.role': 'Взрослый ученик',
-      'testimonials.t3.text': '«Тренер Абдулла объясняет сложные идеи очень простым языком».',
+      'testimonials.t3.text': '«Тренер Абдулла объясняет сложные идеи простым и понятным языком».',
       'testimonials.t3.role': 'Родитель',
-      'testimonials.t4.text': '«Групповые занятия мотивируют, но при этом ученики получают индивидуальное внимание».',
+      'testimonials.t4.text': '«Групповые занятия мотивируют, и при этом каждый ученик получает индивидуальное внимание».',
       'testimonials.t4.role': 'Родитель',
       'testimonials.t5.text': '«Мой рейтинг вырос, и теперь я гораздо лучше понимаю свои ошибки».',
       'testimonials.t5.role': 'Ученик среднего уровня',
-      'testimonials.t6.text': '«Домашние задания после каждого урока помогают сыну заниматься регулярно».',
+      'testimonials.t6.text': '«Домашние задания после каждого занятия помогают моему сыну заниматься регулярно».',
       'testimonials.t6.role': 'Родитель',
-      'testimonials.t7.text': '«Обновления в WhatsApp облегчают отслеживание расписания и домашних заданий».',
+      'testimonials.t7.text': '«Сообщения в WhatsApp позволяют легко следить за расписанием и домашними заданиями».',
       'testimonials.t7.role': 'Родитель',
-      'testimonials.t8.text': '«Мне нравится, что у каждого урока есть чёткая цель и практические упражнения».',
+      'testimonials.t8.text': '«Мне нравится, что у каждого занятия есть чёткая цель и практические упражнения».',
       'testimonials.t8.role': 'Ученик',
 
-      'contact.tag': 'Начните сейчас',
+      'contact.tag': 'Начните обучение',
       'contact.title': 'Связаться с нами',
       'contact.subtitle': 'Готовы начать свой шахматный путь?',
-      'contact.desc': 'Заполните форму или свяжитесь с нами напрямую. Мы ответим в течение 24 часов, чтобы назначить пробный урок.',
+      'contact.desc': 'Заполните форму или свяжитесь с нами напрямую. Мы ответим в течение 24 часов.',
       'contact.whatsappLabel': 'WhatsApp',
-      'contact.emailLabel': 'Email',
+      'contact.emailLabel': 'Электронная почта',
       'contact.locationLabel': 'Адрес',
       'contact.locationValue': 'Баку, Азербайджан',
       'contact.hoursLabel': 'Часы работы',
@@ -2036,10 +2118,10 @@
       'contact.level': 'Уровень шахмат *',
       'contact.levelPlaceholder': 'Выберите ваш уровень',
       'contact.fideRating': 'Рейтинг FIDE (необязательно)',
-      'contact.fideRatingPlaceholder': 'напр. 1650',
+      'contact.fideRatingPlaceholder': 'например, 1650',
       'contact.noFideRating': 'У меня нет официального рейтинга FIDE',
       'contact.message': 'Сообщение',
-      'contact.messagePlaceholder': 'Любые вопросы или пожелания...',
+      'contact.messagePlaceholder': 'Напишите ваши вопросы или пожелания...',
       'contact.submit': 'Отправить и связаться через WhatsApp',
       'contact.thankYouTitle': 'Спасибо!',
       'contact.thankYouText': 'Мы свяжемся с вами в ближайшее время через WhatsApp.',
@@ -2051,7 +2133,7 @@
       'chessLevel.expert': 'Эксперт',
       'chessLevel.notSure': 'Не уверен(а)',
 
-      'footer.tagline': 'Профессиональное обучение шахматам для всех возрастов. Воспитываем чемпионов ход за ходом.',
+      'footer.tagline': 'Профессиональное обучение шахматам для всех возрастов. Воспитываем будущих чемпионов ход за ходом.',
       'footer.linksTitle': 'Ссылки',
       'footer.contactTitle': 'Контакты',
       'footer.emailLink': 'Email',
@@ -2627,34 +2709,122 @@
     });
   });
 
-  // Gallery lightbox
-  var lightbox = document.getElementById('lightbox');
-  var lightboxEmoji = document.getElementById('lightboxEmoji');
-  var lightboxCaption = document.getElementById('lightboxCaption');
-  function closeLightbox() { lightbox.classList.remove('open'); }
-  document.querySelectorAll('#galleryGrid .gallery-item').forEach(function(item){
-    item.addEventListener('click', function(){
-      lightboxEmoji.textContent = item.getAttribute('data-emoji');
-      lightboxCaption.textContent = item.querySelector('.gallery-label').textContent;
-      lightbox.classList.add('open');
-    });
-  });
-  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', function(e){ if (e.target === lightbox) closeLightbox(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeLightbox(); });
+  // Render news cards and gallery from news-data.js
+  (function(){
+    // ── News cards (homepage: first 3) ──────────────────────────────────────
+    var newsGrid = document.getElementById('newsGrid');
+    if (newsGrid && typeof NEWS !== 'undefined') {
+      NEWS.slice(0, 3).forEach(function(item) {
+        var a = document.createElement('a');
+        a.className = 'news-card';
+        a.href = 'news-article.html?slug=' + item.slug;
+        var d = new Date(item.date);
+        var dateStr = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+        var imgHtml = item.image
+          ? '<img src="' + item.image + '" alt="' + (item.imageAlt || item.title) + '" loading="lazy" />'
+          : '<span aria-hidden="true">' + (item.imageEmoji || '♟') + '</span>';
+        a.innerHTML = '<div class="news-card-img">' + imgHtml + '</div>'
+          + '<div class="news-card-body">'
+          + '<div class="news-card-meta"><span class="news-card-cat">' + item.category + '</span>'
+          + '<span class="news-card-date">' + dateStr + '</span></div>'
+          + '<h3>' + item.title + '</h3><p>' + item.excerpt + '</p>'
+          + '</div>';
+        newsGrid.appendChild(a);
+      });
+    }
 
-  // Achievements carousel — arrows on desktop, native scroll-snap swipe on mobile
-  var achTrack = document.getElementById('achTrack');
-  function achStep() {
-    var card = achTrack.querySelector('.ach-card');
-    return card ? card.offsetWidth + 24 : 320;
-  }
-  document.getElementById('achPrev').addEventListener('click', function(){
-    achTrack.scrollBy({ left: -achStep(), behavior: 'smooth' });
-  });
-  document.getElementById('achNext').addEventListener('click', function(){
-    achTrack.scrollBy({ left: achStep(), behavior: 'smooth' });
-  });
+    // ── Gallery items ────────────────────────────────────────────────────────
+    var galleryGrid = document.getElementById('galleryGrid');
+    if (galleryGrid && typeof GALLERY !== 'undefined') {
+      GALLERY.forEach(function(item) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'gallery-item';
+        btn.setAttribute('data-category', item.category);
+        btn.setAttribute('data-img', item.image || '');
+        btn.setAttribute('data-alt', item.alt || item.title || '');
+        btn.setAttribute('data-caption', item.caption || '');
+        btn.setAttribute('data-title', item.title || '');
+        var mediaHtml = item.image
+          ? '<img src="' + item.image + '" alt="' + (item.alt || item.title || '') + '" loading="lazy" />'
+          : '<span class="gallery-emoji" aria-hidden="true">' + (item.emoji || '♟') + '</span>';
+        btn.innerHTML = mediaHtml
+          + '<div class="gallery-hover"><span class="gallery-hover-label">' + (item.title || '') + '</span></div>';
+        galleryGrid.appendChild(btn);
+      });
+    }
+
+    // ── Gallery filters ──────────────────────────────────────────────────────
+    function applyFilter(filter) {
+      document.querySelectorAll('#galleryFilters .gallery-filter-btn').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-filter') === filter);
+      });
+      document.querySelectorAll('#galleryGrid .gallery-item').forEach(function(item){
+        item.classList.toggle('hidden', filter !== 'all' && item.getAttribute('data-category') !== filter);
+      });
+    }
+    document.querySelectorAll('#galleryFilters .gallery-filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(){ applyFilter(btn.getAttribute('data-filter')); });
+    });
+
+    // Apply filter from URL param (e.g. index.html?galleryFilter=tournaments#gallery)
+    var urlFilter = new URLSearchParams(location.search).get('galleryFilter');
+    if (urlFilter) {
+      applyFilter(urlFilter);
+      var gallerySection = document.getElementById('gallery');
+      if (gallerySection) { setTimeout(function(){ gallerySection.scrollIntoView({ behavior: 'smooth' }); }, 200); }
+    }
+
+    // ── Lightbox ─────────────────────────────────────────────────────────────
+    var lightbox    = document.getElementById('lightbox');
+    var lbMedia     = document.getElementById('lightboxMedia');
+    var lbCaption   = document.getElementById('lightboxCaption');
+    var lbNote      = document.getElementById('lightboxNote');
+    var currentIndex = -1;
+
+    function getVisible() {
+      return Array.from(document.querySelectorAll('#galleryGrid .gallery-item:not(.hidden)'));
+    }
+    function openLightbox(index) {
+      var visible = getVisible();
+      if (!visible.length) return;
+      if (index < 0) index = visible.length - 1;
+      if (index >= visible.length) index = 0;
+      currentIndex = index;
+      var item = visible[currentIndex];
+      var src = item.getAttribute('data-img');
+      var alt = item.getAttribute('data-alt');
+      lbMedia.innerHTML = src
+        ? '<img src="' + src + '" alt="' + alt + '" />'
+        : '<span class="lightbox-media-emoji">' + (item.querySelector('.gallery-emoji') || {}).textContent + '</span>';
+      lbCaption.textContent = item.getAttribute('data-title') || '';
+      lbNote.textContent    = item.getAttribute('data-caption') || '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    if (galleryGrid) {
+      galleryGrid.addEventListener('click', function(e) {
+        var item = e.target.closest('.gallery-item');
+        if (!item) return;
+        openLightbox(getVisible().indexOf(item));
+      });
+    }
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightboxPrev').addEventListener('click', function(){ openLightbox(currentIndex - 1); });
+    document.getElementById('lightboxNext').addEventListener('click', function(){ openLightbox(currentIndex + 1); });
+    lightbox.addEventListener('click', function(e){ if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', function(e){
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') openLightbox(currentIndex - 1);
+      else if (e.key === 'ArrowRight') openLightbox(currentIndex + 1);
+    });
+  })();
 
   // Subtle scroll-reveal animations
   var revealEls = document.querySelectorAll('.reveal');

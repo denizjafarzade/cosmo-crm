@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News & Achievements — Cosmo Chess Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1E3A5F; --accent: #C9A84C; --bg: #F8F9FB; --surface: #fff;
+      --border: #E2E8F0; --text: #1E293B; --text-muted: #64748B;
+      --card-shadow: rgba(0,0,0,0.08); --white: #fff;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: inherit; }
+    .page-nav {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .page-nav a { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; }
+    .page-nav a:hover { color: var(--primary); }
+    .page-nav .sep { color: var(--border); }
+    .page-nav .brand { font-weight: 700; color: var(--primary); font-family: 'Playfair Display', serif; }
+    .hero {
+      background: var(--primary); color: #fff;
+      padding: 4rem 2rem 3rem; text-align: center;
+    }
+    .hero-tag { font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.75rem, 4vw, 2.5rem); margin-bottom: 0.75rem; }
+    .hero p { color: rgba(255,255,255,0.7); max-width: 520px; margin: 0 auto; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+    .filter-btn {
+      padding: 0.35rem 1rem; border-radius: 50px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-btn.active, .filter-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .news-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit;
+    }
+    .news-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--card-shadow); }
+    .news-card.hidden { display: none; }
+    .news-card-img {
+      aspect-ratio: 16/9; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #EEF2FF, #F8F9FB);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+    }
+    .news-card-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .news-card-body { padding: 1.25rem 1.5rem 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .news-card-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+    .news-card-cat { font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
+    .news-card-date { font-size: 0.75rem; color: var(--text-muted); }
+    .news-card h3 { font-size: 1rem; line-height: 1.4; margin-bottom: 0.5rem; }
+    .news-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; flex: 1; }
+    .empty { text-align: center; padding: 3rem; color: var(--text-muted); grid-column: 1/-1; }
+    footer { background: var(--primary); color: rgba(255,255,255,0.6); text-align: center; padding: 1.5rem; font-size: 0.8rem; }
+    footer a { color: #fff; text-decoration: none; font-weight: 600; }
+    @media (max-width: 900px) { .news-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .news-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="page-nav">
+    <span class="brand">Cosmo Chess</span>
+    <span class="sep">›</span>
+    <a href="index.html">Home</a>
+    <span class="sep">›</span>
+    <span>News &amp; Achievements</span>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-tag">Academy News</div>
+    <h1>News &amp; Achievements</h1>
+    <p>The latest from Cosmo Chess Academy — student milestones, upcoming events, and academy announcements.</p>
+  </div>
+
+  <div class="container">
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="Achievement">Achievements</button>
+      <button class="filter-btn" data-filter="News">News</button>
+    </div>
+    <div class="news-grid" id="newsGrid">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html">Back to Home</a></footer>
+
+  <script src="/news-data.js"></script>
+  <script>
+    var grid = document.getElementById('newsGrid');
+    var currentFilter = 'all';
+
+    function render() {
+      grid.innerHTML = '';
+      var filtered = currentFilter === 'all' ? NEWS : NEWS.filter(function(n){ return n.category === currentFilter; });
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty">No articles in this category yet.</div>';
+        return;
+      }
+      filtered.forEach(function(item) {
+        var a = document.createElement('a');
+        a.className = 'news-card';
+        a.href = 'news-article.html?slug=' + item.slug;
+        var d = new Date(item.date);
+        var dateStr = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+        var imgHtml = item.image
+          ? '<img src="' + item.image + '" alt="' + (item.imageAlt || item.title) + '" loading="lazy" />'
+          : '<span aria-hidden="true">' + (item.imageEmoji || '♟') + '</span>';
+        a.innerHTML = '<div class="news-card-img">' + imgHtml + '</div>'
+          + '<div class="news-card-body">'
+          + '<div class="news-card-meta"><span class="news-card-cat">' + item.category + '</span><span class="news-card-date">' + dateStr + '</span></div>'
+          + '<h3>' + item.title + '</h3><p>' + item.excerpt + '</p>'
+          + '</div>';
+        grid.appendChild(a);
+      });
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-filter');
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>

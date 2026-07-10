@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A3255"/>
+      <stop offset="100%" stop-color="#0C1C35"/>
+    </linearGradient>
+    <pattern id="sq" patternUnits="userSpaceOnUse" width="48" height="48">
+      <rect width="24" height="24" fill="rgba(255,255,255,0.028)"/>
+      <rect x="24" y="24" width="24" height="24" fill="rgba(255,255,255,0.028)"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <rect width="800" height="450" fill="url(#sq)"/>
+  <text x="400" y="215" text-anchor="middle" dominant-baseline="middle"
+        font-size="280" fill="rgba(201,168,76,0.11)" font-family="Georgia,serif">♛</text>
+  <rect x="300" y="358" width="200" height="2" rx="1" fill="#C9A84C" opacity="0.65"/>
+</svg>

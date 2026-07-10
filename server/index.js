@@ -20,8 +20,9 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
 
-// Public landing page at / (must be before CRM static mount)
+// Public landing page — serve all static files from /public (index.html, news-data.js, img/, etc.)
 const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir));
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
