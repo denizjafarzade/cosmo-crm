@@ -545,61 +545,144 @@
 
     /* ===== PRICING ===== */
     .pricing-online-note {
-      text-align: center; margin-bottom: 2.25rem;
+      text-align: center; margin-bottom: 2rem;
       font-size: 0.85rem; color: var(--text-muted);
     }
     .pricing-online-note strong { color: var(--text); font-weight: 600; }
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
-      max-width: 860px; margin: 0 auto;
+    .pricing-tabs {
+      display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2.5rem;
     }
-    .price-card {
-      position: relative; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.75rem; text-align: left;
-      display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
+    .pricing-tab {
+      padding: 0.55rem 2rem; border-radius: 50px;
+      border: 1px solid var(--border); background: transparent;
+      font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
-    .price-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px var(--card-shadow); }
-    .price-card.featured {
-      border-color: var(--accent); background: var(--surface);
+    .pricing-tab:hover { border-color: var(--primary); color: var(--primary); }
+    .pricing-tab.active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    .pricing-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    .pricing-formats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+      max-width: 1060px; margin: 0 auto;
     }
-    .price-popular-inline {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 0.6rem; display: block;
+    .pricing-formats.adults-view { grid-template-columns: repeat(2, 1fr); max-width: 720px; }
+    .fmt-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
     }
-    .price-label {
-      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: 0.5rem; display: block;
+    .fmt-header { padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid var(--border); }
+    .fmt-header h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
+    .fmt-group-size { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
+    .fmt-body { flex: 1; }
+    .teacher-block { padding: 0.75rem 1.4rem; }
+    .teacher-block + .teacher-block { border-top: 1px solid var(--border); }
+    .teacher-name-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .teacher-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--icon-bg); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: var(--text-muted); flex-shrink: 0; overflow: hidden;
     }
-    .price-card h3 { font-size: 1.15rem; margin-bottom: 0.85rem; color: var(--text); }
-    .price-freq-line {
-      font-size: 0.9rem; font-weight: 600; color: var(--accent);
-      margin-bottom: 0.2rem;
+    .teacher-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .teacher-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .price-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+    .price-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+      padding: 0.45rem 0.65rem; border-radius: 10px; background: var(--bg);
     }
-    .price-month-line { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; }
-    .price-divider { border: none; border-top: 1px solid var(--border); margin: 0 0 1.25rem; }
-    .price-benefits { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
-    .price-benefits li {
-      display: flex; align-items: flex-start; gap: 0.5rem;
-      font-size: 0.875rem; color: var(--text-muted); line-height: 1.45;
+    .price-row.popular {
+      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.28);
     }
-    .price-benefits li::before {
-      content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; font-size: 0.8rem; margin-top: 0.1rem;
+    .price-row-meta { display: flex; flex-direction: column; gap: 0.05rem; }
+    .price-row-freq { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; }
+    .price-row-popular {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--accent);
     }
-    .price-val {
-      font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700;
-      color: var(--text); margin: 1.35rem 0 1rem; line-height: 1;
+    .price-row-contact {
+      font-size: 0.72rem; color: var(--text-muted); white-space: nowrap;
+      flex-shrink: 0; font-style: italic;
     }
-    .price-val em { font-style: normal; font-size: 0.9rem; font-weight: 400; color: var(--text-muted); font-family: 'Inter', sans-serif; }
-    .price-card .btn-price {
-      display: block; text-align: center; padding: 0.65rem 1.25rem;
+    .price-row-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 700; color: var(--text); white-space: nowrap; flex-shrink: 0;
+    }
+    .price-row-amount em {
+      font-size: 0.7rem; font-weight: 400; color: var(--text-muted);
+      font-family: 'Inter', sans-serif; font-style: normal;
+    }
+    /* Group card: desc + price block + for/benefits lists */
+    .fmt-desc { padding: 0.65rem 1.4rem 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .fmt-price-block {
+      margin: 0.85rem 1.4rem 0;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.9rem 1.1rem;
+    }
+    .fmt-price-block-amount {
+      font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;
+      color: var(--text); line-height: 1; display: block;
+    }
+    .fmt-price-block-amount em {
+      font-style: normal; font-size: 0.82rem; font-weight: 400;
+      color: var(--text-muted); font-family: 'Inter', sans-serif;
+    }
+    .fmt-price-block-label { font-size: 0.73rem; color: var(--text-muted); margin-top: 0.25rem; display: block; }
+    .fmt-section { padding: 0.7rem 1.4rem 0; }
+    .fmt-section-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.7px;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;
+    }
+    .fmt-for-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+    .fmt-for-list li { font-size: 0.8rem; color: var(--text-muted); padding-left: 0.85rem; position: relative; }
+    .fmt-for-list li::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+    .fmt-benefits { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+    .fmt-benefits li { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+    .fmt-benefits li::before { content: '✓'; color: var(--accent); font-weight: 700; font-size: 0.72rem; flex-shrink: 0; }
+    /* Individual lesson stepper */
+    .indiv-stepper { padding: 0.55rem 0 0.3rem; }
+    .stepper-label {
+      font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 0.4rem;
+    }
+    .stepper-control { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.45rem; }
+    .stepper-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); font-size: 1rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s, background 0.15s; font-family: inherit;
+      padding: 0;
+    }
+    .stepper-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--icon-bg); }
+    .stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .stepper-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .stepper-val { font-size: 1rem; font-weight: 700; color: var(--text); min-width: 1.2rem; text-align: center; }
+    .stepper-result { display: flex; flex-direction: column; gap: 0.1rem; }
+    .stepper-month { font-size: 0.76rem; color: var(--text-muted); }
+    .stepper-price {
+      font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--text);
+    }
+    .stepper-price em {
+      font-style: normal; font-size: 0.7rem; font-weight: 400;
+      color: var(--text-muted); font-family: 'Inter', sans-serif;
+    }
+    .stepper-note { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.35rem; font-style: italic; }
+    .fmt-footer { padding: 0.85rem 1.4rem 1.1rem; border-top: 1px solid var(--border); margin-top: auto; }
+    .btn-price {
+      display: block; text-align: center; padding: 0.6rem 1.25rem;
       background: var(--primary); color: var(--white); border-radius: 50px;
-      text-decoration: none; font-weight: 600; font-size: 0.875rem; transition: background 0.2s;
+      text-decoration: none; font-weight: 600; font-size: 0.85rem;
+      transition: background 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit;
     }
-    .price-card .btn-price:hover { background: var(--primary-light); }
-    .price-card.featured .btn-price { background: var(--accent); color: #1E293B; }
-    .price-card.featured .btn-price:hover { background: #b8902e; }
-    .pricing-note { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 1.5rem; }
-    @media (max-width: 640px) { .pricing-grid { grid-template-columns: 1fr; max-width: 440px; } }
+    .btn-price:hover { background: var(--primary-light); }
+    .pricing-note { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 1.75rem; }
+    @media (max-width: 900px) {
+      .pricing-formats { grid-template-columns: repeat(2, 1fr); }
+      .pricing-formats.adults-view { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .pricing-formats, .pricing-formats.adults-view { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
+    }
 
     /* ===== TOURNAMENT CARD ===== */
     .tourn-wrap {
@@ -658,10 +741,69 @@
     .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
     .faq-a-inner { padding: 0 1.4rem 1.15rem; color: var(--text-muted); font-size: 0.9rem; }
 
+    /* ===== NAV DROPDOWNS ===== */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-btn {
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      font-size: 0.9rem; font-weight: 500; color: var(--text-muted); padding: 0;
+      display: inline-flex; align-items: center; gap: 0.3rem; transition: color 0.2s;
+    }
+    .nav-dropdown-btn::after { content: '▾'; font-size: 0.8rem; line-height: 1; transition: transform 0.2s; }
+    .nav-dropdown-btn:hover { color: var(--primary); }
+    .nav-dropdown.open > .nav-dropdown-btn,
+    .nav-dropdown:hover > .nav-dropdown-btn { color: var(--primary); }
+    .nav-dropdown.open > .nav-dropdown-btn::after { transform: rotate(180deg); }
+    .nav-dropdown-menu {
+      position: absolute; top: calc(100% + 0.75rem); left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      z-index: 200; min-width: 185px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 14px 34px var(--card-shadow);
+      list-style: none; margin: 0; padding: 0.4rem;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+    .nav-dropdown:hover > .nav-dropdown-menu,
+    .nav-dropdown:focus-within > .nav-dropdown-menu,
+    .nav-dropdown.open > .nav-dropdown-menu {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0);
+    }
+    .nav-dropdown-menu a {
+      display: block; padding: 0.55rem 0.9rem; border-radius: 8px;
+      text-decoration: none; color: var(--text); font-size: 0.875rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-dropdown-menu a:hover,
+    .nav-dropdown-menu a.active { background: var(--icon-bg); color: var(--primary); }
+    /* Scroll offset for sticky header */
+    section[id], #testimonials, #gallery { scroll-margin-top: 80px; }
+
     /* ===== MOBILE ===== */
-    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); }
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); line-height: 1; }
     @media (max-width: 768px) {
-      .nav-links { display: none; }
+      .nav { position: relative; }
+      .nav-links {
+        display: none; flex-direction: column; gap: 0;
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: var(--nav-bg); border-bottom: 1px solid var(--border);
+        padding: 0.5rem 1.25rem 1rem; backdrop-filter: blur(12px);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links > li { border-bottom: 1px solid var(--border); }
+      .nav-links > li:last-child { border-bottom: none; }
+      .nav-links > li > a { display: block; padding: 0.75rem 0; font-size: 0.95rem; }
+      .nav-dropdown { position: static; }
+      .nav-dropdown-btn { display: block; width: 100%; padding: 0.75rem 0; font-size: 0.95rem; text-align: left; }
+      .nav-dropdown:hover > .nav-dropdown-menu { opacity: 0; visibility: hidden; pointer-events: none; transform: none; }
+      .nav-dropdown-menu {
+        position: static; transform: none !important; box-shadow: none;
+        border: none; background: transparent; padding: 0 0 0.5rem 0.75rem;
+        opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;
+        display: none; transition: none;
+      }
+      .nav-dropdown.open > .nav-dropdown-menu { display: block; }
+      .nav-dropdown.open > .nav-dropdown-btn::after { transform: rotate(180deg); }
+      .nav-dropdown-menu a { padding: 0.55rem 0; border-radius: 0; font-size: 0.9rem; }
       .mobile-menu-btn { display: block; }
       .about-grid, .contact-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
@@ -680,10 +822,23 @@
     <span>Cosmo <em>Chess</em></span>
   </a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#levels" data-i18n="nav.levels">Levels</a></li>
-    <li><a href="#about" data-i18n="nav.about">About</a></li>
-    <li><a href="#features" data-i18n="nav.whyUs">Why Us</a></li>
-    <li><a href="#testimonials" data-i18n="nav.reviews">Reviews</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false" data-i18n="nav.programs">Programs</button>
+      <ul class="nav-dropdown-menu" role="menu">
+        <li><a href="#levels" role="menuitem" data-i18n="nav.levels">Levels</a></li>
+        <li><a href="#formats" role="menuitem" data-i18n="nav.formats">Lesson Formats</a></li>
+        <li><a href="#how" role="menuitem" data-i18n="nav.how">How It Works</a></li>
+      </ul>
+    </li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false" data-i18n="nav.academy">Academy</button>
+      <ul class="nav-dropdown-menu" role="menu">
+        <li><a href="#about" role="menuitem" data-i18n="nav.about">About</a></li>
+        <li><a href="#features" role="menuitem" data-i18n="nav.whyUs">Why Us</a></li>
+        <li><a href="#news" role="menuitem" data-i18n="nav.news">News</a></li>
+        <li><a href="#gallery" role="menuitem" data-i18n="nav.gallery">Gallery</a></li>
+      </ul>
+    </li>
     <li><a href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
     <li><a href="#faq" data-i18n="nav.faq">FAQ</a></li>
     <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
@@ -700,7 +855,7 @@
       </ul>
     </div>
     <a href="#contact" class="nav-cta" data-i18n="common.startLearning">Start Learning</a>
-    <button class="mobile-menu-btn" onclick="var nl=document.getElementById('navLinks'); nl.style.display = nl.style.display === 'flex' ? 'none' : 'flex';">&#9776;</button>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
   </div>
 </nav>
 
@@ -1054,13 +1209,9 @@
 </div>
 
 <!--
-  PACKAGE PRICES — edit pricing.pX.price in the I18N object below (all 3 languages).
-  Replace ₼XX with the actual price. "/ month" is rendered separately via pricing.perMonth.
-  Keys:
-    pricing.p1.price  — Adult Individual
-    pricing.p2.price  — Children's Standard
-    pricing.p3.price  — Children's Intensive
-    pricing.p4.price  — Group Lessons
+  PRICING DATA — edit TEACHERS and PRICING_DATA in the <script id="pricing-data"> block below.
+  Add teachers to TEACHERS, then reference them by id in PRICING_DATA.
+  Prices are in AZN integers. The popular flag marks the Most Popular badge.
 -->
 <!-- PRICING -->
 <div class="section-alt" id="pricing">
@@ -1069,80 +1220,19 @@
       <span class="section-tag" data-i18n="pricing.tag">Packages</span>
       <h2 data-i18n="pricing.title">Lesson Packages</h2>
       <hr class="divider" />
-      <p data-i18n="pricing.subtitle">Simple, flexible packages for every schedule and goal.</p>
+      <p data-i18n="pricing.subtitle">Choose the lesson format, teacher, and schedule that best fits your goals.</p>
     </div>
 
-    <p class="pricing-online-note reveal" data-i18n="pricing.onlineNote">All lessons are held online. Contact us to find the right package.</p>
+    <p class="pricing-online-note reveal" data-i18n="pricing.onlineNote">All lessons are held online.</p>
 
-    <div class="pricing-grid reveal">
-
-      <!-- Adult Individual: 2 lessons/week only -->
-      <div class="price-card">
-        <span class="price-label" data-i18n="pricing.badgeAdults">For Adults</span>
-        <h3 data-i18n="pricing.p1.title">Adult Individual</h3>
-        <div class="price-freq-line" data-i18n="pricing.p1.freq">2 lessons per week</div>
-        <div class="price-month-line" data-i18n="pricing.p1.sub">8 lessons per month</div>
-        <hr class="price-divider" />
-        <ul class="price-benefits">
-          <li data-i18n="pricing.p1.f1">One-on-one coaching</li>
-          <li data-i18n="pricing.p1.f2">Personalized learning plan</li>
-          <li data-i18n="pricing.p1.f3">Flexible scheduling</li>
-        </ul>
-        <div class="price-val" data-i18n="pricing.p1.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
-        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
-      </div>
-
-      <!-- Children Standard: 2 lessons/week -->
-      <div class="price-card">
-        <span class="price-label" data-i18n="pricing.badgeChildren">For Children</span>
-        <h3 data-i18n="pricing.p2.title">Children's Standard</h3>
-        <div class="price-freq-line" data-i18n="pricing.p2.freq">2 lessons per week</div>
-        <div class="price-month-line" data-i18n="pricing.p2.sub">8 lessons per month</div>
-        <hr class="price-divider" />
-        <ul class="price-benefits">
-          <li data-i18n="pricing.p2.f1">Personalized coaching</li>
-          <li data-i18n="pricing.p2.f2">Weekly homework</li>
-          <li data-i18n="pricing.p2.f3">Parent progress updates</li>
-        </ul>
-        <div class="price-val" data-i18n="pricing.p2.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
-        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
-      </div>
-
-      <!-- Children Intensive: 3 lessons/week — featured -->
-      <div class="price-card featured">
-        <span class="price-popular-inline" data-i18n="pricing.popular">★ Most Popular</span>
-        <span class="price-label" data-i18n="pricing.badgeChildren">For Children</span>
-        <h3 data-i18n="pricing.p3.title">Children's Intensive</h3>
-        <div class="price-freq-line" data-i18n="pricing.p3.freq">3 lessons per week</div>
-        <div class="price-month-line" data-i18n="pricing.p3.sub">12 lessons per month</div>
-        <hr class="price-divider" />
-        <ul class="price-benefits">
-          <li data-i18n="pricing.p3.f1">Faster improvement</li>
-          <li data-i18n="pricing.p3.f2">Weekly homework</li>
-          <li data-i18n="pricing.p3.f3">Tournament preparation</li>
-        </ul>
-        <div class="price-val" data-i18n="pricing.p3.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
-        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
-      </div>
-
-      <!-- Group Lessons: 2 lessons/week, 4–10 students -->
-      <div class="price-card">
-        <span class="price-label" data-i18n="pricing.badgeGroup">Small Groups</span>
-        <h3 data-i18n="pricing.p4.title">Group Lessons</h3>
-        <div class="price-freq-line" data-i18n="pricing.p4.freq">2 lessons per week</div>
-        <div class="price-month-line" data-i18n="pricing.p4.sub">8 lessons per month</div>
-        <hr class="price-divider" />
-        <ul class="price-benefits">
-          <li data-i18n="pricing.p4.f1">4–10 students per group</li>
-          <li data-i18n="pricing.p4.f2">Groups matched by level</li>
-          <li data-i18n="pricing.p4.f3">Most affordable option</li>
-        </ul>
-        <div class="price-val" data-i18n="pricing.p4.price">₼XX <em data-i18n="pricing.perMonth">/ month</em></div>
-        <a href="#contact" class="btn-price" data-i18n="pricing.contactUs">Contact Us</a>
-      </div>
-
+    <div class="pricing-tabs reveal" role="tablist" aria-label="Audience">
+      <button class="pricing-tab active" role="tab" aria-selected="true" data-audience="children" data-i18n="pricing.tab.children">Children</button>
+      <button class="pricing-tab" role="tab" aria-selected="false" data-audience="adults" data-i18n="pricing.tab.adults">Adults</button>
     </div>
-    <p class="pricing-note reveal" data-i18n="pricing.note">Contact us for current pricing and availability — we'll help you pick the right package.</p>
+
+    <div class="pricing-formats reveal" id="pricing-formats"></div>
+
+    <p class="pricing-note reveal" data-i18n="pricing.note">Contact us for current availability — we'll help you choose the right package.</p>
 
     <!-- SUNDAY TOURNAMENT CARD -->
     <div class="tourn-wrap reveal" id="tournament">
@@ -1431,9 +1521,15 @@
 <script id="i18n-data">
   var I18N = {
     en: {
+      'nav.programs': 'Programs',
+      'nav.academy': 'Academy',
       'nav.levels': 'Levels',
+      'nav.formats': 'Lesson Formats',
+      'nav.how': 'How It Works',
       'nav.about': 'About',
       'nav.whyUs': 'Why Us',
+      'nav.news': 'News',
+      'nav.gallery': 'Gallery',
       'nav.reviews': 'Reviews',
       'nav.contact': 'Contact',
       'common.startLearning': 'Start Learning',
@@ -1509,43 +1605,39 @@
 
       'pricing.tag': 'Packages',
       'pricing.title': 'Lesson Packages',
-      'pricing.subtitle': 'Simple, flexible packages for every schedule and goal.',
-      'pricing.onlineNote': 'All lessons are held online. Contact us to find the right package.',
-      'pricing.popular': '★ Most Popular',
-      'pricing.contactUs': 'Contact Us',
-      'pricing.badgeAdults': 'For Adults',
-      'pricing.badgeChildren': 'For Children',
-      'pricing.badgeGroup': 'Small Groups',
+      'pricing.subtitle': 'Choose the lesson format, teacher, and schedule that best fits your goals.',
+      'pricing.onlineNote': 'All lessons are held online.',
+      'pricing.tab.children': 'Children',
+      'pricing.tab.adults': 'Adults',
+      'pricing.format.standardGroup': 'Standard Group',
+      'pricing.format.miniGroup': 'Mini Group',
+      'pricing.format.individual': 'Individual Lessons',
+      'pricing.format.groupLessons': 'Group Lessons',
+      'pricing.groupSize.standard': '7 or more students',
+      'pricing.groupSize.mini': '2–6 students',
+      'pricing.teacher.abdulla': 'Abdulla',
+      'pricing.teacher.cosmo': 'CosmoChess Teacher',
       'pricing.perMonth': '/ month',
-      'pricing.p1.title': 'Adult Individual',
-      'pricing.p1.freq': '2 lessons per week',
-      'pricing.p1.sub': '8 lessons per month',
-      'pricing.p1.f1': 'One-on-one coaching',
-      'pricing.p1.f2': 'Personalized learning plan',
-      'pricing.p1.f3': 'Flexible scheduling',
-      'pricing.p1.price': '₼XX',
-      'pricing.p2.title': "Children's Standard",
-      'pricing.p2.freq': '2 lessons per week',
-      'pricing.p2.sub': '8 lessons per month',
-      'pricing.p2.f1': 'Personalized coaching',
-      'pricing.p2.f2': 'Weekly homework',
-      'pricing.p2.f3': 'Parent progress updates',
-      'pricing.p2.price': '₼XX',
-      'pricing.p3.title': "Children's Intensive",
-      'pricing.p3.freq': '3 lessons per week',
-      'pricing.p3.sub': '12 lessons per month',
-      'pricing.p3.f1': 'Faster improvement',
-      'pricing.p3.f2': 'Weekly homework',
-      'pricing.p3.f3': 'Tournament preparation',
-      'pricing.p3.price': '₼XX',
-      'pricing.p4.title': 'Group Lessons',
-      'pricing.p4.freq': '2 lessons per week',
-      'pricing.p4.sub': '8 lessons per month',
-      'pricing.p4.f1': '4–10 students per group',
-      'pricing.p4.f2': 'Groups matched by level',
-      'pricing.p4.f3': 'Most affordable option',
-      'pricing.p4.price': '₼XX',
-      'pricing.note': "Contact us for current pricing and availability — we'll help you pick the right package.",
+      'pricing.lessonsMonth': 'lessons / month',
+      'pricing.lessonsWeek': 'lessons / week',
+      'pricing.popular': 'Most Popular',
+      'pricing.apply': 'Apply',
+      'pricing.contactForPrice': 'Contact us for pricing',
+      'pricing.groupLessons.desc': 'Structured group lessons for adult learners of all levels.',
+      'pricing.groupLessons.priceLabel': 'Fixed monthly package',
+      'pricing.groupLessons.forLabel': 'Perfect for',
+      'pricing.groupLessons.for1': 'Adults learning chess as a hobby',
+      'pricing.groupLessons.for2': 'Beginners and intermediate players',
+      'pricing.groupLessons.for3': 'Students who enjoy group learning',
+      'pricing.groupLessons.includesLabel': 'Includes',
+      'pricing.groupLessons.b1': 'Online lessons',
+      'pricing.groupLessons.b2': 'Groups matched by level',
+      'pricing.groupLessons.b3': 'Structured curriculum',
+      'pricing.groupLessons.b4': 'Friendly learning environment',
+      'pricing.indiv.lessonsPerWeek': 'Lessons per week',
+      'pricing.indiv.lessonsPerMonth': 'lessons per month',
+      'pricing.indiv.note': 'Calculated based on 4 weeks per month.',
+      'pricing.note': "Contact us for current availability — we'll help you choose the right package.",
 
       'tournament.tag': 'Free Trial Experience',
       'tournament.title': 'Free Online Tournament Every Sunday',
@@ -1670,9 +1762,15 @@
     },
 
     az: {
+      'nav.programs': 'Proqramlar',
+      'nav.academy': 'Akademiya',
       'nav.levels': 'Səviyyələr',
+      'nav.formats': 'Dərs Formatları',
+      'nav.how': 'Necə İşləyir',
       'nav.about': 'Haqqımızda',
       'nav.whyUs': 'Niyə Biz',
+      'nav.news': 'Xəbərlər',
+      'nav.gallery': 'Qalereya',
       'nav.reviews': 'Rəylər',
       'nav.contact': 'Əlaqə',
       'common.startLearning': 'Dərslərə başlayın',
@@ -1748,43 +1846,39 @@
 
       'pricing.tag': 'Paketlər',
       'pricing.title': 'Dərs Paketləri',
-      'pricing.subtitle': 'Müxtəlif cədvəllərə və məqsədlərə uyğun sadə və uyğunlaşdırıla bilən paketlər.',
-      'pricing.onlineNote': 'Bütün dərslər onlayn keçirilir. Sizə uyğun paketi seçmək üçün bizimlə əlaqə saxlaya bilərsiniz.',
-      'pricing.popular': '★ Ən Populyar',
-      'pricing.contactUs': 'Əlaqə Saxlayın',
-      'pricing.badgeAdults': 'Böyüklər üçün',
-      'pricing.badgeChildren': 'Uşaqlar üçün',
-      'pricing.badgeGroup': 'Kiçik Qruplar',
+      'pricing.subtitle': 'Məqsədlərinizə uyğun dərs formatını, müəllimi və cədvəli seçin.',
+      'pricing.onlineNote': 'Bütün dərslər onlayn keçirilir.',
+      'pricing.tab.children': 'Uşaqlar',
+      'pricing.tab.adults': 'Böyüklər',
+      'pricing.format.standardGroup': 'Standart qrup',
+      'pricing.format.miniGroup': 'Mini qrup',
+      'pricing.format.individual': 'Fərdi dərslər',
+      'pricing.format.groupLessons': 'Qrup dərsləri',
+      'pricing.groupSize.standard': '7 və daha çox şagird',
+      'pricing.groupSize.mini': '2–6 şagird',
+      'pricing.teacher.abdulla': 'Abdulla',
+      'pricing.teacher.cosmo': 'CosmoChess müəllimi',
       'pricing.perMonth': '/ ay',
-      'pricing.p1.title': 'Böyüklər üçün fərdi dərslər',
-      'pricing.p1.freq': 'Həftədə 2 dərs',
-      'pricing.p1.sub': 'Ayda 8 dərs',
-      'pricing.p1.f1': 'Məşqçi ilə fərdi dərslər',
-      'pricing.p1.f2': 'Fərdi tədris planı',
-      'pricing.p1.f3': 'Çevik dərs cədvəli',
-      'pricing.p1.price': '₼XX',
-      'pricing.p2.title': 'Uşaqlar üçün standart paket',
-      'pricing.p2.freq': 'Həftədə 2 dərs',
-      'pricing.p2.sub': 'Ayda 8 dərs',
-      'pricing.p2.f1': 'Fərdi yanaşma',
-      'pricing.p2.f2': 'Həftəlik ev tapşırıqları',
-      'pricing.p2.f3': 'Valideynlər üçün inkişaf hesabatları',
-      'pricing.p2.price': '₼XX',
-      'pricing.p3.title': 'Uşaqlar üçün intensiv paket',
-      'pricing.p3.freq': 'Həftədə 3 dərs',
-      'pricing.p3.sub': 'Ayda 12 dərs',
-      'pricing.p3.f1': 'Daha sürətli inkişaf',
-      'pricing.p3.f2': 'Həftəlik ev tapşırıqları',
-      'pricing.p3.f3': 'Turnir hazırlığı',
-      'pricing.p3.price': '₼XX',
-      'pricing.p4.title': 'Qrup Dərsləri',
-      'pricing.p4.freq': 'Həftədə 2 dərs',
-      'pricing.p4.sub': 'Ayda 8 dərs',
-      'pricing.p4.f1': 'Hər qrupda 4–10 şagird',
-      'pricing.p4.f2': 'Səviyyələrə uyğun formalaşdırılmış qruplar',
-      'pricing.p4.f3': 'Ən sərfəli seçim',
-      'pricing.p4.price': '₼XX',
-      'pricing.note': 'Aktual qiymətlər və mövcud yerlər haqqında məlumat almaq üçün bizimlə əlaqə saxlayın — sizə uyğun paketi seçməyə kömək edəcəyik.',
+      'pricing.lessonsMonth': 'dərs / ay',
+      'pricing.lessonsWeek': 'dəfə / həftə',
+      'pricing.popular': 'Ən çox seçilən',
+      'pricing.apply': 'Müraciət et',
+      'pricing.contactForPrice': 'Qiymət üçün müraciət edin',
+      'pricing.groupLessons.desc': 'Hər səviyyədən böyük şagirdlər üçün sistemli qrup dərsləri.',
+      'pricing.groupLessons.priceLabel': 'Sabit aylıq paket',
+      'pricing.groupLessons.forLabel': 'Bunlar üçün idealdır',
+      'pricing.groupLessons.for1': 'Şahmatı hobi kimi öyrənən böyüklər',
+      'pricing.groupLessons.for2': 'Başlanğıc və orta səviyyəli oyunçular',
+      'pricing.groupLessons.for3': 'Qrup mühitini sevən şagirdlər',
+      'pricing.groupLessons.includesLabel': 'Daxildir',
+      'pricing.groupLessons.b1': 'Onlayn dərslər',
+      'pricing.groupLessons.b2': 'Səviyyəyə görə formalaşdırılmış qruplar',
+      'pricing.groupLessons.b3': 'Sistemli tədris proqramı',
+      'pricing.groupLessons.b4': 'Mehriban tədris mühiti',
+      'pricing.indiv.lessonsPerWeek': 'Həftədə dərs sayı',
+      'pricing.indiv.lessonsPerMonth': 'dərs / ay',
+      'pricing.indiv.note': 'Qiymət ayda 4 həftə əsasında hesablanır.',
+      'pricing.note': 'Mövcud yerlər haqqında məlumat almaq üçün bizimlə əlaqə saxlayın — sizə uyğun variantı seçməyə kömək edəcəyik.',
 
       'tournament.tag': 'Ödənişsiz tanışlıq imkanı',
       'tournament.title': 'Hər Bazar Günü Ödənişsiz Onlayn Turnir',
@@ -1909,9 +2003,15 @@
     },
 
     ru: {
+      'nav.programs': 'Программы',
+      'nav.academy': 'Академия',
       'nav.levels': 'Уровни',
+      'nav.formats': 'Форматы занятий',
+      'nav.how': 'Как это работает',
       'nav.about': 'О нас',
       'nav.whyUs': 'Почему мы',
+      'nav.news': 'Новости',
+      'nav.gallery': 'Галерея',
       'nav.reviews': 'Отзывы',
       'nav.contact': 'Контакты',
       'common.startLearning': 'Начать обучение',
@@ -1987,43 +2087,39 @@
 
       'pricing.tag': 'Пакеты',
       'pricing.title': 'Пакеты занятий',
-      'pricing.subtitle': 'Простые и гибкие пакеты для разных графиков и целей.',
-      'pricing.onlineNote': 'Все занятия проходят онлайн. Свяжитесь с нами, чтобы подобрать подходящий пакет.',
-      'pricing.popular': '★ Самый популярный',
-      'pricing.contactUs': 'Связаться с нами',
-      'pricing.badgeAdults': 'Для взрослых',
-      'pricing.badgeChildren': 'Для детей',
-      'pricing.badgeGroup': 'Малые группы',
+      'pricing.subtitle': 'Выберите формат занятий, тренера и расписание, которые лучше всего соответствуют вашим целям.',
+      'pricing.onlineNote': 'Все занятия проходят онлайн.',
+      'pricing.tab.children': 'Дети',
+      'pricing.tab.adults': 'Взрослые',
+      'pricing.format.standardGroup': 'Стандартная группа',
+      'pricing.format.miniGroup': 'Мини-группа',
+      'pricing.format.individual': 'Индивидуальные занятия',
+      'pricing.format.groupLessons': 'Групповые занятия',
+      'pricing.groupSize.standard': '7 и более учеников',
+      'pricing.groupSize.mini': '2–6 учеников',
+      'pricing.teacher.abdulla': 'Абдулла',
+      'pricing.teacher.cosmo': 'Тренер CosmoChess',
       'pricing.perMonth': '/ месяц',
-      'pricing.p1.title': 'Индивидуальные занятия для взрослых',
-      'pricing.p1.freq': '2 занятия в неделю',
-      'pricing.p1.sub': '8 занятий в месяц',
-      'pricing.p1.f1': 'Индивидуальные занятия с тренером',
-      'pricing.p1.f2': 'Персональный план обучения',
-      'pricing.p1.f3': 'Гибкое расписание',
-      'pricing.p1.price': '₼XX',
-      'pricing.p2.title': 'Стандартный пакет для детей',
-      'pricing.p2.freq': '2 занятия в неделю',
-      'pricing.p2.sub': '8 занятий в месяц',
-      'pricing.p2.f1': 'Индивидуальный подход',
-      'pricing.p2.f2': 'Еженедельные домашние задания',
-      'pricing.p2.f3': 'Отчёты о прогрессе для родителей',
-      'pricing.p2.price': '₼XX',
-      'pricing.p3.title': 'Интенсивный пакет для детей',
-      'pricing.p3.freq': '3 занятия в неделю',
-      'pricing.p3.sub': '12 занятий в месяц',
-      'pricing.p3.f1': 'Более быстрый прогресс',
-      'pricing.p3.f2': 'Еженедельные домашние задания',
-      'pricing.p3.f3': 'Подготовка к турнирам',
-      'pricing.p3.price': '₼XX',
-      'pricing.p4.title': 'Групповые занятия',
-      'pricing.p4.freq': '2 занятия в неделю',
-      'pricing.p4.sub': '8 занятий в месяц',
-      'pricing.p4.f1': '4–10 учеников в группе',
-      'pricing.p4.f2': 'Группы, сформированные по уровню',
-      'pricing.p4.f3': 'Самый доступный вариант',
-      'pricing.p4.price': '₼XX',
-      'pricing.note': 'Свяжитесь с нами, чтобы узнать актуальные цены и наличие мест, — мы поможем подобрать подходящий пакет.',
+      'pricing.lessonsMonth': 'занятий / месяц',
+      'pricing.lessonsWeek': 'раза / неделю',
+      'pricing.popular': 'Самый популярный',
+      'pricing.apply': 'Оставить заявку',
+      'pricing.contactForPrice': 'Уточните стоимость',
+      'pricing.groupLessons.desc': 'Структурированные групповые занятия для взрослых любого уровня.',
+      'pricing.groupLessons.priceLabel': 'Фиксированный ежемесячный пакет',
+      'pricing.groupLessons.forLabel': 'Подходит для',
+      'pricing.groupLessons.for1': 'Взрослых, изучающих шахматы как хобби',
+      'pricing.groupLessons.for2': 'Начинающих и игроков среднего уровня',
+      'pricing.groupLessons.for3': 'Тех, кто любит обучение в группе',
+      'pricing.groupLessons.includesLabel': 'Включает',
+      'pricing.groupLessons.b1': 'Занятия онлайн',
+      'pricing.groupLessons.b2': 'Группы по уровню подготовки',
+      'pricing.groupLessons.b3': 'Структурированная программа',
+      'pricing.groupLessons.b4': 'Дружелюбная учебная атмосфера',
+      'pricing.indiv.lessonsPerWeek': 'Занятий в неделю',
+      'pricing.indiv.lessonsPerMonth': 'занятий / месяц',
+      'pricing.indiv.note': 'Стоимость рассчитана исходя из 4 недель в месяц.',
+      'pricing.note': 'Свяжитесь с нами, чтобы узнать о наличии мест, — мы поможем подобрать подходящий вариант.',
 
       'tournament.tag': 'Бесплатная возможность познакомиться с академией',
       'tournament.title': 'Бесплатный онлайн-турнир каждое воскресенье',
@@ -2218,6 +2314,408 @@
   var savedLang = 'en';
   try { savedLang = localStorage.getItem('cosmo-lang') || 'en'; } catch (e) {}
   applyTranslations(savedLang);
+</script>
+
+<script id="pricing-data">
+(function () {
+  /* ============================================================
+     TEACHERS
+     Add new teachers here. baseLessons + basePrice define the
+     per-lesson rate used for dynamic individual-lesson pricing.
+     pricePerLesson = basePrice / baseLessons
+     Set image to a path string once a real photo is available.
+     ============================================================ */
+  var TEACHERS = {
+    abdulla: {
+      id: 'abdulla',
+      nameKey: 'pricing.teacher.abdulla',
+      name: 'Abdulla',
+      image: null,
+      bio: null,
+      active: true,
+      baseLessons: 8,   /* confirmed: 8 lessons/month at 2×/week */
+      basePrice: 300    /* confirmed: 300 AZN/month              */
+    },
+    cosmo: {
+      id: 'cosmo',
+      nameKey: 'pricing.teacher.cosmo',
+      name: 'CosmoChess Teacher',
+      image: null,
+      bio: null,
+      active: true,
+      baseLessons: 8,   /* confirmed: 8 lessons/month at 2×/week */
+      basePrice: 180    /* confirmed: 180 AZN/month              */
+    }
+  };
+
+  /* ============================================================
+     PRICING DATA
+     Standard group option: { month, week, price, popular? }
+     Individual format:   type:'individual', teachers:[{teacherId}]
+       → pricing is derived from TEACHERS.baseLessons / basePrice
+     Fixed-price format:  fixedPrice, descKey?, benefits?[]
+       → adult group card: one price, description, benefit list
+     ============================================================ */
+  var PRICING_DATA = {
+    children: [
+      {
+        formatKey: 'pricing.format.standardGroup',
+        groupSizeKey: 'pricing.groupSize.standard',
+        teachers: [
+          { teacherId: 'abdulla', options: [{ month: 8, week: 2, price: 80 }] },
+          { teacherId: 'cosmo',   options: [{ month: 8, week: 2, price: 60 }] }
+        ]
+      },
+      {
+        formatKey: 'pricing.format.miniGroup',
+        groupSizeKey: 'pricing.groupSize.mini',
+        teachers: [
+          { teacherId: 'abdulla', options: [
+            { month: 8,  week: 2, price: 120 },
+            { month: 12, week: 3, price: 170, popular: true },
+            { month: 20, week: 5, price: 260 }
+          ]},
+          { teacherId: 'cosmo', options: [{ month: 8, week: 2, price: 90 }] }
+        ]
+      },
+      {
+        formatKey: 'pricing.format.individual',
+        type: 'individual',
+        teachers: [
+          { teacherId: 'abdulla' },
+          { teacherId: 'cosmo'   }
+        ]
+      }
+    ],
+    adults: [
+      {
+        formatKey: 'pricing.format.groupLessons',
+        fixedPrice: 150,
+        descKey: 'pricing.groupLessons.desc',
+        forItems: [
+          'pricing.groupLessons.for1',
+          'pricing.groupLessons.for2',
+          'pricing.groupLessons.for3'
+        ],
+        benefits: [
+          'pricing.groupLessons.b1',
+          'pricing.groupLessons.b2',
+          'pricing.groupLessons.b3',
+          'pricing.groupLessons.b4'
+        ]
+      },
+      {
+        formatKey: 'pricing.format.individual',
+        type: 'individual',
+        teachers: [
+          { teacherId: 'abdulla' },
+          { teacherId: 'cosmo'   }
+        ]
+      }
+    ]
+  };
+
+  /* ============================================================
+     HELPERS
+     ============================================================ */
+  var _activeAudience = 'children';
+
+  function esc(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  }
+
+  /* monthlyPrice = lessonsPerWeek × 4 weeks × pricePerLesson
+     Results are always whole numbers for the confirmed rates:
+       Abdulla  37.5 AZN/lesson → multiples of 150
+       CosmoChess 22.5 AZN/lesson → multiples of 90            */
+  function calcMonthlyPrice(lessonsPerWeek, basePrice, baseLessons) {
+    return Math.round(lessonsPerWeek * 4 * (basePrice / baseLessons));
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  function renderPricing(lang) {
+    var container = document.getElementById('pricing-formats');
+    if (!container) return;
+    var dict = (window.I18N && (window.I18N[lang] || window.I18N.en)) || {};
+    var formats = PRICING_DATA[_activeAudience] || [];
+
+    /* Keep `visible` class intact — do NOT reset className.
+       Resetting would strip `visible` which the IntersectionObserver
+       added once then unobserved, leaving the container at opacity:0. */
+    container.classList.toggle('adults-view', _activeAudience === 'adults');
+    container.classList.add('visible');
+
+    container.innerHTML = formats.map(function (fmt) {
+      return buildCard(fmt, dict);
+    }).join('');
+
+    attachEvents(container, dict);
+  }
+
+  /* ============================================================
+     CARD BUILDER
+     ============================================================ */
+  function buildCard(fmt, dict) {
+    var title     = dict[fmt.formatKey] || fmt.formatKey;
+    var groupSize = fmt.groupSizeKey ? (dict[fmt.groupSizeKey] || '') : '';
+    var applyLbl  = dict['pricing.apply'] || 'Apply';
+
+    var bodyHtml;
+    if (fmt.type === 'individual') {
+      bodyHtml = buildIndividualBody(fmt, dict, title);
+    } else if (fmt.fixedPrice != null) {
+      bodyHtml = buildFixedBody(fmt, dict);
+    } else {
+      bodyHtml = buildGroupBody(fmt, dict, title);
+    }
+
+    var prefillCard = (dict['pricing.tab.' + _activeAudience] || _activeAudience) + ' / ' + title;
+
+    return '<div class="fmt-card">' +
+      '<div class="fmt-header">' +
+        '<h3>' + esc(title) + '</h3>' +
+        (groupSize ? '<p class="fmt-group-size">' + esc(groupSize) + '</p>' : '') +
+      '</div>' +
+      bodyHtml +
+      '<div class="fmt-footer">' +
+        '<button class="btn-price" data-prefill="' + esc(prefillCard) + '">' + esc(applyLbl) + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* --- Fixed-price card (Adult Group Lessons) --- */
+  function buildFixedBody(fmt, dict) {
+    var perMonth     = dict['pricing.perMonth'] || '/ month';
+    var descText     = fmt.descKey   ? (dict[fmt.descKey]   || '') : '';
+    var priceLabel   = dict[fmt.priceLabelKey || 'pricing.groupLessons.priceLabel'] || 'Fixed monthly package';
+    var forLabel     = dict['pricing.groupLessons.forLabel']      || 'Perfect for';
+    var includesLabel= dict['pricing.groupLessons.includesLabel'] || 'Includes';
+    var forItems     = fmt.forItems  || [];
+    var benefits     = fmt.benefits  || [];
+
+    var descHtml = descText
+      ? '<p class="fmt-desc">' + esc(descText) + '</p>'
+      : '';
+
+    var priceBlockHtml =
+      '<div class="fmt-price-block">' +
+        '<span class="fmt-price-block-amount">' +
+          fmt.fixedPrice + ' AZN <em>' + esc(perMonth) + '</em>' +
+        '</span>' +
+        '<span class="fmt-price-block-label">' + esc(priceLabel) + '</span>' +
+      '</div>';
+
+    var forHtml = forItems.length
+      ? '<div class="fmt-section">' +
+          '<span class="fmt-section-label">' + esc(forLabel) + '</span>' +
+          '<ul class="fmt-for-list">' +
+            forItems.map(function (key) {
+              return '<li>' + esc(dict[key] || key) + '</li>';
+            }).join('') +
+          '</ul>' +
+        '</div>'
+      : '';
+
+    var benefitsHtml = benefits.length
+      ? '<div class="fmt-section">' +
+          '<span class="fmt-section-label">' + esc(includesLabel) + '</span>' +
+          '<ul class="fmt-benefits">' +
+            benefits.map(function (key) {
+              return '<li>' + esc(dict[key] || key) + '</li>';
+            }).join('') +
+          '</ul>' +
+        '</div>'
+      : '';
+
+    return descHtml + priceBlockHtml + forHtml + benefitsHtml;
+  }
+
+  /* --- Standard / mini group card --- */
+  function buildGroupBody(fmt, dict, title) {
+    var lMonth    = dict['pricing.lessonsMonth'] || 'lessons / month';
+    var lWeek     = dict['pricing.lessonsWeek']  || 'lessons / week';
+    var popularLbl = dict['pricing.popular']     || 'Most Popular';
+
+    return '<div class="fmt-body">' +
+      (fmt.teachers || []).map(function (tb) {
+        var teacher = TEACHERS[tb.teacherId];
+        if (!teacher || !teacher.active) return '';
+        var tname = dict[teacher.nameKey] || teacher.name;
+        var avatarInner = teacher.image
+          ? '<img src="' + esc(teacher.image) + '" alt="' + esc(tname) + '">'
+          : esc(tname.charAt(0));
+
+        var rows = (tb.options || []).map(function (opt) {
+          var prefill = [
+            dict['pricing.tab.' + _activeAudience] || _activeAudience,
+            title, tname, opt.month + ' ' + lMonth
+          ].join(' / ');
+          return '<div class="price-row' + (opt.popular ? ' popular' : '') + '" data-prefill="' + esc(prefill) + '">' +
+            '<div class="price-row-meta">' +
+              '<span class="price-row-freq">' + opt.month + ' ' + esc(lMonth) + ' &nbsp;·&nbsp; ' + opt.week + ' ' + esc(lWeek) + '</span>' +
+              (opt.popular ? '<span class="price-row-popular">★ ' + esc(popularLbl) + '</span>' : '') +
+            '</div>' +
+            '<span class="price-row-amount">' + opt.price + ' AZN</span>' +
+          '</div>';
+        }).join('');
+
+        return '<div class="teacher-block">' +
+          '<div class="teacher-name-row">' +
+            '<div class="teacher-avatar">' + avatarInner + '</div>' +
+            '<span class="teacher-name">' + esc(tname) + '</span>' +
+          '</div>' +
+          '<div class="price-rows">' + rows + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  /* --- Individual lesson card with dynamic stepper --- */
+  function buildIndividualBody(fmt, dict, title) {
+    var lpwLabel  = dict['pricing.indiv.lessonsPerWeek']  || 'Lessons per week';
+    var lpmLabel  = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var noteText  = dict['pricing.indiv.note']            || 'Calculated based on 4 weeks per month.';
+    var perMonth  = dict['pricing.perMonth']              || '/ month';
+    var DEFAULT   = 2;
+
+    return '<div class="fmt-body">' +
+      (fmt.teachers || []).map(function (tb) {
+        var teacher = TEACHERS[tb.teacherId];
+        if (!teacher || !teacher.active) return '';
+        var tname = dict[teacher.nameKey] || teacher.name;
+        var avatarInner = teacher.image
+          ? '<img src="' + esc(teacher.image) + '" alt="' + esc(tname) + '">'
+          : esc(tname.charAt(0));
+
+        var monthCount = DEFAULT * 4;
+        var monthPrice = calcMonthlyPrice(DEFAULT, teacher.basePrice, teacher.baseLessons);
+
+        return '<div class="teacher-block"' +
+          ' data-teacher-id="' + esc(tb.teacherId) + '"' +
+          ' data-base-price="' + teacher.basePrice + '"' +
+          ' data-base-lessons="' + teacher.baseLessons + '">' +
+          '<div class="teacher-name-row">' +
+            '<div class="teacher-avatar">' + avatarInner + '</div>' +
+            '<span class="teacher-name">' + esc(tname) + '</span>' +
+          '</div>' +
+          '<div class="indiv-stepper" data-count="' + DEFAULT + '">' +
+            '<div class="stepper-label">' + esc(lpwLabel) + '</div>' +
+            '<div class="stepper-control">' +
+              '<button class="stepper-btn" data-dir="-1" aria-label="Decrease" disabled>−</button>' +
+              '<span class="stepper-val">' + DEFAULT + '</span>' +
+              '<button class="stepper-btn" data-dir="1" aria-label="Increase">+</button>' +
+            '</div>' +
+            '<div class="stepper-result">' +
+              '<span class="stepper-month">' + monthCount + ' ' + esc(lpmLabel) + '</span>' +
+              '<span class="stepper-price">' + monthPrice + ' AZN <em>' + esc(perMonth) + '</em></span>' +
+            '</div>' +
+            '<p class="stepper-note">' + esc(noteText) + '</p>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  /* ============================================================
+     EVENT WIRING (called after every innerHTML replacement)
+     ============================================================ */
+  function attachEvents(container, dict) {
+    /* Stepper buttons */
+    container.querySelectorAll('.stepper-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var stepper = btn.closest('.indiv-stepper');
+        var block   = btn.closest('.teacher-block');
+        if (!stepper || !block) return;
+
+        var count = parseInt(stepper.getAttribute('data-count'), 10) || 2;
+        var dir   = parseInt(btn.getAttribute('data-dir'), 10) || 0;
+        count = Math.max(1, Math.min(7, count + dir));
+        stepper.setAttribute('data-count', count);
+
+        /* Update stepper display */
+        stepper.querySelector('.stepper-val').textContent = count;
+        stepper.querySelector('[data-dir="-1"]').disabled = count <= 1;
+        stepper.querySelector('[data-dir="1"]').disabled  = count >= 7;
+
+        var basePrice   = parseFloat(block.getAttribute('data-base-price'));
+        var baseLessons = parseFloat(block.getAttribute('data-base-lessons'));
+        var monthCount  = count * 4;
+        var monthPrice  = calcMonthlyPrice(count, basePrice, baseLessons);
+
+        var d = (window.I18N && (window.I18N[window.__cosmoLang] || window.I18N.en)) || {};
+        stepper.querySelector('.stepper-month').textContent =
+          monthCount + ' ' + (d['pricing.indiv.lessonsPerMonth'] || 'lessons per month');
+        stepper.querySelector('.stepper-price').innerHTML =
+          monthPrice + ' AZN <em>' + esc(d['pricing.perMonth'] || '/ month') + '</em>';
+      });
+    });
+
+    /* CTA buttons */
+    container.querySelectorAll('.btn-price').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var card = btn.closest('.fmt-card');
+        var d    = (window.I18N && (window.I18N[window.__cosmoLang] || window.I18N.en)) || {};
+        var audLabel = d['pricing.tab.' + _activeAudience] || _activeAudience;
+        var fmtTitle = card ? (card.querySelector('h3') || {}).textContent || '' : '';
+        var msg;
+
+        var steppers = card ? card.querySelectorAll('.indiv-stepper') : [];
+        if (steppers.length) {
+          /* Individual lesson card — build per-teacher context */
+          var lines = [audLabel + ' / ' + fmtTitle];
+          steppers.forEach(function (stepper) {
+            var block      = stepper.closest('.teacher-block');
+            var tname      = block ? (block.querySelector('.teacher-name') || {}).textContent || '' : '';
+            var count      = parseInt(stepper.getAttribute('data-count'), 10) || 2;
+            var basePrice  = parseFloat(block.getAttribute('data-base-price'));
+            var baseLessons= parseFloat(block.getAttribute('data-base-lessons'));
+            var monthPrice = calcMonthlyPrice(count, basePrice, baseLessons);
+            lines.push(tname + ': ' + count + '×/week · ' + (count * 4) + ' lessons/month · ' + monthPrice + ' AZN');
+          });
+          msg = lines.join('\n');
+        } else {
+          msg = btn.getAttribute('data-prefill') || '';
+        }
+
+        if (msg) {
+          var ta = document.querySelector('#contact textarea[name="message"]');
+          if (ta) ta.value = msg;
+        }
+        var contactEl = document.getElementById('contact');
+        if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  }
+
+  /* ============================================================
+     TAB SWITCHING
+     ============================================================ */
+  document.addEventListener('click', function (e) {
+    var tab = e.target.closest ? e.target.closest('.pricing-tab') : null;
+    if (!tab) return;
+    _activeAudience = tab.getAttribute('data-audience') || 'children';
+    document.querySelectorAll('.pricing-tab').forEach(function (t) {
+      var isActive = t === tab;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    renderPricing(window.__cosmoLang || 'en');
+  });
+
+  /* ============================================================
+     HOOK INTO applyTranslations so pricing re-renders on lang change
+     ============================================================ */
+  var _origApply = window.applyTranslations;
+  window.applyTranslations = function (lang) {
+    if (_origApply) _origApply(lang);
+    renderPricing(lang);
+  };
+
+  /* Initial render */
+  renderPricing(window.__cosmoLang || savedLang || 'en');
+})();
 </script>
 
 <script>
@@ -2845,6 +3343,59 @@
 </script>
 
 <script>
+/* ---- Nav dropdowns (desktop click/hover + keyboard) ---- */
+(function(){
+  var dropdowns = document.querySelectorAll('.nav-dropdown');
+
+  dropdowns.forEach(function(dd){
+    var btn = dd.querySelector('.nav-dropdown-btn');
+
+    function openDD() { dd.classList.add('open'); if (btn) btn.setAttribute('aria-expanded','true'); }
+    function closeDD() { dd.classList.remove('open'); if (btn) btn.setAttribute('aria-expanded','false'); }
+    function toggleDD() { dd.classList.contains('open') ? closeDD() : openDD(); }
+
+    if (btn) {
+      btn.addEventListener('click', function(e){ e.stopPropagation(); toggleDD(); });
+    }
+    dd.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { closeDD(); if (btn) btn.focus(); }
+    });
+  });
+
+  document.addEventListener('click', function(){
+    dropdowns.forEach(function(dd){ dd.classList.remove('open'); dd.querySelector('.nav-dropdown-btn') && dd.querySelector('.nav-dropdown-btn').setAttribute('aria-expanded','false'); });
+  });
+})();
+
+/* ---- Mobile menu toggle ---- */
+(function(){
+  var btn = document.getElementById('mobileMenuBtn');
+  var menu = document.getElementById('navLinks');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.innerHTML = open ? '&#10005;' : '&#9776;';
+  });
+
+  menu.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(){
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+      btn.innerHTML = '&#9776;';
+    });
+  });
+
+  document.addEventListener('click', function(){
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    btn.innerHTML = '&#9776;';
+  });
+})();
+
+/* ---- Scroll-spy ---- */
 (function(){
   var navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
   var sections = [];
