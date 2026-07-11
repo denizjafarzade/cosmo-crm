@@ -1,4 +1,4 @@
-// Demo content for client preview — replace with real academy content before launch.
+﻿// Demo content for client preview — replace with real academy content before launch.
 // Edit all articles and gallery items in this single file.
 
 var NEWS = [
@@ -8,7 +8,7 @@ var NEWS = [
     date: '2026-06-21',
     title: 'Young Players Shine at the Weekend Rapid Tournament',
     excerpt: 'Our students demonstrated strong focus, confidence, and sportsmanship during a competitive weekend event with players from across the city.',
-    image: '/img/ph-tournament.svg',
+    image: 'img/ph-tournament.svg',
     imageAlt: 'Students competing at the Weekend Rapid Tournament',
     relatedGalleryFilter: 'tournaments',
     galleryItems: ['g4', 'g5', 'g6'],
@@ -24,7 +24,7 @@ var NEWS = [
     date: '2026-05-30',
     title: 'A Season of Strong Progress and New Milestones',
     excerpt: 'Several students reached important personal milestones after months of structured training — from first tournament entries to significant rating improvements.',
-    image: '/img/ph-awards.svg',
+    image: 'img/ph-awards.svg',
     imageAlt: 'Student receiving recognition for chess progress',
     relatedGalleryFilter: 'awards',
     galleryItems: ['g7', 'g8', 'g9'],
@@ -40,7 +40,7 @@ var NEWS = [
     date: '2026-05-10',
     title: 'Highlights from Our Latest Online Chess Event',
     excerpt: 'Students from different age groups came together for an engaging online tournament and shared learning session that showcased both skill and sportsmanship.',
-    image: '/img/ph-training.svg',
+    image: 'img/ph-training.svg',
     imageAlt: 'Students participating in an online chess event',
     relatedGalleryFilter: 'training',
     galleryItems: ['g1', 'g2', 'g3'],
@@ -56,7 +56,7 @@ var NEWS = [
     date: '2026-04-18',
     title: 'How Personalised Coaching Plans Change the Game',
     excerpt: 'Every student at the academy trains with a tailored plan built around their current level, goals, and learning style — here is what that looks like in practice.',
-    image: '/img/ph-training.svg',
+    image: 'img/ph-training.svg',
     imageAlt: 'Coach working one-on-one with a student at a chess board',
     relatedGalleryFilter: 'training',
     galleryItems: ['g1', 'g2', 'g12'],
@@ -72,7 +72,7 @@ var NEWS = [
     date: '2026-03-22',
     title: 'Student Recognition Ceremony — End-of-Season Awards',
     excerpt: 'The academy held its end-of-season recognition evening, celebrating the dedication and growth of students who made exceptional strides over the past months.',
-    image: '/img/ph-awards.svg',
+    image: 'img/ph-awards.svg',
     imageAlt: 'End-of-season student recognition ceremony at the academy',
     relatedGalleryFilter: 'awards',
     galleryItems: ['g7', 'g8', 'g9'],
@@ -88,7 +88,7 @@ var NEWS = [
     date: '2026-02-28',
     title: 'Summer Chess Camp 2026 — Registration Open',
     excerpt: 'Our intensive five-day summer programme returns this July, offering structured training, friendly competition, and group activities for players aged 7 to 16.',
-    image: '/img/ph-camps.svg',
+    image: 'img/ph-camps.svg',
     imageAlt: 'Group of students at a chess camp activity',
     relatedGalleryFilter: 'camps',
     galleryItems: ['g10', 'g11', 'g12'],
@@ -108,7 +108,7 @@ var GALLERY = [
     category: 'training',
     title: 'Individual Training Session',
     caption: 'One-on-one coaching with focused board analysis and personalised feedback.',
-    image: '/img/ph-training.svg',
+    image: 'img/ph-training.svg',
     alt: 'Coach and student analysing a chess position together'
   },
   {
@@ -116,7 +116,7 @@ var GALLERY = [
     category: 'training',
     title: 'Group Strategy Workshop',
     caption: 'Students working through a shared tactical puzzle in a collaborative session.',
-    image: '/img/ph-training.svg',
+    image: 'img/ph-training.svg',
     alt: 'Group of students studying chess positions on a shared board',
     relatedArticle: 'highlights-online-chess-event'
   },
@@ -125,7 +125,7 @@ var GALLERY = [
     category: 'training',
     title: 'Online Coaching Session',
     caption: 'A typical online lesson — screen-shared board, live analysis, real feedback.',
-    image: '/img/ph-training.svg',
+    image: 'img/ph-training.svg',
     alt: 'Online coaching session with shared chess board on screen',
     relatedArticle: 'highlights-online-chess-event'
   },
@@ -134,7 +134,7 @@ var GALLERY = [
     category: 'tournaments',
     title: 'Weekend Rapid Tournament',
     caption: 'Students focused and in the zone during the Saturday rapid event.',
-    image: '/img/ph-tournament.svg',
+    image: 'img/ph-tournament.svg',
     alt: 'Students competing at the Weekend Rapid Tournament',
     relatedArticle: 'young-players-shine-rapid-tournament'
   },
@@ -143,7 +143,7 @@ var GALLERY = [
     category: 'tournaments',
     title: 'Junior Online Competition',
     caption: 'Our junior students competing in a structured online blitz format.',
-    image: '/img/ph-tournament.svg',
+    image: 'img/ph-tournament.svg',
     alt: 'Junior students in an online chess competition',
     relatedArticle: 'young-players-shine-rapid-tournament'
   },
@@ -152,7 +152,7 @@ var GALLERY = [
     category: 'tournaments',
     title: 'Friendly Practice Tournament',
     caption: 'An internal practice event for students preparing for upcoming rated competitions.',
-    image: '/img/ph-tournament.svg',
+    image: 'img/ph-tournament.svg',
     alt: 'Students at a friendly practice tournament between training groups'
   },
   {
@@ -160,7 +160,7 @@ var GALLERY = [
     category: 'awards',
     title: 'Student Recognition Ceremony',
     caption: 'Celebrating the season\'s standout moments of growth and dedication.',
-    image: '/img/ph-awards.svg',
+    image: 'img/ph-awards.svg',
     alt: 'Student receiving recognition at the end-of-season ceremony',
     relatedArticle: 'end-of-season-awards'
   },
@@ -169,7 +169,7 @@ var GALLERY = [
     category: 'awards',
     title: 'End-of-Season Awards',
     caption: 'Coaches presenting students with awards for progress and commitment.',
-    image: '/img/ph-awards.svg',
+    image: 'img/ph-awards.svg',
     alt: 'Coach presenting an award to a student at the end-of-season event',
     relatedArticle: 'end-of-season-awards'
   },
@@ -178,7 +178,7 @@ var GALLERY = [
     category: 'awards',
     title: 'Regional Tournament Podium',
     caption: 'A proud moment after a strong showing at a regional open event.',
-    image: '/img/ph-awards.svg',
+    image: 'img/ph-awards.svg',
     alt: 'Students celebrating a podium finish at a regional chess tournament'
   },
   {
@@ -186,7 +186,7 @@ var GALLERY = [
     category: 'camps',
     title: 'Summer Chess Camp',
     caption: 'Five days of intensive training, games, and team activities every July.',
-    image: '/img/ph-camps.svg',
+    image: 'img/ph-camps.svg',
     alt: 'Students gathered for a day of summer chess camp activities',
     relatedArticle: 'summer-chess-camp-2026'
   },
@@ -195,7 +195,7 @@ var GALLERY = [
     category: 'camps',
     title: 'Chess Camp Group Activity',
     caption: 'Team puzzle-solving and group games during a camp afternoon session.',
-    image: '/img/ph-camps.svg',
+    image: 'img/ph-camps.svg',
     alt: 'Students doing a group chess activity during summer camp',
     relatedArticle: 'summer-chess-camp-2026'
   },
@@ -204,7 +204,7 @@ var GALLERY = [
     category: 'camps',
     title: 'Outdoor Strategy Session',
     caption: 'A change of setting — strategic thinking exercises in an outdoor format.',
-    image: '/img/ph-camps.svg',
+    image: 'img/ph-camps.svg',
     alt: 'Students participating in an outdoor chess strategy session'
   }
 ];
