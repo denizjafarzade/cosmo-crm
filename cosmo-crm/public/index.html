@@ -1166,17 +1166,6 @@
         </div>
       </div>
 
-      <!-- Live chat -->
-      <div class="screen-chat">
-        <div class="chat-header">💬 Lesson Chat</div>
-        <div class="chat-messages">
-          <div class="chat-msg coach-msg msg-1"><span class="msg-who">Coach:</span> See how Ng5 eyes the f7 pawn? ♟</div>
-          <div class="chat-msg student-msg msg-2"><span class="msg-who">You:</span> It threatens Nxf7 forking queen &amp; rook! 🤔</div>
-          <div class="chat-msg coach-msg msg-3"><span class="msg-who">Coach:</span> Exactly! ♛ What's Black's best response?</div>
-          <div class="chat-msg student-msg msg-4"><span class="msg-who">You:</span> O-O! Get the king safe first 🏰</div>
-        </div>
-      </div>
-
       <!-- Call controls -->
       <div class="call-controls">
         <div class="cc-btn">🎤</div>
@@ -3004,6 +2993,13 @@
       '</button>';
     }).join('');
 
+    var initOpts   = (firstTb.options || []);
+    var initSingle = initOpts.length <= 1;
+    var lweekLbl   = dict['pricing.lessonsWeek'] || 'lessons / week';
+    var initCountStr = initSingle
+      ? (initMonth + ' ' + lpmLbl + ' · ' + initCount + ' ' + lweekLbl)
+      : (initMonth + ' ' + lpmLbl);
+
     return '<div class="pcv2" data-card-type="group" data-sub-idx="0" data-tid="' + esc((firstFmt.teachers||[{teacherId:''}])[0].teacherId) + '" data-opt-idx="0" data-formats="' + dataJson + '">' +
       '<div class="pcv2-header"><span class="pcv2-icon">♟ ♟</span><span class="pcv2-title">Group Lessons</span></div>' +
       '<div class="pcv2-subtabs">' + subTabsHtml + '</div>' +
@@ -3014,13 +3010,13 @@
       '<div class="pcv2-section">' +
         '<span class="pcv2-section-label">' + esc(lpwLbl) + '</span>' +
         '<div class="pcv2-lpw-row">' +
-          '<div class="pcv2-stepper">' +
+          '<div class="pcv2-stepper"' + (initSingle ? ' style="display:none"' : '') + '>' +
             '<button class="pcv2-step-btn" data-dir="-1" ' + (initCount <= 1 ? 'disabled' : '') + '>−</button>' +
             '<span class="pcv2-step-val">' + initCount + '</span>' +
             '<button class="pcv2-step-btn" data-dir="1">+</button>' +
           '</div>' +
           '<div class="pcv2-price-info">' +
-            '<div class="pcv2-month-count">' + initMonth + ' ' + esc(lpmLbl) + '</div>' +
+            '<div class="pcv2-month-count">' + initCountStr + '</div>' +
             '<div class="pcv2-price">' + initPrice + ' AZN <em>' + esc(perMonth) + '</em></div>' +
           '</div>' +
         '</div>' +
@@ -3284,6 +3280,7 @@
 
   function refreshGroupStepper(card, dict, optIdx) {
     var lpmLbl  = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var lweekLbl = dict['pricing.lessonsWeek'] || 'lessons / week';
     var perMonth = dict['pricing.perMonth'] || '/ month';
     var formats = [];
     try { formats = JSON.parse(card.getAttribute('data-formats') || '[]'); } catch(e) {}
@@ -3293,19 +3290,27 @@
     var tbData  = (fmtData.teachers || []).find(function(t) { return t.id === tid; }) || (fmtData.teachers||[])[0] || {};
     var opts    = tbData.options || [];
     var opt     = opts[optIdx] || opts[0] || {};
+    var single  = opts.length <= 1;
 
     card.setAttribute('data-opt-idx', optIdx);
-    var valEl   = card.querySelector('.pcv2-step-val');
-    var countEl = card.querySelector('.pcv2-month-count');
-    var priceEl = card.querySelector('.pcv2-price');
-    var decBtn  = card.querySelector('.pcv2-step-btn[data-dir="-1"]');
-    var incBtn  = card.querySelector('.pcv2-step-btn[data-dir="1"]');
+    var stepperEl = card.querySelector('.pcv2-stepper');
+    var valEl     = card.querySelector('.pcv2-step-val');
+    var countEl   = card.querySelector('.pcv2-month-count');
+    var priceEl   = card.querySelector('.pcv2-price');
+    var decBtn    = card.querySelector('.pcv2-step-btn[data-dir="-1"]');
+    var incBtn    = card.querySelector('.pcv2-step-btn[data-dir="1"]');
 
-    if (valEl)   valEl.textContent = opt.week || 0;
-    if (countEl) countEl.textContent = (opt.month || 0) + ' ' + lpmLbl;
+    /* Hide stepper buttons for single-option groups, show inline week info instead */
+    if (stepperEl) stepperEl.style.display = single ? 'none' : '';
+    if (single) {
+      if (countEl) countEl.textContent = (opt.month || 0) + ' ' + lpmLbl + ' · ' + (opt.week || 0) + ' ' + lweekLbl;
+    } else {
+      if (valEl)   valEl.textContent = opt.week || 0;
+      if (countEl) countEl.textContent = (opt.month || 0) + ' ' + lpmLbl;
+      if (decBtn)  decBtn.disabled = optIdx <= 0;
+      if (incBtn)  incBtn.disabled = optIdx >= opts.length - 1;
+    }
     if (priceEl) priceEl.innerHTML = (opt.price || 0) + ' AZN <em>' + esc(perMonth) + '</em>';
-    if (decBtn)  decBtn.disabled = optIdx <= 0;
-    if (incBtn)  incBtn.disabled = optIdx >= opts.length - 1;
   }
 
   function refreshIndivStepper(card, dict) {
