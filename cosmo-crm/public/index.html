@@ -21,6 +21,11 @@
       --green: #16A34A;
       --border: #E2E8F0;
       --surface: #FFFFFF;
+      --hero-bg-from: #0c0f1e;
+      --hero-bg-mid: #151b3a;
+      --hero-bg-to: #0e1628;
+      --hero-glow-1: rgba(79,70,229,0.13);
+      --hero-glow-2: rgba(201,168,76,0.09);
       --hero-gradient-mid: #EEF2FF;
       --icon-bg: #EEF2FF;
       --card-shadow: rgba(0,0,0,0.06);
@@ -129,7 +134,7 @@
       min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
       align-items: center; gap: 2rem;
       padding: 7rem 5vw 5rem;
-      background: linear-gradient(135deg, #0c0f1e 0%, #151b3a 40%, #0e1628 100%);
+      background: linear-gradient(135deg, var(--hero-bg-from) 0%, var(--hero-bg-mid) 40%, var(--hero-bg-to) 100%);
       position: relative; overflow: hidden;
     }
     .hero::before {
@@ -140,8 +145,8 @@
       content: '';
       position: absolute; inset: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 70% 70% at 25% 50%, rgba(79,70,229,0.13) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 50% at 80% 70%, rgba(201,168,76,0.09) 0%, transparent 60%);
+        radial-gradient(ellipse 70% 70% at 25% 50%, var(--hero-glow-1) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 70%, var(--hero-glow-2) 0%, transparent 60%);
     }
     .hero-content { position: relative; z-index: 2; }
     .hero-badge {
@@ -399,10 +404,10 @@
     .cc-btn {
       width: 32px; height: 32px; border-radius: 50%; cursor: default;
       display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-      background: #1c1f34; border: none;
+      background: #2a2e4a; border: none; color: rgba(255,255,255,0.85);
     }
     .cc-btn.end {
-      background: #ef4444; font-size: 0.7rem; font-weight: 700; color: white;
+      background: #ef4444; font-size: 0.7rem; font-weight: 700; color: #fff;
     }
 
     /* ===== SECTIONS ===== */
@@ -3638,7 +3643,9 @@
         '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
         '--badge-advanced-bg':'#DBEAFE','--badge-advanced-text':'#4F46E5',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(238,242,255,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(238,242,255,0.95)',
+        '--hero-bg-from':'#0c0f1e','--hero-bg-mid':'#151b3a','--hero-bg-to':'#0e1628',
+        '--hero-glow-1':'rgba(79,70,229,0.15)','--hero-glow-2':'rgba(201,168,76,0.09)'
       },
       dark: {
         '--primary':'#818CF8','--primary-light':'#A5B4FC','--accent':'#c9a84c','--accent-light':'#e8d5a3',
@@ -3650,7 +3657,9 @@
         '--badge-beginner-bg':'#064E3B','--badge-beginner-text':'#6EE7B7',
         '--badge-intermediate-bg':'#78350F','--badge-intermediate-text':'#FCD34D',
         '--badge-advanced-bg':'#312E81','--badge-advanced-text':'#A5B4FC',
-        '--carousel-btn-bg':'rgba(30,41,59,0.85)','--carousel-btn-active-bg':'rgba(30,41,59,0.95)'
+        '--carousel-btn-bg':'rgba(30,41,59,0.85)','--carousel-btn-active-bg':'rgba(30,41,59,0.95)',
+        '--hero-bg-from':'#060a14','--hero-bg-mid':'#0d1530','--hero-bg-to':'#06101e',
+        '--hero-glow-1':'rgba(129,140,248,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
       }
     },
     royal: {
@@ -3665,7 +3674,9 @@
         '--badge-beginner-bg':'#FFF8E7','--badge-beginner-text':'#B8860B',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#92400E',
         '--badge-advanced-bg':'#FFF1CC','--badge-advanced-text':'#78350F',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,248,231,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,248,231,0.95)',
+        '--hero-bg-from':'#1a0d03','--hero-bg-mid':'#2d1a08','--hero-bg-to':'#160b02',
+        '--hero-glow-1':'rgba(184,134,11,0.18)','--hero-glow-2':'rgba(201,168,76,0.12)'
       },
       dark: {
         '--primary':'#DAA520','--primary-light':'#F0C040','--accent':'#DAA520','--accent-light':'#e8d5a3',
@@ -3677,7 +3688,9 @@
         '--badge-beginner-bg':'#3D3520','--badge-beginner-text':'#DAA520',
         '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#F0C040',
         '--badge-advanced-bg':'#3D3010','--badge-advanced-text':'#FFD700',
-        '--carousel-btn-bg':'rgba(30,26,16,0.85)','--carousel-btn-active-bg':'rgba(42,36,24,0.95)'
+        '--carousel-btn-bg':'rgba(30,26,16,0.85)','--carousel-btn-active-bg':'rgba(42,36,24,0.95)',
+        '--hero-bg-from':'#0a0700','--hero-bg-mid':'#140e03','--hero-bg-to':'#080500',
+        '--hero-glow-1':'rgba(218,165,32,0.14)','--hero-glow-2':'rgba(201,168,76,0.08)'
       }
     },
     midnight: {
@@ -3692,7 +3705,9 @@
         '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
         '--badge-advanced-bg':'#DBEAFE','--badge-advanced-text':'#1E3A5F',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(226,232,240,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(226,232,240,0.95)',
+        '--hero-bg-from':'#07091a','--hero-bg-mid':'#0d1330','--hero-bg-to':'#060818',
+        '--hero-glow-1':'rgba(30,58,95,0.2)','--hero-glow-2':'rgba(201,168,76,0.12)'
       },
       dark: {
         '--primary':'#C9A84C','--primary-light':'#E0C068','--accent':'#C9A84C','--accent-light':'#e8d5a3',
@@ -3704,7 +3719,9 @@
         '--badge-beginner-bg':'#0A2E1A','--badge-beginner-text':'#6EE7B7',
         '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#FCD34D',
         '--badge-advanced-bg':'#1E3050','--badge-advanced-text':'#C9A84C',
-        '--carousel-btn-bg':'rgba(21,34,56,0.85)','--carousel-btn-active-bg':'rgba(30,48,80,0.95)'
+        '--carousel-btn-bg':'rgba(21,34,56,0.85)','--carousel-btn-active-bg':'rgba(30,48,80,0.95)',
+        '--hero-bg-from':'#050810','--hero-bg-mid':'#0b1120','--hero-bg-to':'#040709',
+        '--hero-glow-1':'rgba(201,168,76,0.12)','--hero-glow-2':'rgba(30,58,95,0.15)'
       }
     },
     emerald: {
@@ -3719,7 +3736,9 @@
         '--badge-beginner-bg':'#D1FAE5','--badge-beginner-text':'#059669',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
         '--badge-advanced-bg':'#A7F3D0','--badge-advanced-text':'#065F46',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(236,253,245,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(236,253,245,0.95)',
+        '--hero-bg-from':'#011a10','--hero-bg-mid':'#022c1c','--hero-bg-to':'#010e0a',
+        '--hero-glow-1':'rgba(5,150,105,0.18)','--hero-glow-2':'rgba(201,168,76,0.09)'
       },
       dark: {
         '--primary':'#34D399','--primary-light':'#6EE7B7','--accent':'#34D399','--accent-light':'#A7F3D0',
@@ -3731,7 +3750,9 @@
         '--badge-beginner-bg':'#065F46','--badge-beginner-text':'#6EE7B7',
         '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#FCD34D',
         '--badge-advanced-bg':'#064E3B','--badge-advanced-text':'#34D399',
-        '--carousel-btn-bg':'rgba(6,78,59,0.85)','--carousel-btn-active-bg':'rgba(6,95,70,0.95)'
+        '--carousel-btn-bg':'rgba(6,78,59,0.85)','--carousel-btn-active-bg':'rgba(6,95,70,0.95)',
+        '--hero-bg-from':'#010e08','--hero-bg-mid':'#011a0e','--hero-bg-to':'#010a06',
+        '--hero-glow-1':'rgba(52,211,153,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
       }
     },
     ocean: {
@@ -3746,7 +3767,9 @@
         '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
         '--badge-advanced-bg':'#E0F2FE','--badge-advanced-text':'#0284C7',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(224,242,254,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(224,242,254,0.95)',
+        '--hero-bg-from':'#050e1c','--hero-bg-mid':'#0a1e38','--hero-bg-to':'#040c14',
+        '--hero-glow-1':'rgba(2,132,199,0.18)','--hero-glow-2':'rgba(201,168,76,0.09)'
       },
       dark: {
         '--primary':'#38BDF8','--primary-light':'#7DD3FC','--accent':'#38BDF8','--accent-light':'#BAE6FD',
@@ -3758,7 +3781,9 @@
         '--badge-beginner-bg':'#064E3B','--badge-beginner-text':'#6EE7B7',
         '--badge-intermediate-bg':'#78350F','--badge-intermediate-text':'#FCD34D',
         '--badge-advanced-bg':'#1E3A5F','--badge-advanced-text':'#38BDF8',
-        '--carousel-btn-bg':'rgba(23,42,62,0.85)','--carousel-btn-active-bg':'rgba(30,58,95,0.95)'
+        '--carousel-btn-bg':'rgba(23,42,62,0.85)','--carousel-btn-active-bg':'rgba(30,58,95,0.95)',
+        '--hero-bg-from':'#04090f','--hero-bg-mid':'#081422','--hero-bg-to':'#03060c',
+        '--hero-glow-1':'rgba(56,189,248,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
       }
     },
     chessboard: {
@@ -3773,7 +3798,9 @@
         '--badge-beginner-bg':'#FFF5E0','--badge-beginner-text':'#8B6F47',
         '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#92400E',
         '--badge-advanced-bg':'#F3E8D0','--badge-advanced-text':'#5C4033',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,245,224,0.95)'
+        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,245,224,0.95)',
+        '--hero-bg-from':'#180c04','--hero-bg-mid':'#2c1808','--hero-bg-to':'#140a03',
+        '--hero-glow-1':'rgba(139,111,71,0.2)','--hero-glow-2':'rgba(201,168,76,0.14)'
       },
       dark: {
         '--primary':'#C9A84C','--primary-light':'#DAB960','--accent':'#C9A84C','--accent-light':'#e8d5a3',
@@ -3785,7 +3812,9 @@
         '--badge-beginner-bg':'#3E3020','--badge-beginner-text':'#C9A84C',
         '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#DAB960',
         '--badge-advanced-bg':'#3E3020','--badge-advanced-text':'#E0C068',
-        '--carousel-btn-bg':'rgba(42,32,24,0.85)','--carousel-btn-active-bg':'rgba(62,48,32,0.95)'
+        '--carousel-btn-bg':'rgba(42,32,24,0.85)','--carousel-btn-active-bg':'rgba(62,48,32,0.95)',
+        '--hero-bg-from':'#0e0805','--hero-bg-mid':'#1a1008','--hero-bg-to':'#0a0603',
+        '--hero-glow-1':'rgba(201,168,76,0.14)','--hero-glow-2':'rgba(139,111,71,0.1)'
       }
     }
   };
