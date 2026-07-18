@@ -205,10 +205,10 @@
     }
     .chrome-live {
       display: flex; align-items: center; gap: 4px;
-      font-size: 0.63rem; font-weight: 700; color: #ef4444; letter-spacing: 0.5px;
+      font-size: 0.63rem; font-weight: 700; color: #22c55e; letter-spacing: 0.5px;
     }
     .chrome-live-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: #ef4444;
+      width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
       animation: livePulse 1.2s infinite;
     }
     @keyframes livePulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
@@ -348,67 +348,62 @@
     @keyframes bgF5 { 0%{transform:translate(-15px,5px) rotate(12deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(50px,-175px) rotate(-6deg);opacity:0} }
     @keyframes bgF6 { 0%{transform:translate(10px,25px) rotate(-4deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(-55px,-195px) rotate(20deg);opacity:0} }
 
-    /* ===== VIDEO CALL TILE ===== */
-    .vcall-section {
-      display: flex; gap: 0.5rem; padding: 0.55rem;
-      background: #080b16; border-bottom: 1px solid rgba(255,255,255,0.06);
+    /* ===== VIDEO CALL TILES (screenshot-style) ===== */
+    .vcall-main {
+      display: flex; height: 155px; overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .vcall-coach {
-      flex: 1; height: 82px; border-radius: 9px; position: relative;
-      background: linear-gradient(135deg, #1a2248 0%, #0d1530 100%);
-      border: 1.5px solid rgba(22,163,74,0.5);
-      box-shadow: 0 0 0 2px rgba(22,163,74,0.15), inset 0 0 20px rgba(22,163,74,0.04);
+    .vcall-teacher-tile {
+      flex: 1; position: relative;
+      background: linear-gradient(160deg, #3a6fd8 0%, #2350aa 60%, #182f80 100%);
       display: flex; align-items: center; justify-content: center;
-      overflow: hidden; animation: speakPulse 2.5s infinite;
+      border-right: 1px solid rgba(0,0,0,0.3);
+      animation: speakPulse 2.5s infinite;
     }
-    .vcall-student {
-      width: 70px; height: 82px; border-radius: 9px; position: relative;
-      background: linear-gradient(135deg, #1e2a4a 0%, #150f2a 100%);
-      border: 1.5px solid rgba(255,255,255,0.08);
+    .vcall-chess-badge {
+      position: absolute; top: 8px; right: 8px;
+      width: 30px; height: 30px; border-radius: 6px;
+      background: rgba(201,168,76,0.2); border: 1px solid rgba(201,168,76,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+    .vcall-t-avatar { font-size: 3.8rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+    .vcall-t-label {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      padding: 0.5rem 0.55rem 0.35rem;
+      font-size: 0.5rem; font-weight: 700; color: white; letter-spacing: 0.6px; text-transform: uppercase;
+    }
+    .vcall-student-col {
+      width: 105px; display: flex; flex-direction: column;
+    }
+    .vcall-s-tile {
+      flex: 1; position: relative;
       display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
-    .vcall-avatar { font-size: 2.2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
-    .vcall-name {
+    .vcall-s-tile + .vcall-s-tile { border-top: 1px solid rgba(0,0,0,0.3); }
+    .vcall-s1 { background: linear-gradient(135deg, #1ab8a8 0%, #0c9080 100%); }
+    .vcall-s2 { background: linear-gradient(135deg, #7c4dcc 0%, #5530a8 100%); }
+    .vcall-s-avatar { font-size: 2rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.35)); }
+    .vcall-s-label {
       position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      padding: 0.2rem 0.45rem 0.3rem;
-      font-size: 0.55rem; font-weight: 700; color: white;
-    }
-    .vcall-mic {
-      position: absolute; top: 5px; right: 6px;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: rgba(22,163,74,0.25); border: 1px solid rgba(22,163,74,0.5);
-      display: flex; align-items: center; justify-content: center; font-size: 0.55rem;
-    }
-    .vcall-speaking {
-      position: absolute; top: 5px; left: 6px;
-      font-size: 0.5rem; color: #86efac; font-weight: 700; letter-spacing: 0.3px;
-      display: flex; align-items: center; gap: 3px;
-    }
-    .vcall-speaking-dot {
-      width: 5px; height: 5px; border-radius: 50%; background: #22c55e;
-      animation: livePulse 1s infinite;
+      background: linear-gradient(transparent, rgba(0,0,0,0.65));
+      padding: 0.3rem 0.4rem 0.2rem;
+      font-size: 0.48rem; font-weight: 700; color: white; letter-spacing: 0.5px; text-transform: uppercase;
     }
     /* Call controls bar */
     .call-controls {
-      background: #060810; border-top: 1px solid rgba(255,255,255,0.05);
-      padding: 0.45rem 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+      background: #09091a; border-top: 1px solid rgba(255,255,255,0.05);
+      padding: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
     }
     .cc-btn {
-      width: 30px; height: 30px; border-radius: 50%; cursor: default;
-      display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08);
-      transition: background 0.2s;
+      width: 32px; height: 32px; border-radius: 50%; cursor: default;
+      display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+      background: #1c1f34; border: none;
     }
-    .cc-btn.on  { background: rgba(22,163,74,0.2); border-color: rgba(22,163,74,0.35); }
-    .cc-btn.off { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); }
-    .cc-spacer { flex: 1; }
-    .cc-end {
-      display: flex; align-items: center; gap: 5px; padding: 0.28rem 0.7rem;
-      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 20px; font-size: 0.58rem; font-weight: 700; color: #f87171; cursor: default;
+    .cc-btn.end {
+      background: #ef4444; font-size: 0.7rem; font-weight: 700; color: white;
     }
-    .cc-end-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
 
     /* ===== SECTIONS ===== */
     .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -786,143 +781,133 @@
 
     /* ===== PRICING ===== */
     .pricing-online-note {
-      text-align: center; margin-bottom: 2rem;
+      text-align: center; margin-bottom: 1.5rem;
       font-size: 0.85rem; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
     }
-    .pricing-online-note strong { color: var(--text); font-weight: 600; }
     .pricing-tabs {
-      display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2.5rem;
+      display: flex; justify-content: center; gap: 0.4rem; margin-bottom: 2rem;
     }
     .pricing-tab {
       padding: 0.55rem 2rem; border-radius: 50px;
-      border: 1px solid var(--border); background: transparent;
+      border: 1.5px solid var(--border); background: transparent;
       font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
       cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
     .pricing-tab:hover { border-color: var(--primary); color: var(--primary); }
     .pricing-tab.active { background: var(--primary); color: var(--white); border-color: var(--primary); }
     .pricing-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+    /* New v2 card grid */
     .pricing-formats {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
-      max-width: 1060px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+      max-width: 860px; margin: 0 auto;
     }
-    .pricing-formats.adults-view { grid-template-columns: repeat(2, 1fr); max-width: 720px; }
-    .fmt-card {
+    /* Card */
+    .pcv2 {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
     }
-    .fmt-header { padding: 1.1rem 1.4rem 0.9rem; border-bottom: 1px solid var(--border); }
-    .fmt-header h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 0.2rem; }
-    .fmt-group-size { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
-    .fmt-body { flex: 1; }
-    .teacher-block { padding: 0.75rem 1.4rem; }
-    .teacher-block + .teacher-block { border-top: 1px solid var(--border); }
-    .teacher-name-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .teacher-avatar {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--icon-bg); border: 1px solid var(--border);
+    /* Card header */
+    .pcv2-header {
+      padding: 1.1rem 1.4rem 0.85rem;
+      display: flex; align-items: center; gap: 0.55rem;
+    }
+    .pcv2-icon { font-size: 0.95rem; color: var(--text-muted); }
+    .pcv2-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    /* Sub-tabs for group size */
+    .pcv2-subtabs {
+      display: flex; gap: 0.35rem; padding: 0 1.4rem 0.9rem; flex-wrap: wrap;
+    }
+    .pcv2-subtab {
+      padding: 0.28rem 0.8rem; border-radius: 50px;
+      border: 1.5px solid var(--border); background: transparent;
+      font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .pcv2-subtab:hover { border-color: var(--primary); color: var(--primary); }
+    .pcv2-subtab.active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    /* Section (with top border) */
+    .pcv2-section {
+      padding: 0.85rem 1.4rem; border-top: 1px solid var(--border);
+    }
+    .pcv2-section-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.55rem; display: block;
+    }
+    /* Teacher pills */
+    .pcv2-teacher-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .pcv2-teacher-pill {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.75rem 0.3rem 0.35rem; border-radius: 50px;
+      border: 1.5px solid var(--border); background: transparent;
+      font-family: inherit; font-size: 0.8rem; font-weight: 600; color: var(--text);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .pcv2-teacher-pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pcv2-teacher-pill.active { border-color: var(--primary); background: rgba(79,70,229,0.06); color: var(--primary); }
+    .pcv2-pill-av {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; color: var(--text-muted); flex-shrink: 0; overflow: hidden;
+      font-size: 0.62rem; font-weight: 700; color: var(--white);
     }
-    .teacher-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .teacher-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
-    .price-rows { display: flex; flex-direction: column; gap: 0.4rem; }
-    .price-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
-      padding: 0.45rem 0.65rem; border-radius: 10px; background: var(--bg);
+    .pcv2-pill-av.abdulla { background: var(--primary); }
+    .pcv2-pill-av.cosmo   { background: var(--text-muted); }
+    /* LPW stepper */
+    .pcv2-lpw-row { display: flex; align-items: center; gap: 0.9rem; }
+    .pcv2-stepper { display: flex; align-items: center; gap: 0.5rem; }
+    .pcv2-step-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: transparent;
+      color: var(--text); font-size: 1.1rem; line-height: 1; font-family: inherit;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0; transition: all 0.15s;
     }
-    .price-row.popular {
-      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.28);
+    .pcv2-step-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .pcv2-step-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .pcv2-step-val { font-size: 1.05rem; font-weight: 700; color: var(--text); min-width: 1.1rem; text-align: center; }
+    .pcv2-price-info { display: flex; flex-direction: column; gap: 0.05rem; }
+    .pcv2-month-count { font-size: 0.76rem; color: var(--text-muted); }
+    .pcv2-price {
+      font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; color: var(--text);
     }
-    .price-row-meta { display: flex; flex-direction: column; gap: 0.05rem; }
-    .price-row-freq { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; }
-    .price-row-popular {
-      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.8px;
-      text-transform: uppercase; color: var(--accent);
+    .pcv2-price em {
+      font-style: normal; font-size: 0.72rem; font-weight: 400;
+      color: var(--text-muted); font-family: 'Inter', sans-serif;
     }
-    .price-row-contact {
-      font-size: 0.72rem; color: var(--text-muted); white-space: nowrap;
-      flex-shrink: 0; font-style: italic;
-    }
-    .price-row-amount {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem; font-weight: 700; color: var(--text); white-space: nowrap; flex-shrink: 0;
-    }
-    .price-row-amount em {
-      font-size: 0.7rem; font-weight: 400; color: var(--text-muted);
-      font-family: 'Inter', sans-serif; font-style: normal;
-    }
-    /* Group card: desc + price block + for/benefits lists */
-    .fmt-desc { padding: 0.65rem 1.4rem 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-    .fmt-price-block {
-      margin: 0.85rem 1.4rem 0;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 12px; padding: 0.9rem 1.1rem;
-    }
-    .fmt-price-block-amount {
+    .pcv2-price-note { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.45rem; font-style: italic; }
+    /* Benefits (adult group card) */
+    .pcv2-benefit-list { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .pcv2-benefit-list li { font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: baseline; gap: 0.4rem; }
+    .pcv2-benefit-list li::before { content: '✓'; color: var(--accent); font-weight: 700; font-size: 0.7rem; flex-shrink: 0; }
+    /* Fixed price display (adult group) */
+    .pcv2-fixed-price {
       font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;
-      color: var(--text); line-height: 1; display: block;
+      color: var(--text); display: block;
     }
-    .fmt-price-block-amount em {
-      font-style: normal; font-size: 0.82rem; font-weight: 400;
+    .pcv2-fixed-price em {
+      font-style: normal; font-size: 0.8rem; font-weight: 400;
       color: var(--text-muted); font-family: 'Inter', sans-serif;
     }
-    .fmt-price-block-label { font-size: 0.73rem; color: var(--text-muted); margin-top: 0.25rem; display: block; }
-    .fmt-section { padding: 0.7rem 1.4rem 0; }
-    .fmt-section-label {
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.7px;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; display: block;
+    /* Tournament note */
+    .pcv2-tournament {
+      font-size: 0.8rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 0.4rem;
     }
-    .fmt-for-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
-    .fmt-for-list li { font-size: 0.8rem; color: var(--text-muted); padding-left: 0.85rem; position: relative; }
-    .fmt-for-list li::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
-    .fmt-benefits { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
-    .fmt-benefits li { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
-    .fmt-benefits li::before { content: '✓'; color: var(--accent); font-weight: 700; font-size: 0.72rem; flex-shrink: 0; }
-    /* Individual lesson stepper */
-    .indiv-stepper { padding: 0.55rem 0 0.3rem; }
-    .stepper-label {
-      font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
-      letter-spacing: 0.5px; margin-bottom: 0.4rem;
-    }
-    .stepper-control { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.45rem; }
-    .stepper-btn {
-      width: 26px; height: 26px; border-radius: 50%;
-      border: 1px solid var(--border); background: var(--bg);
-      color: var(--text); font-size: 1rem; line-height: 1; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.15s, color 0.15s, background 0.15s; font-family: inherit;
-      padding: 0;
-    }
-    .stepper-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--icon-bg); }
-    .stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .stepper-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .stepper-val { font-size: 1rem; font-weight: 700; color: var(--text); min-width: 1.2rem; text-align: center; }
-    .stepper-result { display: flex; flex-direction: column; gap: 0.1rem; }
-    .stepper-month { font-size: 0.76rem; color: var(--text-muted); }
-    .stepper-price {
-      font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--text);
-    }
-    .stepper-price em {
-      font-style: normal; font-size: 0.7rem; font-weight: 400;
-      color: var(--text-muted); font-family: 'Inter', sans-serif;
-    }
-    .stepper-note { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.35rem; font-style: italic; }
-    .fmt-footer { padding: 0.85rem 1.4rem 1.1rem; border-top: 1px solid var(--border); margin-top: auto; }
-    .btn-price {
-      display: block; text-align: center; padding: 0.6rem 1.25rem;
+    .pcv2-tournament-icon { color: var(--accent); }
+    /* Footer */
+    .pcv2-footer { padding: 0.85rem 1.4rem 1.1rem; border-top: 1px solid var(--border); margin-top: auto; }
+    .pcv2-apply-btn {
+      display: block; width: 100%; padding: 0.7rem;
       background: var(--primary); color: var(--white); border-radius: 50px;
-      text-decoration: none; font-weight: 600; font-size: 0.85rem;
-      transition: background 0.2s; border: none; cursor: pointer; width: 100%; font-family: inherit;
+      border: none; font-size: 0.9rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: background 0.2s;
     }
-    .btn-price:hover { background: var(--primary-light); }
+    .pcv2-apply-btn:hover { background: var(--primary-light); }
+
     .pricing-note { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 1.75rem; }
-    @media (max-width: 900px) {
-      .pricing-formats { grid-template-columns: repeat(2, 1fr); }
-      .pricing-formats.adults-view { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .pricing-formats, .pricing-formats.adults-view { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
+    @media (max-width: 640px) {
+      .pricing-formats { grid-template-columns: 1fr; max-width: 440px; margin-inline: auto; }
     }
 
     /* ===== TOURNAMENT CARD ===== */
@@ -1135,16 +1120,21 @@
       </div>
 
       <!-- Video call tiles -->
-      <div class="vcall-section">
-        <div class="vcall-coach">
-          <div class="vcall-avatar">👨‍🏫</div>
-          <div class="vcall-name">Coach Abdulla</div>
-          <div class="vcall-mic">🎙</div>
-          <div class="vcall-speaking"><div class="vcall-speaking-dot"></div>Speaking</div>
+      <div class="vcall-main">
+        <div class="vcall-teacher-tile">
+          <div class="vcall-chess-badge">♟</div>
+          <div class="vcall-t-avatar">🧑‍💼</div>
+          <div class="vcall-t-label">Coach Abdulla – Live Video</div>
         </div>
-        <div class="vcall-student">
-          <div class="vcall-avatar">👦</div>
-          <div class="vcall-name">You</div>
+        <div class="vcall-student-col">
+          <div class="vcall-s-tile vcall-s1">
+            <div class="vcall-s-avatar">👦</div>
+            <div class="vcall-s-label">Student</div>
+          </div>
+          <div class="vcall-s-tile vcall-s2">
+            <div class="vcall-s-avatar">👧</div>
+            <div class="vcall-s-label">Student</div>
+          </div>
         </div>
       </div>
 
@@ -1189,12 +1179,9 @@
 
       <!-- Call controls -->
       <div class="call-controls">
-        <div class="cc-btn on">🎤</div>
-        <div class="cc-btn on">📹</div>
-        <div class="cc-btn">🖥️</div>
-        <div class="cc-btn">✋</div>
-        <div class="cc-spacer"></div>
-        <div class="cc-end"><div class="cc-end-dot"></div> Leave</div>
+        <div class="cc-btn">🎤</div>
+        <div class="cc-btn">📹</div>
+        <div class="cc-btn end">✕</div>
       </div>
 
     </div>
@@ -2873,14 +2860,6 @@
   var PRICING_DATA = {
     children: [
       {
-        formatKey: 'pricing.format.standardGroup',
-        groupSizeKey: 'pricing.groupSize.standard',
-        teachers: [
-          { teacherId: 'abdulla', options: [{ month: 8, week: 2, price: 80 }] },
-          { teacherId: 'cosmo',   options: [{ month: 8, week: 2, price: 60 }] }
-        ]
-      },
-      {
         formatKey: 'pricing.format.miniGroup',
         groupSizeKey: 'pricing.groupSize.mini',
         teachers: [
@@ -2890,6 +2869,14 @@
             { month: 20, week: 5, price: 260 }
           ]},
           { teacherId: 'cosmo', options: [{ month: 8, week: 2, price: 90 }] }
+        ]
+      },
+      {
+        formatKey: 'pricing.format.standardGroup',
+        groupSizeKey: 'pricing.groupSize.standard',
+        teachers: [
+          { teacherId: 'abdulla', options: [{ month: 8, week: 2, price: 80 }] },
+          { teacherId: 'cosmo',   options: [{ month: 8, week: 2, price: 60 }] }
         ]
       },
       {
@@ -2954,253 +2941,392 @@
     if (!container) return;
     var dict = (window.I18N && (window.I18N[lang] || window.I18N.en)) || {};
     var formats = PRICING_DATA[_activeAudience] || [];
-
-    /* Keep `visible` class intact — do NOT reset className.
-       Resetting would strip `visible` which the IntersectionObserver
-       added once then unobserved, leaving the container at opacity:0. */
-    container.classList.toggle('adults-view', _activeAudience === 'adults');
     container.classList.add('visible');
 
-    container.innerHTML = formats.map(function (fmt) {
-      return buildCard(fmt, dict);
-    }).join('');
-
+    /* For children: merge the two group formats into one card with sub-tabs */
+    if (_activeAudience === 'children') {
+      var groupFormats = formats.filter(function(f) { return f.type !== 'individual' && f.fixedPrice == null; });
+      var indivFormat  = formats.find(function(f) { return f.type === 'individual'; });
+      container.innerHTML =
+        buildChildrenGroupCard(groupFormats, dict) +
+        (indivFormat ? buildChildrenIndivCard(indivFormat, dict) : '');
+    } else {
+      container.innerHTML = formats.map(function(fmt) { return buildAdultCard(fmt, dict); }).join('');
+    }
     attachEvents(container, dict);
   }
 
   /* ============================================================
-     CARD BUILDER
+     CHILDREN — GROUP CARD (with sub-tabs for group size)
      ============================================================ */
-  function buildCard(fmt, dict) {
-    var title     = dict[fmt.formatKey] || fmt.formatKey;
-    var groupSize = fmt.groupSizeKey ? (dict[fmt.groupSizeKey] || '') : '';
-    var applyLbl  = dict['pricing.apply'] || 'Apply';
+  function buildChildrenGroupCard(groupFormats, dict) {
+    var applyLbl    = dict['pricing.apply'] || 'Apply';
+    var tournNote   = dict['pricing.tournamentNote'] || 'Free online tournament every Sunday included';
+    var lpmLbl      = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var perMonth    = dict['pricing.perMonth'] || '/ month';
+    var teacherLbl  = dict['pricing.teacherLabel'] || 'TEACHER';
+    var lpwLbl      = dict['pricing.indiv.lessonsPerWeek'] || 'LESSONS PER WEEK';
 
-    var bodyHtml;
-    if (fmt.type === 'individual') {
-      bodyHtml = buildIndividualBody(fmt, dict, title);
-    } else if (fmt.fixedPrice != null) {
-      bodyHtml = buildFixedBody(fmt, dict);
-    } else {
-      bodyHtml = buildGroupBody(fmt, dict, title);
-    }
+    /* Build sub-tab list: label comes from groupSizeKey */
+    var subTabsHtml = groupFormats.map(function(fmt, i) {
+      var label = dict[fmt.groupSizeKey] || fmt.groupSizeKey || ('Group ' + i);
+      return '<button class="pcv2-subtab' + (i === 0 ? ' active' : '') + '" data-sub-idx="' + i + '">' + esc(label) + '</button>';
+    }).join('');
 
-    var prefillCard = (dict['pricing.tab.' + _activeAudience] || _activeAudience) + ' / ' + title;
+    /* Serialise group formats data for JS access */
+    var dataJson = esc(JSON.stringify(groupFormats.map(function(fmt) {
+      return {
+        teachers: (fmt.teachers || []).map(function(tb) {
+          var t = TEACHERS[tb.teacherId];
+          if (!t || !t.active) return null;
+          return { id: tb.teacherId, options: tb.options || [] };
+        }).filter(Boolean)
+      };
+    })));
 
-    return '<div class="fmt-card">' +
-      '<div class="fmt-header">' +
-        '<h3>' + esc(title) + '</h3>' +
-        (groupSize ? '<p class="fmt-group-size">' + esc(groupSize) + '</p>' : '') +
+    /* Default: first group, first teacher, first option */
+    var firstFmt = groupFormats[0] || {};
+    var firstTb  = (firstFmt.teachers || [])[0] || {};
+    var firstT   = TEACHERS[firstTb.teacherId] || {};
+    var firstOpt = (firstTb.options || [])[0] || {};
+    var initCount = firstOpt.week || 2;
+    var initMonth = firstOpt.month || (initCount * 4);
+    var initPrice = firstOpt.price || 0;
+
+    /* Teacher pills */
+    var teacherPills = (firstFmt.teachers || []).map(function(tb, ti) {
+      var t = TEACHERS[tb.teacherId];
+      if (!t || !t.active) return '';
+      var tname = dict[t.nameKey] || t.name;
+      return '<button class="pcv2-teacher-pill' + (ti === 0 ? ' active' : '') + '" data-tid="' + esc(tb.teacherId) + '">' +
+        '<div class="pcv2-pill-av ' + esc(tb.teacherId) + '">' + esc(tname.charAt(0)) + '</div>' +
+        esc(tname) +
+      '</button>';
+    }).join('');
+
+    return '<div class="pcv2" data-card-type="group" data-sub-idx="0" data-tid="' + esc((firstFmt.teachers||[{teacherId:''}])[0].teacherId) + '" data-opt-idx="0" data-formats="' + dataJson + '">' +
+      '<div class="pcv2-header"><span class="pcv2-icon">♟ ♟</span><span class="pcv2-title">Group Lessons</span></div>' +
+      '<div class="pcv2-subtabs">' + subTabsHtml + '</div>' +
+      '<div class="pcv2-section">' +
+        '<span class="pcv2-section-label">' + esc(teacherLbl) + '</span>' +
+        '<div class="pcv2-teacher-pills" data-role="teacher-pills">' + teacherPills + '</div>' +
       '</div>' +
-      bodyHtml +
-      '<div class="fmt-footer">' +
-        '<button class="btn-price" data-prefill="' + esc(prefillCard) + '">' + esc(applyLbl) + '</button>' +
+      '<div class="pcv2-section">' +
+        '<span class="pcv2-section-label">' + esc(lpwLbl) + '</span>' +
+        '<div class="pcv2-lpw-row">' +
+          '<div class="pcv2-stepper">' +
+            '<button class="pcv2-step-btn" data-dir="-1" ' + (initCount <= 1 ? 'disabled' : '') + '>−</button>' +
+            '<span class="pcv2-step-val">' + initCount + '</span>' +
+            '<button class="pcv2-step-btn" data-dir="1">+</button>' +
+          '</div>' +
+          '<div class="pcv2-price-info">' +
+            '<div class="pcv2-month-count">' + initMonth + ' ' + esc(lpmLbl) + '</div>' +
+            '<div class="pcv2-price">' + initPrice + ' AZN <em>' + esc(perMonth) + '</em></div>' +
+          '</div>' +
+        '</div>' +
       '</div>' +
-    '</div>';
-  }
-
-  /* --- Fixed-price card (Adult Group Lessons) --- */
-  function buildFixedBody(fmt, dict) {
-    var perMonth     = dict['pricing.perMonth'] || '/ month';
-    var descText     = fmt.descKey   ? (dict[fmt.descKey]   || '') : '';
-    var priceLabel   = dict[fmt.priceLabelKey || 'pricing.groupLessons.priceLabel'] || 'Fixed monthly package';
-    var forLabel     = dict['pricing.groupLessons.forLabel']      || 'Perfect for';
-    var includesLabel= dict['pricing.groupLessons.includesLabel'] || 'Includes';
-    var forItems     = fmt.forItems  || [];
-    var benefits     = fmt.benefits  || [];
-
-    var descHtml = descText
-      ? '<p class="fmt-desc">' + esc(descText) + '</p>'
-      : '';
-
-    var priceBlockHtml =
-      '<div class="fmt-price-block">' +
-        '<span class="fmt-price-block-amount">' +
-          fmt.fixedPrice + ' AZN <em>' + esc(perMonth) + '</em>' +
-        '</span>' +
-        '<span class="fmt-price-block-label">' + esc(priceLabel) + '</span>' +
-      '</div>';
-
-    var forHtml = forItems.length
-      ? '<div class="fmt-section">' +
-          '<span class="fmt-section-label">' + esc(forLabel) + '</span>' +
-          '<ul class="fmt-for-list">' +
-            forItems.map(function (key) {
-              return '<li>' + esc(dict[key] || key) + '</li>';
-            }).join('') +
-          '</ul>' +
-        '</div>'
-      : '';
-
-    var benefitsHtml = benefits.length
-      ? '<div class="fmt-section">' +
-          '<span class="fmt-section-label">' + esc(includesLabel) + '</span>' +
-          '<ul class="fmt-benefits">' +
-            benefits.map(function (key) {
-              return '<li>' + esc(dict[key] || key) + '</li>';
-            }).join('') +
-          '</ul>' +
-        '</div>'
-      : '';
-
-    return descHtml + priceBlockHtml + forHtml + benefitsHtml;
-  }
-
-  /* --- Standard / mini group card --- */
-  function buildGroupBody(fmt, dict, title) {
-    var lMonth    = dict['pricing.lessonsMonth'] || 'lessons / month';
-    var lWeek     = dict['pricing.lessonsWeek']  || 'lessons / week';
-    var popularLbl = dict['pricing.popular']     || 'Most Popular';
-
-    return '<div class="fmt-body">' +
-      (fmt.teachers || []).map(function (tb) {
-        var teacher = TEACHERS[tb.teacherId];
-        if (!teacher || !teacher.active) return '';
-        var tname = dict[teacher.nameKey] || teacher.name;
-        var avatarInner = teacher.image
-          ? '<img src="' + esc(teacher.image) + '" alt="' + esc(tname) + '">'
-          : esc(tname.charAt(0));
-
-        var rows = (tb.options || []).map(function (opt) {
-          var prefill = [
-            dict['pricing.tab.' + _activeAudience] || _activeAudience,
-            title, tname, opt.month + ' ' + lMonth
-          ].join(' / ');
-          return '<div class="price-row' + (opt.popular ? ' popular' : '') + '" data-prefill="' + esc(prefill) + '">' +
-            '<div class="price-row-meta">' +
-              '<span class="price-row-freq">' + opt.month + ' ' + esc(lMonth) + ' &nbsp;·&nbsp; ' + opt.week + ' ' + esc(lWeek) + '</span>' +
-              (opt.popular ? '<span class="price-row-popular">★ ' + esc(popularLbl) + '</span>' : '') +
-            '</div>' +
-            '<span class="price-row-amount">' + opt.price + ' AZN</span>' +
-          '</div>';
-        }).join('');
-
-        return '<div class="teacher-block">' +
-          '<div class="teacher-name-row">' +
-            '<div class="teacher-avatar">' + avatarInner + '</div>' +
-            '<span class="teacher-name">' + esc(tname) + '</span>' +
-          '</div>' +
-          '<div class="price-rows">' + rows + '</div>' +
-        '</div>';
-      }).join('') +
-    '</div>';
-  }
-
-  /* --- Individual lesson card with dynamic stepper --- */
-  function buildIndividualBody(fmt, dict, title) {
-    var lpwLabel  = dict['pricing.indiv.lessonsPerWeek']  || 'Lessons per week';
-    var lpmLabel  = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
-    var noteText  = dict['pricing.indiv.note']            || 'Calculated based on 4 weeks per month.';
-    var perMonth  = dict['pricing.perMonth']              || '/ month';
-    var DEFAULT   = 2;
-
-    return '<div class="fmt-body">' +
-      (fmt.teachers || []).map(function (tb) {
-        var teacher = TEACHERS[tb.teacherId];
-        if (!teacher || !teacher.active) return '';
-        var tname = dict[teacher.nameKey] || teacher.name;
-        var avatarInner = teacher.image
-          ? '<img src="' + esc(teacher.image) + '" alt="' + esc(tname) + '">'
-          : esc(tname.charAt(0));
-
-        var monthCount = DEFAULT * 4;
-        var monthPrice = calcMonthlyPrice(DEFAULT, teacher.basePrice, teacher.baseLessons);
-
-        return '<div class="teacher-block"' +
-          ' data-teacher-id="' + esc(tb.teacherId) + '"' +
-          ' data-base-price="' + teacher.basePrice + '"' +
-          ' data-base-lessons="' + teacher.baseLessons + '">' +
-          '<div class="teacher-name-row">' +
-            '<div class="teacher-avatar">' + avatarInner + '</div>' +
-            '<span class="teacher-name">' + esc(tname) + '</span>' +
-          '</div>' +
-          '<div class="indiv-stepper" data-count="' + DEFAULT + '">' +
-            '<div class="stepper-label">' + esc(lpwLabel) + '</div>' +
-            '<div class="stepper-control">' +
-              '<button class="stepper-btn" data-dir="-1" aria-label="Decrease" disabled>−</button>' +
-              '<span class="stepper-val">' + DEFAULT + '</span>' +
-              '<button class="stepper-btn" data-dir="1" aria-label="Increase">+</button>' +
-            '</div>' +
-            '<div class="stepper-result">' +
-              '<span class="stepper-month">' + monthCount + ' ' + esc(lpmLabel) + '</span>' +
-              '<span class="stepper-price">' + monthPrice + ' AZN <em>' + esc(perMonth) + '</em></span>' +
-            '</div>' +
-            '<p class="stepper-note">' + esc(noteText) + '</p>' +
-          '</div>' +
-        '</div>';
-      }).join('') +
+      '<div class="pcv2-section">' +
+        '<div class="pcv2-tournament"><span class="pcv2-tournament-icon">♟</span>' + esc(tournNote) + '</div>' +
+      '</div>' +
+      '<div class="pcv2-footer"><button class="pcv2-apply-btn">' + esc(applyLbl) + '</button></div>' +
     '</div>';
   }
 
   /* ============================================================
-     EVENT WIRING (called after every innerHTML replacement)
+     CHILDREN — INDIVIDUAL CARD
+     ============================================================ */
+  function buildChildrenIndivCard(fmt, dict) {
+    var applyLbl   = dict['pricing.apply'] || 'Apply';
+    var tournNote  = dict['pricing.tournamentNote'] || 'Free online tournament every Sunday included';
+    var lpmLbl     = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var perMonth   = dict['pricing.perMonth'] || '/ month';
+    var teacherLbl = dict['pricing.teacherLabel'] || 'TEACHER';
+    var lpwLbl     = dict['pricing.indiv.lessonsPerWeek'] || 'LESSONS PER WEEK';
+    var noteTxt    = dict['pricing.indiv.note'] || 'Calculated based on 4 weeks per month.';
+    var DEFAULT    = 1;
+
+    var firstTb = (fmt.teachers || [])[0] || {};
+    var firstT  = TEACHERS[firstTb.teacherId] || {};
+    var initPrice = calcMonthlyPrice(DEFAULT, firstT.basePrice || 0, firstT.baseLessons || 1);
+
+    var teacherPills = (fmt.teachers || []).map(function(tb, ti) {
+      var t = TEACHERS[tb.teacherId];
+      if (!t || !t.active) return '';
+      var tname = dict[t.nameKey] || t.name;
+      return '<button class="pcv2-teacher-pill' + (ti === 0 ? ' active' : '') + '" data-tid="' + esc(tb.teacherId) + '">' +
+        '<div class="pcv2-pill-av ' + esc(tb.teacherId) + '">' + esc(tname.charAt(0)) + '</div>' +
+        esc(tname) +
+      '</button>';
+    }).join('');
+
+    return '<div class="pcv2" data-card-type="indiv" data-tid="' + esc(firstTb.teacherId || '') + '" data-count="' + DEFAULT + '" data-base-price="' + (firstT.basePrice||0) + '" data-base-lessons="' + (firstT.baseLessons||1) + '">' +
+      '<div class="pcv2-header"><span class="pcv2-icon">♛</span><span class="pcv2-title">Individual Lessons</span></div>' +
+      '<div class="pcv2-section">' +
+        '<span class="pcv2-section-label">' + esc(teacherLbl) + '</span>' +
+        '<div class="pcv2-teacher-pills" data-role="teacher-pills">' + teacherPills + '</div>' +
+      '</div>' +
+      '<div class="pcv2-section">' +
+        '<span class="pcv2-section-label">' + esc(lpwLbl) + '</span>' +
+        '<div class="pcv2-lpw-row">' +
+          '<div class="pcv2-stepper">' +
+            '<button class="pcv2-step-btn" data-dir="-1" disabled>−</button>' +
+            '<span class="pcv2-step-val">' + DEFAULT + '</span>' +
+            '<button class="pcv2-step-btn" data-dir="1">+</button>' +
+          '</div>' +
+          '<div class="pcv2-price-info">' +
+            '<div class="pcv2-month-count">' + (DEFAULT*4) + ' ' + esc(lpmLbl) + '</div>' +
+            '<div class="pcv2-price">' + initPrice + ' AZN <em>' + esc(perMonth) + '</em></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pcv2-price-note">' + esc(noteTxt) + '</div>' +
+      '</div>' +
+      '<div class="pcv2-section">' +
+        '<div class="pcv2-tournament"><span class="pcv2-tournament-icon">♟</span>' + esc(tournNote) + '</div>' +
+      '</div>' +
+      '<div class="pcv2-footer"><button class="pcv2-apply-btn">' + esc(applyLbl) + '</button></div>' +
+    '</div>';
+  }
+
+  /* ============================================================
+     ADULT CARDS
+     ============================================================ */
+  function buildAdultCard(fmt, dict) {
+    var applyLbl   = dict['pricing.apply'] || 'Apply';
+    var tournNote  = dict['pricing.tournamentNote'] || 'Free online tournament every Sunday included';
+    var perMonth   = dict['pricing.perMonth'] || '/ month';
+    var teacherLbl = dict['pricing.teacherLabel'] || 'TEACHER';
+    var lpwLbl     = dict['pricing.indiv.lessonsPerWeek'] || 'LESSONS PER WEEK';
+    var noteTxt    = dict['pricing.indiv.note'] || 'Calculated based on 4 weeks per month.';
+    var includesLbl= dict['pricing.groupLessons.includesLabel'] || 'INCLUDES';
+
+    if (fmt.fixedPrice != null) {
+      /* Adult group — fixed price */
+      var benefits = (fmt.benefits || []).map(function(k) {
+        return '<li>' + esc(dict[k] || k) + '</li>';
+      }).join('');
+      return '<div class="pcv2">' +
+        '<div class="pcv2-header"><span class="pcv2-icon">♟ ♟</span><span class="pcv2-title">' + esc(dict[fmt.formatKey] || fmt.formatKey) + '</span></div>' +
+        (fmt.descKey ? '<div class="pcv2-section"><p style="font-size:0.85rem;color:var(--text-muted)">' + esc(dict[fmt.descKey] || '') + '</p></div>' : '') +
+        '<div class="pcv2-section">' +
+          '<span class="pcv2-fixed-price">' + fmt.fixedPrice + ' AZN <em>' + esc(perMonth) + '</em></span>' +
+        '</div>' +
+        '<div class="pcv2-section">' +
+          '<span class="pcv2-section-label">' + esc(includesLbl) + '</span>' +
+          '<ul class="pcv2-benefit-list">' + benefits + '</ul>' +
+        '</div>' +
+        '<div class="pcv2-section"><div class="pcv2-tournament"><span class="pcv2-tournament-icon">♟</span>' + esc(tournNote) + '</div></div>' +
+        '<div class="pcv2-footer"><button class="pcv2-apply-btn">' + esc(applyLbl) + '</button></div>' +
+      '</div>';
+    }
+
+    /* Adult individual */
+    var DEFAULT = 1;
+    var firstTb = (fmt.teachers||[])[0] || {};
+    var firstT  = TEACHERS[firstTb.teacherId] || {};
+    var initPrice = calcMonthlyPrice(DEFAULT, firstT.basePrice||0, firstT.baseLessons||1);
+
+    var teacherPills = (fmt.teachers || []).map(function(tb, ti) {
+      var t = TEACHERS[tb.teacherId];
+      if (!t || !t.active) return '';
+      var tname = dict[t.nameKey] || t.name;
+      return '<button class="pcv2-teacher-pill' + (ti===0?' active':'') + '" data-tid="' + esc(tb.teacherId) + '">' +
+        '<div class="pcv2-pill-av ' + esc(tb.teacherId) + '">' + esc(tname.charAt(0)) + '</div>' + esc(tname) +
+      '</button>';
+    }).join('');
+
+    return '<div class="pcv2" data-card-type="indiv" data-tid="' + esc(firstTb.teacherId||'') + '" data-count="' + DEFAULT + '" data-base-price="' + (firstT.basePrice||0) + '" data-base-lessons="' + (firstT.baseLessons||1) + '">' +
+      '<div class="pcv2-header"><span class="pcv2-icon">♛</span><span class="pcv2-title">' + esc(dict[fmt.formatKey]||fmt.formatKey) + '</span></div>' +
+      '<div class="pcv2-section"><span class="pcv2-section-label">' + esc(teacherLbl) + '</span><div class="pcv2-teacher-pills" data-role="teacher-pills">' + teacherPills + '</div></div>' +
+      '<div class="pcv2-section">' +
+        '<span class="pcv2-section-label">' + esc(lpwLbl) + '</span>' +
+        '<div class="pcv2-lpw-row"><div class="pcv2-stepper">' +
+          '<button class="pcv2-step-btn" data-dir="-1" disabled>−</button>' +
+          '<span class="pcv2-step-val">' + DEFAULT + '</span>' +
+          '<button class="pcv2-step-btn" data-dir="1">+</button>' +
+        '</div><div class="pcv2-price-info">' +
+          '<div class="pcv2-month-count">' + (DEFAULT*4) + ' ' + esc(dict['pricing.indiv.lessonsPerMonth']||'lessons per month') + '</div>' +
+          '<div class="pcv2-price">' + initPrice + ' AZN <em>' + esc(perMonth) + '</em></div>' +
+        '</div></div>' +
+        '<div class="pcv2-price-note">' + esc(noteTxt) + '</div>' +
+      '</div>' +
+      '<div class="pcv2-section"><div class="pcv2-tournament"><span class="pcv2-tournament-icon">♟</span>' + esc(tournNote) + '</div></div>' +
+      '<div class="pcv2-footer"><button class="pcv2-apply-btn">' + esc(applyLbl) + '</button></div>' +
+    '</div>';
+  }
+
+  /* ============================================================
+     EVENT WIRING
      ============================================================ */
   function attachEvents(container, dict) {
-    /* Stepper buttons */
-    container.querySelectorAll('.stepper-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var stepper = btn.closest('.indiv-stepper');
-        var block   = btn.closest('.teacher-block');
-        if (!stepper || !block) return;
+    var lpmLbl  = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var perMonth = dict['pricing.perMonth'] || '/ month';
 
-        var count = parseInt(stepper.getAttribute('data-count'), 10) || 2;
-        var dir   = parseInt(btn.getAttribute('data-dir'), 10) || 0;
-        count = Math.max(1, Math.min(7, count + dir));
-        stepper.setAttribute('data-count', count);
+    /* --- Group card: sub-tab switching --- */
+    container.querySelectorAll('.pcv2-subtab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var card = tab.closest('.pcv2');
+        if (!card) return;
+        var idx = parseInt(tab.getAttribute('data-sub-idx'), 10) || 0;
+        card.setAttribute('data-sub-idx', idx);
+        card.setAttribute('data-opt-idx', '0');
 
-        /* Update stepper display */
-        stepper.querySelector('.stepper-val').textContent = count;
-        stepper.querySelector('[data-dir="-1"]').disabled = count <= 1;
-        stepper.querySelector('[data-dir="1"]').disabled  = count >= 7;
+        /* Highlight active sub-tab */
+        card.querySelectorAll('.pcv2-subtab').forEach(function(t) { t.classList.toggle('active', t === tab); });
 
-        var basePrice   = parseFloat(block.getAttribute('data-base-price'));
-        var baseLessons = parseFloat(block.getAttribute('data-base-lessons'));
-        var monthCount  = count * 4;
-        var monthPrice  = calcMonthlyPrice(count, basePrice, baseLessons);
+        /* Load formats data and rebuild teacher pills + reset stepper */
+        var formats = [];
+        try { formats = JSON.parse(card.getAttribute('data-formats') || '[]'); } catch(e) {}
+        var fmtData = formats[idx] || {};
+        var teachers = fmtData.teachers || [];
 
-        var d = (window.I18N && (window.I18N[window.__cosmoLang] || window.I18N.en)) || {};
-        stepper.querySelector('.stepper-month').textContent =
-          monthCount + ' ' + (d['pricing.indiv.lessonsPerMonth'] || 'lessons per month');
-        stepper.querySelector('.stepper-price').innerHTML =
-          monthPrice + ' AZN <em>' + esc(d['pricing.perMonth'] || '/ month') + '</em>';
+        /* Rebuild teacher pills */
+        var pillsEl = card.querySelector('[data-role="teacher-pills"]');
+        if (pillsEl) {
+          pillsEl.innerHTML = teachers.map(function(t, ti) {
+            var teacher = TEACHERS[t.id];
+            var tname = teacher ? (dict[teacher.nameKey] || teacher.name) : t.id;
+            return '<button class="pcv2-teacher-pill' + (ti===0?' active':'') + '" data-tid="' + esc(t.id) + '">' +
+              '<div class="pcv2-pill-av ' + esc(t.id) + '">' + esc(tname.charAt(0)) + '</div>' + esc(tname) +
+            '</button>';
+          }).join('');
+          card.setAttribute('data-tid', teachers[0] ? teachers[0].id : '');
+          /* Re-attach pill events */
+          pillsEl.querySelectorAll('.pcv2-teacher-pill').forEach(function(p) {
+            p.addEventListener('click', function() { handleTeacherPill(p, card, dict); });
+          });
+        }
+
+        /* Reset stepper to first option */
+        refreshGroupStepper(card, dict, 0);
       });
     });
 
-    /* CTA buttons */
-    container.querySelectorAll('.btn-price').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var card = btn.closest('.fmt-card');
+    /* --- Group card: teacher pill switching --- */
+    container.querySelectorAll('.pcv2[data-card-type="group"] .pcv2-teacher-pill').forEach(function(pill) {
+      pill.addEventListener('click', function() { handleTeacherPill(pill, pill.closest('.pcv2'), dict); });
+    });
+
+    /* --- Group card: stepper --- */
+    container.querySelectorAll('.pcv2[data-card-type="group"] .pcv2-step-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var card = btn.closest('.pcv2');
+        if (!card) return;
+        var optIdx = parseInt(card.getAttribute('data-opt-idx'), 10) || 0;
+        var dir    = parseInt(btn.getAttribute('data-dir'), 10) || 0;
+        var formats = [];
+        try { formats = JSON.parse(card.getAttribute('data-formats') || '[]'); } catch(e) {}
+        var subIdx = parseInt(card.getAttribute('data-sub-idx'), 10) || 0;
+        var tid    = card.getAttribute('data-tid') || '';
+        var fmtData = formats[subIdx] || {};
+        var tbData  = (fmtData.teachers || []).find(function(t) { return t.id === tid; }) || (fmtData.teachers||[])[0] || {};
+        var opts   = tbData.options || [];
+        optIdx = Math.max(0, Math.min(opts.length - 1, optIdx + dir));
+        card.setAttribute('data-opt-idx', optIdx);
+        refreshGroupStepper(card, dict, optIdx);
+      });
+    });
+
+    /* --- Individual card: teacher pill switching --- */
+    container.querySelectorAll('.pcv2[data-card-type="indiv"] .pcv2-teacher-pill').forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        var card = pill.closest('.pcv2');
+        if (!card) return;
+        card.querySelectorAll('.pcv2-teacher-pill').forEach(function(p) { p.classList.toggle('active', p === pill); });
+        var tid = pill.getAttribute('data-tid') || '';
+        var t   = TEACHERS[tid];
+        if (t) {
+          card.setAttribute('data-base-price',   t.basePrice);
+          card.setAttribute('data-base-lessons', t.baseLessons);
+          card.setAttribute('data-tid', tid);
+        }
+        refreshIndivStepper(card, dict);
+      });
+    });
+
+    /* --- Individual card: stepper --- */
+    container.querySelectorAll('.pcv2[data-card-type="indiv"] .pcv2-step-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var card = btn.closest('.pcv2');
+        if (!card) return;
+        var count = parseInt(card.getAttribute('data-count'), 10) || 1;
+        var dir   = parseInt(btn.getAttribute('data-dir'), 10) || 0;
+        count = Math.max(1, Math.min(7, count + dir));
+        card.setAttribute('data-count', count);
+        refreshIndivStepper(card, dict);
+      });
+    });
+
+    /* --- Apply buttons --- */
+    container.querySelectorAll('.pcv2-apply-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var card = btn.closest('.pcv2');
         var d    = (window.I18N && (window.I18N[window.__cosmoLang] || window.I18N.en)) || {};
-        var audLabel = d['pricing.tab.' + _activeAudience] || _activeAudience;
-        var fmtTitle = card ? (card.querySelector('h3') || {}).textContent || '' : '';
-        var msg;
-
-        var steppers = card ? card.querySelectorAll('.indiv-stepper') : [];
-        if (steppers.length) {
-          /* Individual lesson card — build per-teacher context */
-          var lines = [audLabel + ' / ' + fmtTitle];
-          steppers.forEach(function (stepper) {
-            var block      = stepper.closest('.teacher-block');
-            var tname      = block ? (block.querySelector('.teacher-name') || {}).textContent || '' : '';
-            var count      = parseInt(stepper.getAttribute('data-count'), 10) || 2;
-            var basePrice  = parseFloat(block.getAttribute('data-base-price'));
-            var baseLessons= parseFloat(block.getAttribute('data-base-lessons'));
-            var monthPrice = calcMonthlyPrice(count, basePrice, baseLessons);
-            lines.push(tname + ': ' + count + '×/week · ' + (count * 4) + ' lessons/month · ' + monthPrice + ' AZN');
-          });
-          msg = lines.join('\n');
-        } else {
-          msg = btn.getAttribute('data-prefill') || '';
-        }
-
-        if (msg) {
-          var ta = document.querySelector('#contact textarea[name="message"]');
-          if (ta) ta.value = msg;
-        }
+        var title = card ? (card.querySelector('.pcv2-title') || {}).textContent || '' : '';
+        var audLbl = d['pricing.tab.' + _activeAudience] || _activeAudience;
+        var priceTxt = card ? (card.querySelector('.pcv2-price') || {}).textContent || '' : '';
+        var msg = audLbl + ' / ' + title + ' — ' + priceTxt;
+        var ta = document.querySelector('#contact textarea[name="message"]');
+        if (ta) ta.value = msg;
         var contactEl = document.getElementById('contact');
         if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
       });
     });
+  }
+
+  function handleTeacherPill(pill, card, dict) {
+    if (!card) return;
+    card.querySelectorAll('.pcv2-teacher-pill').forEach(function(p) { p.classList.toggle('active', p === pill); });
+    var tid = pill.getAttribute('data-tid') || '';
+    card.setAttribute('data-tid', tid);
+    card.setAttribute('data-opt-idx', '0');
+    refreshGroupStepper(card, dict, 0);
+  }
+
+  function refreshGroupStepper(card, dict, optIdx) {
+    var lpmLbl  = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var perMonth = dict['pricing.perMonth'] || '/ month';
+    var formats = [];
+    try { formats = JSON.parse(card.getAttribute('data-formats') || '[]'); } catch(e) {}
+    var subIdx = parseInt(card.getAttribute('data-sub-idx'), 10) || 0;
+    var tid    = card.getAttribute('data-tid') || '';
+    var fmtData = formats[subIdx] || {};
+    var tbData  = (fmtData.teachers || []).find(function(t) { return t.id === tid; }) || (fmtData.teachers||[])[0] || {};
+    var opts    = tbData.options || [];
+    var opt     = opts[optIdx] || opts[0] || {};
+
+    card.setAttribute('data-opt-idx', optIdx);
+    var valEl   = card.querySelector('.pcv2-step-val');
+    var countEl = card.querySelector('.pcv2-month-count');
+    var priceEl = card.querySelector('.pcv2-price');
+    var decBtn  = card.querySelector('.pcv2-step-btn[data-dir="-1"]');
+    var incBtn  = card.querySelector('.pcv2-step-btn[data-dir="1"]');
+
+    if (valEl)   valEl.textContent = opt.week || 0;
+    if (countEl) countEl.textContent = (opt.month || 0) + ' ' + lpmLbl;
+    if (priceEl) priceEl.innerHTML = (opt.price || 0) + ' AZN <em>' + esc(perMonth) + '</em>';
+    if (decBtn)  decBtn.disabled = optIdx <= 0;
+    if (incBtn)  incBtn.disabled = optIdx >= opts.length - 1;
+  }
+
+  function refreshIndivStepper(card, dict) {
+    var lpmLbl   = dict['pricing.indiv.lessonsPerMonth'] || 'lessons per month';
+    var perMonth  = dict['pricing.perMonth'] || '/ month';
+    var count     = parseInt(card.getAttribute('data-count'), 10) || 1;
+    var basePrice = parseFloat(card.getAttribute('data-base-price')) || 0;
+    var baseLess  = parseFloat(card.getAttribute('data-base-lessons')) || 1;
+    var price     = calcMonthlyPrice(count, basePrice, baseLess);
+
+    var valEl   = card.querySelector('.pcv2-step-val');
+    var countEl = card.querySelector('.pcv2-month-count');
+    var priceEl = card.querySelector('.pcv2-price');
+    var decBtn  = card.querySelector('.pcv2-step-btn[data-dir="-1"]');
+    var incBtn  = card.querySelector('.pcv2-step-btn[data-dir="1"]');
+
+    if (valEl)   valEl.textContent = count;
+    if (countEl) countEl.textContent = (count * 4) + ' ' + lpmLbl;
+    if (priceEl) priceEl.innerHTML = price + ' AZN <em>' + esc(perMonth) + '</em>';
+    if (decBtn)  decBtn.disabled = count <= 1;
+    if (incBtn)  incBtn.disabled = count >= 7;
   }
 
   /* ============================================================
