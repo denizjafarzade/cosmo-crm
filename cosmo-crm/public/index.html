@@ -135,8 +135,6 @@
     .hero::before {
       content: '';
       position: absolute; inset: 0; pointer-events: none;
-      background-image: repeating-conic-gradient(rgba(255,255,255,0.025) 0% 25%, transparent 0% 50%);
-      background-size: 56px 56px;
     }
     .hero::after {
       content: '';
@@ -186,6 +184,7 @@
       transform: perspective(1100px) rotateY(-6deg) rotateX(2deg);
       transition: transform 0.4s ease;
       width: 440px;
+      user-select: none;
     }
     .hero-visual:hover .lesson-screen { transform: perspective(1100px) rotateY(-2deg) rotateX(1deg); }
 
@@ -337,15 +336,79 @@
     /* ===== BACKGROUND FLOATING PIECES ===== */
     .bg-piece {
       position: absolute; pointer-events: none; user-select: none; z-index: 1;
-      animation: bgFloat linear infinite;
+      font-size: 1.8rem; line-height: 1;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
       will-change: transform, opacity;
     }
-    @keyframes bgFloat {
-      0%   { transform: translateY(30px) rotate(-8deg) scale(1);   opacity: 0; }
-      12%  { opacity: 1; }
-      88%  { opacity: 1; }
-      100% { transform: translateY(-220px) rotate(14deg) scale(0.85); opacity: 0; }
+    @keyframes bgF1 { 0%{transform:translateY(20px) rotate(-6deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translateY(-200px) rotate(10deg);opacity:0} }
+    @keyframes bgF2 { 0%{transform:translate(-25px,15px) rotate(8deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(35px,-180px) rotate(-14deg);opacity:0} }
+    @keyframes bgF3 { 0%{transform:translate(25px,10px) rotate(-10deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(-40px,-190px) rotate(16deg);opacity:0} }
+    @keyframes bgF4 { 0%{transform:translateY(10px) rotate(0deg) scale(0.9);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translateY(-210px) rotate(-22deg) scale(1.1);opacity:0} }
+    @keyframes bgF5 { 0%{transform:translate(-15px,5px) rotate(12deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(50px,-175px) rotate(-6deg);opacity:0} }
+    @keyframes bgF6 { 0%{transform:translate(10px,25px) rotate(-4deg);opacity:0} 14%{opacity:1} 86%{opacity:1} 100%{transform:translate(-55px,-195px) rotate(20deg);opacity:0} }
+
+    /* ===== VIDEO CALL TILE ===== */
+    .vcall-section {
+      display: flex; gap: 0.5rem; padding: 0.55rem;
+      background: #080b16; border-bottom: 1px solid rgba(255,255,255,0.06);
     }
+    .vcall-coach {
+      flex: 1; height: 82px; border-radius: 9px; position: relative;
+      background: linear-gradient(135deg, #1a2248 0%, #0d1530 100%);
+      border: 1.5px solid rgba(22,163,74,0.5);
+      box-shadow: 0 0 0 2px rgba(22,163,74,0.15), inset 0 0 20px rgba(22,163,74,0.04);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; animation: speakPulse 2.5s infinite;
+    }
+    .vcall-student {
+      width: 70px; height: 82px; border-radius: 9px; position: relative;
+      background: linear-gradient(135deg, #1e2a4a 0%, #150f2a 100%);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .vcall-avatar { font-size: 2.2rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+    .vcall-name {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      padding: 0.2rem 0.45rem 0.3rem;
+      font-size: 0.55rem; font-weight: 700; color: white;
+    }
+    .vcall-mic {
+      position: absolute; top: 5px; right: 6px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(22,163,74,0.25); border: 1px solid rgba(22,163,74,0.5);
+      display: flex; align-items: center; justify-content: center; font-size: 0.55rem;
+    }
+    .vcall-speaking {
+      position: absolute; top: 5px; left: 6px;
+      font-size: 0.5rem; color: #86efac; font-weight: 700; letter-spacing: 0.3px;
+      display: flex; align-items: center; gap: 3px;
+    }
+    .vcall-speaking-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #22c55e;
+      animation: livePulse 1s infinite;
+    }
+    /* Call controls bar */
+    .call-controls {
+      background: #060810; border-top: 1px solid rgba(255,255,255,0.05);
+      padding: 0.45rem 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .cc-btn {
+      width: 30px; height: 30px; border-radius: 50%; cursor: default;
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.2s;
+    }
+    .cc-btn.on  { background: rgba(22,163,74,0.2); border-color: rgba(22,163,74,0.35); }
+    .cc-btn.off { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); }
+    .cc-spacer { flex: 1; }
+    .cc-end {
+      display: flex; align-items: center; gap: 5px; padding: 0.28rem 0.7rem;
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 20px; font-size: 0.58rem; font-weight: 700; color: #f87171; cursor: default;
+    }
+    .cc-end-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; }
 
     /* ===== SECTIONS ===== */
     .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
@@ -983,6 +1046,7 @@
       .nav-dropdown.open > .nav-dropdown-btn::after { transform: rotate(180deg); }
       .nav-dropdown-menu a { padding: 0.55rem 0; border-radius: 0; font-size: 0.9rem; }
       .mobile-menu-btn { display: block; }
+      .nav-cta { display: none; }
       .about-grid, .contact-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
       .hero-stats { gap: 1.5rem; }
@@ -1070,27 +1134,17 @@
         <div class="chrome-timer" id="lessonTimer">00:34:12</div>
       </div>
 
-      <!-- Participants bar -->
-      <div class="screen-participants">
-        <div class="p-cam speaking">
-          <div class="p-emoji">👨‍🏫</div>
-          <div>
-            <div class="p-name">Coach Abdulla</div>
-            <div class="p-role">🎙 Speaking</div>
-          </div>
+      <!-- Video call tiles -->
+      <div class="vcall-section">
+        <div class="vcall-coach">
+          <div class="vcall-avatar">👨‍🏫</div>
+          <div class="vcall-name">Coach Abdulla</div>
+          <div class="vcall-mic">🎙</div>
+          <div class="vcall-speaking"><div class="vcall-speaking-dot"></div>Speaking</div>
         </div>
-        <div class="p-cam">
-          <div class="p-emoji">👦</div>
-          <div>
-            <div class="p-name">Student</div>
-            <div class="p-role">👁 Watching</div>
-          </div>
-        </div>
-        <div class="p-spacer"></div>
-        <div class="p-controls">
-          <div class="p-ctrl">🎤</div>
-          <div class="p-ctrl">📹</div>
-          <div class="p-ctrl">⚙️</div>
+        <div class="vcall-student">
+          <div class="vcall-avatar">👦</div>
+          <div class="vcall-name">You</div>
         </div>
       </div>
 
@@ -1131,6 +1185,16 @@
           <div class="chat-msg coach-msg msg-3"><span class="msg-who">Coach:</span> Exactly! ♛ What's Black's best response?</div>
           <div class="chat-msg student-msg msg-4"><span class="msg-who">You:</span> O-O! Get the king safe first 🏰</div>
         </div>
+      </div>
+
+      <!-- Call controls -->
+      <div class="call-controls">
+        <div class="cc-btn on">🎤</div>
+        <div class="cc-btn on">📹</div>
+        <div class="cc-btn">🖥️</div>
+        <div class="cc-btn">✋</div>
+        <div class="cc-spacer"></div>
+        <div class="cc-end"><div class="cc-end-dot"></div> Leave</div>
       </div>
 
     </div>
@@ -1208,6 +1272,209 @@
           <li data-i18n="formats.group.f4">Affordable option</li>
         </ul>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ONLINE LESSONS SHOWCASE REMOVED -->
+<div id="online" style="display:none">
+  <div class="ol-section">
+    <div class="section-header reveal">
+      <span class="section-tag">Platform</span>
+      <h2>Everything Happens Online</h2>
+      <hr class="divider" />
+      <p>Live coaching, daily puzzles, and deep game analysis — all inside one platform, from anywhere in the world.</p>
+    </div>
+
+    <div class="ol-cards">
+
+      <!-- Card 1: Live Lesson -->
+      <div class="ol-card reveal">
+        <div class="ol-card-screen">
+          <div class="ms-chrome">
+            <div class="ms-dots"><div class="ms-dot"></div><div class="ms-dot"></div><div class="ms-dot"></div></div>
+            <div class="ms-url">cosmochess.academy/lesson/live</div>
+            <div class="ms-badge red">● LIVE</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-live">
+              <div class="ms-participants">
+                <div class="ms-p speak">👨‍🏫 Coach Abdulla &nbsp;🎙</div>
+                <div class="ms-p">👦 You</div>
+              </div>
+              <div class="ms-row">
+                <div class="ms-board-wrap">
+                  <div class="ms-board">
+                    <!-- highlight squares -->
+                    <div class="ms-highlight" style="left:80px;top:48px;"></div>
+                    <!-- pieces: row=0 is rank8, each cell=16px -->
+                    <span class="ms-piece bp" style="left:0;top:0">♜</span>
+                    <span class="ms-piece bp" style="left:32px;top:0">♝</span>
+                    <span class="ms-piece bp" style="left:48px;top:0">♛</span>
+                    <span class="ms-piece bp" style="left:64px;top:0">♚</span>
+                    <span class="ms-piece bp" style="left:112px;top:0">♜</span>
+                    <span class="ms-piece bp" style="left:32px;top:16px">♟</span>
+                    <span class="ms-piece bp" style="left:48px;top:16px">♟</span>
+                    <span class="ms-piece bp" style="left:80px;top:16px">♟</span>
+                    <span class="ms-piece bp" style="left:96px;top:16px">♟</span>
+                    <span class="ms-piece bp" style="left:0;top:32px">♟</span>
+                    <span class="ms-piece bp" style="left:32px;top:48px">♟</span>
+                    <span class="ms-piece bp" style="left:64px;top:48px">♟</span>
+                    <span class="ms-piece wp" style="left:0;top:64px">♗</span>
+                    <span class="ms-piece wp" style="left:64px;top:64px">♙</span>
+                    <span class="ms-piece wp" style="left:80px;top:80px">♘</span>
+                    <span class="ms-piece wp" style="left:0;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:16px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:32px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:48px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:80px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:0;top:112px">♖</span>
+                    <span class="ms-piece wp" style="left:16px;top:112px">♘</span>
+                    <span class="ms-piece wp" style="left:32px;top:112px">♗</span>
+                    <span class="ms-piece wp" style="left:48px;top:112px">♕</span>
+                    <span class="ms-piece wp" style="left:64px;top:112px">♖</span>
+                    <span class="ms-piece wp" style="left:96px;top:112px">♔</span>
+                  </div>
+                </div>
+                <div class="ms-moves">
+                  <div class="ms-move-row"><span class="ms-mn">1.</span><span class="ms-mw">e4</span><span class="ms-mb">e5</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">2.</span><span class="ms-mw">Nf3</span><span class="ms-mb">Nc6</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">3.</span><span class="ms-mw">Bb5</span><span class="ms-mb">a6</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">4.</span><span class="ms-mw">Ba4</span><span class="ms-mb">Nf6</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">5.</span><span class="ms-mw ms-ma">O-O</span><span class="ms-mb">Be7</span></div>
+                </div>
+              </div>
+              <div class="ms-chat">
+                <div class="ms-chat-msg coach"><span class="ms-who">Coach:</span> Watch how Ng5 targets f7 ♟</div>
+                <div class="ms-chat-msg you"><span class="ms-who">You:</span> Got it! Forking king &amp; rook 🤔</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ol-card-body">
+          <div class="ol-card-tag live">🔴 Live Lessons</div>
+          <h3>1-on-1 Coaching Sessions</h3>
+          <p>Real-time lessons with your coach on a shared board — analyse positions together and get instant feedback.</p>
+          <ul class="ol-card-features">
+            <li>Shared interactive board</li>
+            <li>Live voice &amp; chat</li>
+            <li>Instant move feedback</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card 2: Puzzle Training -->
+      <div class="ol-card reveal">
+        <div class="ol-card-screen">
+          <div class="ms-chrome">
+            <div class="ms-dots"><div class="ms-dot"></div><div class="ms-dot"></div><div class="ms-dot"></div></div>
+            <div class="ms-url">cosmochess.academy/puzzles</div>
+            <div class="ms-badge gold">⚡ PUZZLE</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-puzzle">
+              <div class="ms-puzzle-header">
+                <span class="ms-puzzle-id">Puzzle #1,247</span>
+                <span class="ms-streak">🔥 5 streak</span>
+              </div>
+              <div class="ms-puzzle-row">
+                <div class="ms-board-wrap">
+                  <div class="ms-board">
+                    <div class="ms-highlight" style="left:96px;top:32px;background:rgba(239,68,68,0.4);"></div>
+                    <div class="ms-highlight" style="left:64px;top:64px;background:rgba(201,168,76,0.4);"></div>
+                    <span class="ms-piece bp" style="left:0;top:0">♚</span>
+                    <span class="ms-piece bp" style="left:32px;top:16px">♟</span>
+                    <span class="ms-piece bp" style="left:96px;top:32px">♜</span>
+                    <span class="ms-piece bp" style="left:16px;top:48px">♟</span>
+                    <span class="ms-piece wp" style="left:64px;top:64px">♕</span>
+                    <span class="ms-piece wp" style="left:80px;top:80px">♖</span>
+                    <span class="ms-piece wp" style="left:32px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:96px;top:96px">♙</span>
+                    <span class="ms-piece wp" style="left:48px;top:112px">♔</span>
+                  </div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:0.35rem;">
+                  <div class="ms-prompt">♙ White to move — find the winning combination!</div>
+                  <div class="ms-puzzle-btns">
+                    <div class="ms-btn solve">Solve</div>
+                    <div class="ms-btn hint">Hint</div>
+                  </div>
+                  <div class="ms-timer">⏱ 00:47</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ol-card-body">
+          <div class="ol-card-tag puzzle">⚡ Puzzle Training</div>
+          <h3>Daily Tactical Puzzles</h3>
+          <p>Sharpen your tactical vision with curated puzzles rated by difficulty — from beginner forks to grandmaster combinations.</p>
+          <ul class="ol-card-features">
+            <li>1,000+ rated puzzles</li>
+            <li>Progress tracking</li>
+            <li>Coach-assigned sets</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card 3: Game Analysis -->
+      <div class="ol-card reveal">
+        <div class="ol-card-screen">
+          <div class="ms-chrome">
+            <div class="ms-dots"><div class="ms-dot"></div><div class="ms-dot"></div><div class="ms-dot"></div></div>
+            <div class="ms-url">cosmochess.academy/analysis</div>
+            <div class="ms-badge indigo">📊 ANALYSIS</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-analysis">
+              <div class="ms-eval-row">
+                <span class="ms-eval-big">+1.4</span>
+                <div class="ms-eval-track"><div class="ms-eval-fill"></div></div>
+                <span style="font-size:0.58rem;color:rgba(255,255,255,0.3);margin-left:4px;">♙ White</span>
+              </div>
+              <div class="ms-an-row">
+                <div class="ms-board-wrap">
+                  <div class="ms-board">
+                    <div class="ms-highlight" style="left:48px;top:48px;background:rgba(79,70,229,0.35);"></div>
+                    <div class="ms-highlight" style="left:48px;top:96px;background:rgba(239,68,68,0.25);"></div>
+                    <span class="ms-piece bp" style="left:16px;top:16px">♚</span>
+                    <span class="ms-piece bp" style="left:0;top:32px">♟</span>
+                    <span class="ms-piece bp" style="left:32px;top:32px">♟</span>
+                    <span class="ms-piece bp" style="left:48px;top:48px">♞</span>
+                    <span class="ms-piece wp" style="left:64px;top:48px">♗</span>
+                    <span class="ms-piece wp" style="left:48px;top:64px">♙</span>
+                    <span class="ms-piece wp" style="left:16px;top:80px">♙</span>
+                    <span class="ms-piece wp" style="left:48px;top:96px">♔</span>
+                    <span class="ms-piece wp" style="left:80px;top:96px">♖</span>
+                  </div>
+                </div>
+                <div class="ms-notation">
+                  <div class="ms-move-row"><span class="ms-mn">18.</span><span class="ms-mw ms-ma">Bxd5</span><span class="ms-mb">Nxd5</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">19.</span><span class="ms-mw">Rxd5</span><span class="ms-mb">Ke7</span></div>
+                  <div class="ms-move-row"><span class="ms-mn">20.</span><span class="ms-mw">e6</span><span style="font-size:0.55rem;color:#f87171;">?!</span></div>
+                </div>
+              </div>
+              <div class="ms-quality">
+                <div class="ms-q good">✓ 18 good</div>
+                <div class="ms-q inaccu">〜 3 inaccurate</div>
+                <div class="ms-q mistake">✗ 1 mistake</div>
+              </div>
+              <div class="ms-best">💡 Better was <strong>20. Rd7+</strong> winning immediately</div>
+            </div>
+          </div>
+        </div>
+        <div class="ol-card-body">
+          <div class="ol-card-tag review">📊 Game Review</div>
+          <h3>AI-Powered Game Analysis</h3>
+          <p>Upload any game and get a full breakdown — every mistake, every missed opportunity, with coach commentary.</p>
+          <ul class="ol-card-features">
+            <li>Move-by-move evaluation</li>
+            <li>Coach annotations</li>
+            <li>Improvement suggestions</li>
+          </ul>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -3760,26 +4027,36 @@
     }
   }, 2500);
 
-  // Floating background chess pieces
+  // Floating background chess pieces — grid-based, no overlap, same size
   (function() {
     var hero = document.getElementById('hero');
     if (!hero) return;
     var glyphs = ['♔','♕','♖','♗','♘','♙','♚','♛','♜','♝','♞','♟'];
-    for (var i = 0; i < 32; i++) {
+    var anims = ['bgF1','bgF2','bgF3','bgF4','bgF5','bgF6'];
+    // 8 cols × 5 rows = 40 grid slots — place one piece per slot
+    var COLS = 8, ROWS = 5;
+    // shuffle slot indices so pieces get random glyphs/animations per slot
+    var slots = [];
+    for (var s = 0; s < COLS * ROWS; s++) slots.push(s);
+    slots.sort(function() { return Math.random() - 0.5; });
+    for (var i = 0; i < slots.length; i++) {
+      var col = slots[i] % COLS;
+      var row = Math.floor(slots[i] / COLS);
+      // place within inner 70% of each cell to keep spacing
+      var cellW = 100 / COLS, cellH = 100 / ROWS;
+      var left = (col * cellW + cellW * 0.15 + Math.random() * cellW * 0.55).toFixed(2);
+      var top  = (row * cellH + cellH * 0.15 + Math.random() * cellH * 0.55).toFixed(2);
+      var op   = (0.04 + Math.random() * 0.07).toFixed(3);
+      var dur  = (16 + Math.random() * 20).toFixed(1);
+      var delay = -(Math.random() * 28).toFixed(1);
+      var anim = anims[i % anims.length];
       var el = document.createElement('span');
       el.className = 'bg-piece';
       el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-      var size  = (1.2 + Math.random() * 3.8).toFixed(2);
-      var left  = (Math.random() * 98).toFixed(1);
-      var top   = (5 + Math.random() * 90).toFixed(1);
-      var op    = (0.035 + Math.random() * 0.085).toFixed(3);
-      var dur   = (14 + Math.random() * 22).toFixed(1);
-      var delay = -(Math.random() * 30).toFixed(1);
       el.style.cssText =
-        'left:' + left + '%;' +
-        'top:' + top + '%;' +
-        'font-size:' + size + 'rem;' +
+        'left:' + left + '%;top:' + top + '%;' +
         'color:rgba(255,255,255,' + op + ');' +
+        'animation-name:' + anim + ';' +
         'animation-duration:' + dur + 's;' +
         'animation-delay:' + delay + 's;';
       hero.appendChild(el);
