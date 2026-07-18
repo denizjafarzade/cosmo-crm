@@ -10,6 +10,7 @@ export default function Groups() {
   const [coaches, setCoaches] = useState([]);
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id, name }
 
   const load = () => { api.getGroups().then(setGroups); api.getCoaches().then(setCoaches); };
   useEffect(load, []);
@@ -21,11 +22,9 @@ export default function Groups() {
     load();
   };
 
-  const remove = async (e, id, name) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!window.confirm(`Delete group "${name}"? Students will be unassigned.`)) return;
+  const remove = async (id) => {
     await api.deleteGroup(id);
+    setConfirmDelete(null);
     load();
   };
 
@@ -52,7 +51,12 @@ export default function Groups() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={(e) => remove(e, g.id, g.name)} title="Delete group"><FiTrash2 /></button>
+                  <button
+                    className="btn btn-sm btn-icon"
+                    style={{ color: 'var(--red)' }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDelete({ id: g.id, name: g.name }); }}
+                    title="Delete group"
+                  ><FiTrash2 /></button>
                   <FiChevronRight style={{ color: 'var(--slate-300)', fontSize: '1.2rem' }} />
                 </div>
               </div>
@@ -61,8 +65,28 @@ export default function Groups() {
         </div>
       </div>
 
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div className="modal-header">
+              <h3>Delete Group</h3>
+              <button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>"{confirmDelete.name}"</strong>? Students will be unassigned.</p>
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={() => remove(confirmDelete.id)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New group modal */}
       {modal && (
-        <div className="modal-overlay" onClick={() => setModal(false)}>
+        <div className="modal-overlay">
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header"><h3>New Group</h3><button className="modal-close" onClick={() => setModal(false)}><FiX /></button></div>
             <div className="modal-body">

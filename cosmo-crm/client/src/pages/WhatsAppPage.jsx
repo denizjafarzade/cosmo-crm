@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiRefreshCw, FiSend, FiWifi, FiWifiOff, FiAlertTriangle } from 'react-icons/fi';
+import { FiRefreshCw, FiSend, FiWifi, FiWifiOff, FiAlertTriangle, FiCopy, FiCheck } from 'react-icons/fi';
 import api from '../api';
 
 export default function WhatsAppPage() {
@@ -8,11 +8,20 @@ export default function WhatsAppPage() {
   const [testMsg, setTestMsg] = useState('');
   const [sending, setSending] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
+  const [groupSearch, setGroupSearch] = useState('');
+  const [copiedId, setCopiedId] = useState(null);
+
+  const useGroup = (id) => {
+    setTestChat(id);
+    navigator.clipboard.writeText(id).catch(() => {});
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const load = () => api.waStatus().then(setWa).catch(() => {});
   useEffect(() => { load(); const id = setInterval(load, 4000); return () => clearInterval(id); }, []);
 
-  const refresh = async () => { await api.waRefreshGroups(); load(); };
+  const refresh = async () => { await api.waRefreshGroups(); };
 
   const reconnect = async () => {
     setReconnecting(true);
@@ -86,30 +95,58 @@ export default function WhatsAppPage() {
           <div className="card">
             <div className="card-header">
               <h2>WhatsApp Groups</h2>
-              <button className="btn btn-sm btn-outline" onClick={refresh} disabled={wa.status !== 'ready'}><FiRefreshCw /> Refresh</button>
+              <button className="btn btn-sm btn-outline" onClick={refresh} disabled={wa.status !== 'ready' || wa.isRefreshing}>
+                <FiRefreshCw style={{ animation: wa.isRefreshing ? 'spin 1s linear infinite' : 'none' }} /> {wa.isRefreshing ? 'Scanning...' : 'Refresh'}
+              </button>
             </div>
             <div className="card-body">
-              {wa.groups?.length ? (
-                <div className="table-wrap">
-                  <table>
-                    <thead><tr><th>Name</th><th>Group ID</th><th></th></tr></thead>
-                    <tbody>
-                      {wa.groups.map(g => (
-                        <tr key={g.id}>
-                          <td style={{ fontWeight: 500 }}>{g.name}</td>
-                          <td><code style={{ fontSize: '0.7rem', color: 'var(--slate-400)', background: 'var(--slate-100)', padding: '2px 6px', borderRadius: 4 }}>{g.id}</code></td>
-                          <td><button className="btn btn-sm btn-outline" onClick={() => { setTestChat(g.id); }}>Use</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {wa.isRefreshing && (
+                <div style={{ padding: '0.6rem 0.75rem', marginBottom: '0.75rem', background: 'var(--slate-50)', borderRadius: 8, fontSize: '0.85rem', color: 'var(--slate-600)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FiRefreshCw style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+                  <span>Scanning chats… <strong>{wa.groups?.length || 0}</strong> groups found so far{wa.totalChats ? ` (${wa.totalChats} chats total)` : ''}</span>
                 </div>
-              ) : (
+              )}
+              {!wa.isRefreshing && wa.groups?.length > 0 && (
+                <div style={{ padding: '0.4rem 0.75rem', marginBottom: '0.75rem', background: 'var(--green-bg)', borderRadius: 8, fontSize: '0.8rem', color: 'var(--green)' }}>
+                  ✓ All chats scanned — {wa.groups.length} groups found
+                </div>
+              )}
+              {wa.groups?.length ? (
+                <>
+                  <input
+                    className="form-input"
+                    placeholder="Search group name..."
+                    value={groupSearch}
+                    onChange={e => setGroupSearch(e.target.value)}
+                    style={{ marginBottom: '0.75rem' }}
+                  />
+                  <div style={{ maxHeight: 320, overflowY: 'auto', borderRadius: 'var(--radius-sm)', border: '1px solid var(--slate-200)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead style={{ position: 'sticky', top: 0, background: 'var(--white)', zIndex: 1 }}>
+                        <tr><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>Name</th><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>Group ID</th><th style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--slate-200)' }}></th></tr>
+                      </thead>
+                      <tbody>
+                        {wa.groups.filter(g => !groupSearch || g.name.toLowerCase().includes(groupSearch.toLowerCase())).map(g => (
+                          <tr key={g.id} style={{ borderBottom: '1px solid var(--slate-100)' }}>
+                            <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{g.name}</td>
+                            <td style={{ padding: '0.5rem 0.75rem' }}><code style={{ fontSize: '0.7rem', color: 'var(--slate-400)', background: 'var(--slate-100)', padding: '2px 6px', borderRadius: 4 }}>{g.id}</code></td>
+                            <td style={{ padding: '0.5rem 0.75rem' }}>
+                              <button className="btn btn-sm btn-outline" onClick={() => useGroup(g.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                {copiedId === g.id ? <><FiCheck style={{ color: 'var(--green)' }} /> Copied</> : <><FiCopy /> Use</>}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : !wa.isRefreshing ? (
                 <div className="empty-state">
                   <FiWifiOff style={{ fontSize: '2rem', marginBottom: 8 }} />
                   <p>{wa.status === 'ready' ? 'Click "Refresh" to load your WhatsApp groups' : 'Connect WhatsApp first to see your groups'}</p>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Article — Cosmo Chess Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1E3A5F; --accent: #C9A84C; --bg: #F8F9FB; --surface: #fff;
+      --border: #E2E8F0; --text: #1E293B; --text-muted: #64748B;
+      --card-shadow: rgba(0,0,0,0.08); --icon-bg: #EEF2FF;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    a { color: inherit; }
+
+    /* Nav */
+    .page-nav {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .page-nav a { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; }
+    .page-nav a:hover { color: var(--primary); }
+    .page-nav .sep { color: var(--border); font-size: 0.85rem; }
+    .page-nav .brand { font-weight: 700; color: var(--primary); font-family: 'Playfair Display', serif; }
+
+    /* Hero */
+    .article-hero {
+      background: var(--primary); color: #fff;
+      padding: 3.5rem 2rem 2.5rem; text-align: center;
+    }
+    .article-cat {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .article-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 4vw, 2.25rem); max-width: 720px;
+      margin: 0 auto 0.85rem; line-height: 1.25;
+    }
+    .article-date { color: rgba(255,255,255,0.55); font-size: 0.82rem; }
+
+    /* Cover image */
+    .article-img-wrap {
+      max-width: 860px; margin: 2.5rem auto 0; padding: 0 2rem;
+    }
+    .article-img {
+      width: 100%; aspect-ratio: 16/7; border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border); position: relative;
+      background: linear-gradient(135deg, var(--icon-bg), var(--bg));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .article-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+    /* Body */
+    .article-body {
+      max-width: 680px; margin: 2.5rem auto 0; padding: 0 2rem;
+    }
+    .article-body p { color: var(--text); font-size: 1.05rem; line-height: 1.85; margin-bottom: 1.35rem; }
+
+    /* Callout block — used in article.body HTML */
+    .article-callout {
+      border-left: 3px solid var(--accent); background: rgba(201,168,76,0.07);
+      padding: 1.1rem 1.4rem; border-radius: 0 12px 12px 0; margin: 2rem 0;
+    }
+    .article-callout p {
+      font-size: 1rem; font-style: italic; color: var(--text);
+      line-height: 1.75; margin-bottom: 0;
+    }
+
+    /* Related photos */
+    .article-photos-section {
+      max-width: 680px; margin: 2.5rem auto 0; padding: 0 2rem;
+    }
+    .article-photos-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .article-photos-header h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    .article-photos-header a {
+      font-size: 0.8rem; font-weight: 600; color: var(--accent);
+      text-decoration: none; white-space: nowrap;
+    }
+    .article-photos-header a:hover { text-decoration: underline; }
+    .article-photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .article-photo-item {
+      aspect-ratio: 4/3; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border); position: relative;
+      background: linear-gradient(135deg, var(--icon-bg), var(--bg));
+    }
+    .article-photo-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 560px) { .article-photos-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* Back link */
+    .article-back { max-width: 680px; margin: 2rem auto 3.5rem; padding: 0 2rem; }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.55rem 1.2rem; border-radius: 50px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Related articles */
+    .related { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 2rem; }
+    .related-inner { max-width: 1100px; margin: 0 auto; }
+    .related h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1.5rem; }
+    .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .related-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .related-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px var(--card-shadow); }
+    .related-card-img {
+      aspect-ratio: 16/9; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, var(--icon-bg), var(--bg));
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .related-card-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .related-card-body { padding: 1rem 1.25rem 1.25rem; }
+    .related-card-cat { font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
+    .related-card h3 { font-size: 0.9rem; line-height: 1.4; }
+
+    .not-found { text-align: center; padding: 5rem 2rem; }
+    .not-found h2 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .not-found p { color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    footer { background: var(--primary); color: rgba(255,255,255,0.6); text-align: center; padding: 1.5rem; font-size: 0.8rem; }
+    footer a { color: #fff; text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 768px) { .related-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .related-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="page-nav">
+    <span class="brand">Cosmo Chess</span>
+    <span class="sep">›</span>
+    <a href="index.html">Home</a>
+    <span class="sep">›</span>
+    <a href="news.html">News</a>
+    <span class="sep">›</span>
+    <span id="navTitle">Article</span>
+  </nav>
+
+  <div id="articleRoot"></div>
+
+  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html">Back to Home</a></footer>
+
+  <script src="/news-data.js"></script>
+  <script>
+    var root = document.getElementById('articleRoot');
+    var slug = new URLSearchParams(window.location.search).get('slug');
+    var article = NEWS.find(function(n){ return n.slug === slug; });
+
+    if (!article) {
+      root.innerHTML = '<div class="not-found"><h2>Article not found</h2>'
+        + '<p>This article may have been moved or removed.</p>'
+        + '<a href="news.html" class="btn-back">&#8592; Back to News</a></div>';
+    } else {
+      document.title = article.title + ' — Cosmo Chess Academy';
+      document.getElementById('navTitle').textContent = article.title;
+
+      var d = new Date(article.date);
+      var dateStr = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Cover image
+      var coverImg = article.image
+        ? '<img src="' + article.image + '" alt="' + (article.imageAlt || article.title) + '" />'
+        : '';
+
+      // Related gallery photos
+      var photosHtml = '';
+      if (article.galleryItems && article.galleryItems.length) {
+        var photos = article.galleryItems
+          .map(function(id){ return GALLERY.find(function(g){ return g.id === id; }); })
+          .filter(Boolean);
+        if (photos.length) {
+          var galleryLink = article.relatedGalleryFilter
+            ? 'index.html?galleryFilter=' + article.relatedGalleryFilter + '#gallery'
+            : 'index.html#gallery';
+          var photoCat = article.relatedGalleryFilter
+            ? article.relatedGalleryFilter.charAt(0).toUpperCase() + article.relatedGalleryFilter.slice(1)
+            : 'All';
+          var photoItems = photos.map(function(p){
+            return '<div class="article-photo-item">'
+              + (p.image ? '<img src="' + p.image + '" alt="' + (p.alt || p.title) + '" loading="lazy" />' : '')
+              + '</div>';
+          }).join('');
+          photosHtml = '<div class="article-photos-section">'
+            + '<div class="article-photos-header">'
+            + '<h3>Related Photos</h3>'
+            + '<a href="' + galleryLink + '">View all ' + photoCat + ' photos &#8594;</a>'
+            + '</div>'
+            + '<div class="article-photos-grid">' + photoItems + '</div>'
+            + '</div>';
+        }
+      }
+
+      root.innerHTML =
+        '<div class="article-hero">'
+        + '<span class="article-cat">' + article.category + '</span>'
+        + '<h1>' + article.title + '</h1>'
+        + '<div class="article-date">' + dateStr + '</div>'
+        + '</div>'
+        + '<div class="article-img-wrap"><div class="article-img">' + coverImg + '</div></div>'
+        + '<div class="article-body">' + (article.body || '') + '</div>'
+        + photosHtml
+        + '<div class="article-back"><a href="news.html" class="btn-back">&#8592; Back to News</a></div>';
+
+      // Related articles
+      var related = NEWS.filter(function(n){ return n.slug !== slug; }).slice(0, 3);
+      if (related.length) {
+        var relCards = related.map(function(n){
+          var rImg = n.image
+            ? '<img src="' + n.image + '" alt="' + (n.imageAlt || n.title) + '" loading="lazy" />'
+            : '';
+          return '<a class="related-card" href="news-article.html?slug=' + n.slug + '">'
+            + '<div class="related-card-img">' + rImg + '</div>'
+            + '<div class="related-card-body">'
+            + '<div class="related-card-cat">' + n.category + '</div>'
+            + '<h3>' + n.title + '</h3>'
+            + '</div></a>';
+        }).join('');
+        root.innerHTML +=
+          '<div class="related"><div class="related-inner">'
+          + '<h2>More from the Academy</h2>'
+          + '<div class="related-grid">' + relCards + '</div>'
+          + '</div></div>';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiArrowLeft, FiCheck, FiPlus, FiTrash2, FiX, FiChevronRight } from 'react-icons/fi';
+import { FiArrowLeft, FiCheck, FiPlus, FiTrash2, FiX, FiChevronRight, FiPause, FiPlay } from 'react-icons/fi';
 import api from '../api';
+
+function ConfirmModal({ message, onConfirm, onCancel }) {
+  return (
+    <div className="modal-overlay">
+      <div className="modal" style={{ maxWidth: 400 }}>
+        <div className="modal-header"><h3>Confirm</h3><button className="modal-close" onClick={onCancel}><FiX /></button></div>
+        <div className="modal-body">
+          <p>{message}</p>
+          <div className="form-actions">
+            <button className="btn btn-outline" onClick={onCancel}>Cancel</button>
+            <button className="btn btn-primary" onClick={onConfirm}>Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -15,6 +32,9 @@ export default function GroupDetail() {
   const [allStudents, setAllStudents] = useState([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [showStudentDropdown, setShowStudentDropdown] = useState(false);
+  const [confirm, setConfirm] = useState(null); // { message, onConfirm }
+  const [suspendModal, setSuspendModal] = useState(null); // { student }
+  const [suspendLessons, setSuspendLessons] = useState(4);
 
   const load = useCallback(() => {
     api.getGroup(id).then(g => {
@@ -26,10 +46,8 @@ export default function GroupDetail() {
 
   useEffect(() => { load(); api.getStudents({}).then(setAllStudents); }, [load]);
 
-  const markDone = async () => {
-    if (!window.confirm('Mark lesson done for all students in this group?')) return;
-    await api.markLessonDone(id);
-    load();
+  const markDone = () => {
+    setConfirm({ message: 'Mark lesson done for all students in this group?', onConfirm: async () => { setConfirm(null); await api.markLessonDone(id); load(); } });
   };
 
   const saveSchedules = async () => {
@@ -58,11 +76,21 @@ export default function GroupDetail() {
     api.getStudents({}).then(setAllStudents);
   };
 
-  const removeStudent = async (studentId) => {
-    if (!window.confirm('Remove student from this group?')) return;
-    await api.updateStudent(studentId, { group_id: null });
+  const removeStudent = (studentId) => {
+    setConfirm({ message: 'Remove student from this group?', onConfirm: async () => { setConfirm(null); await api.updateStudent(studentId, { group_id: null }); load(); api.getStudents({}).then(setAllStudents); } });
+  };
+
+  const openSuspend = (student) => { setSuspendLessons(4); setSuspendModal(student); };
+
+  const doSuspend = async () => {
+    await api.suspendStudent(id, suspendModal.id, suspendLessons);
+    setSuspendModal(null);
     load();
-    api.getStudents({}).then(setAllStudents);
+  };
+
+  const doUnsuspend = async (studentId) => {
+    await api.unsuspendStudent(id, studentId);
+    load();
   };
 
   const filteredStudents = allStudents
@@ -78,6 +106,41 @@ export default function GroupDetail() {
 
   return (
     <>
+      {confirm && <ConfirmModal message={confirm.message} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}
+
+      {suspendModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div className="modal-header">
+              <h3>Suspend Lessons — {suspendModal.name} {suspendModal.surname}</h3>
+              <button className="modal-close" onClick={() => setSuspendModal(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1.25rem' }}>
+                The student will be automatically skipped (excused) for the next <strong>{suspendLessons}</strong> lesson{suspendLessons !== 1 ? 's' : ''} of this group. Lessons will not count toward their payment cycle. They resume automatically after.
+              </p>
+              <div className="form-group">
+                <label className="form-label">Number of lessons to suspend</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  min={1}
+                  max={52}
+                  value={suspendLessons}
+                  onChange={e => setSuspendLessons(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+                <div className="form-hint">
+                  Will resume automatically after lesson #{group.current_lesson_number + suspendLessons} of this group.
+                </div>
+              </div>
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setSuspendModal(null)}>Cancel</button>
+                <button className="btn btn-amber" onClick={doSuspend}><FiPause /> Suspend {suspendLessons} lesson{suspendLessons !== 1 ? 's' : ''}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link to="/groups" className="btn btn-sm btn-outline btn-icon"><FiArrowLeft /></Link>
@@ -181,17 +244,36 @@ export default function GroupDetail() {
             {group.students?.length ? (
               <div className="table-wrap">
                 <table>
-                  <thead><tr><th>Name</th><th>Level</th><th>Payment</th><th>Lessons</th><th></th></tr></thead>
+                  <thead><tr><th>Name</th><th>Level</th><th>Payment</th><th>Lessons</th><th>Status</th><th></th></tr></thead>
                   <tbody>
-                    {group.students.map(s => (
-                      <tr key={s.id}>
-                        <td><strong>{s.name} {s.surname}</strong><br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span></td>
-                        <td><span className="badge blue">{s.level}</span></td>
-                        <td><span className={`badge ${s.payment_status === 'paid' ? 'green' : s.payment_status === 'due' ? 'amber' : 'red'}`}>{s.payment_status}</span></td>
-                        <td>{s.lessons_since_payment}</td>
-                        <td><button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={() => removeStudent(s.id)} title="Remove from group"><FiTrash2 /></button></td>
-                      </tr>
-                    ))}
+                    {group.students.map(s => {
+                      const isSuspended = s.suspended_until_lesson != null && group.current_lesson_number < s.suspended_until_lesson;
+                      const lessonsLeft = isSuspended ? s.suspended_until_lesson - group.current_lesson_number : 0;
+                      return (
+                        <tr key={s.id} style={isSuspended ? { background: 'var(--amber-bg)' } : {}}>
+                          <td>
+                            <strong>{s.name} {s.surname}</strong>
+                            <br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span>
+                          </td>
+                          <td><span className="badge blue">{s.level}</span></td>
+                          <td><span className={`badge ${s.payment_status === 'paid' ? 'green' : s.payment_status === 'due' ? 'amber' : 'red'}`}>{s.payment_status}</span></td>
+                          <td>{s.lessons_since_payment}</td>
+                          <td>
+                            {isSuspended
+                              ? <span className="badge amber"><FiPause style={{ marginRight: 3 }} />{lessonsLeft} lesson{lessonsLeft !== 1 ? 's' : ''} left</span>
+                              : <span className="badge green"><FiPlay style={{ marginRight: 3 }} />Active</span>
+                            }
+                          </td>
+                          <td style={{ display: 'flex', gap: 4 }}>
+                            {isSuspended
+                              ? <button className="btn btn-sm btn-outline" style={{ color: 'var(--green)' }} onClick={() => doUnsuspend(s.id)} title="Resume now"><FiPlay /></button>
+                              : <button className="btn btn-sm btn-outline" style={{ color: 'var(--amber)' }} onClick={() => openSuspend(s)} title="Suspend lessons"><FiPause /></button>
+                            }
+                            <button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={() => removeStudent(s.id)} title="Remove from group"><FiTrash2 /></button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

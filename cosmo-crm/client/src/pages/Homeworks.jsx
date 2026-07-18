@@ -12,6 +12,7 @@ export default function Homeworks() {
   const [groups, setGroups] = useState([]);
   const [previewGroup, setPreviewGroup] = useState(null);
   const [groupView, setGroupView] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const dragItem = useRef(null);
   const dragOver = useRef(null);
 
@@ -41,9 +42,10 @@ export default function Homeworks() {
     e.target.value = '';
   };
 
-  const deleteHw = async (id) => {
-    if (!window.confirm('Delete this homework? Numbers will re-adjust.')) return;
-    await api.deleteHomework(id);
+  const deleteHw = (id) => setConfirmDelete(id);
+  const confirmDeleteHw = async () => {
+    await api.deleteHomework(confirmDelete);
+    setConfirmDelete(null);
     load();
   };
 
@@ -223,6 +225,21 @@ export default function Homeworks() {
           )}
         </div>
       </div>
+
+      {confirmDelete && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div className="modal-header"><h3>Delete Homework</h3><button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button></div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete this homework? Numbers will re-adjust.</p>
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={confirmDeleteHw}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {modal && (
         <div className="modal-overlay" onClick={() => setModal(null)}>

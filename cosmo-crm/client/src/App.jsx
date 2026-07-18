@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2 } from 'react-icons/fi';
+import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus } from 'react-icons/fi';
 import { FaChessKnight } from 'react-icons/fa';
 import api from './api';
 import Dashboard from './pages/Dashboard';
@@ -14,6 +14,7 @@ import WhatsAppPage from './pages/WhatsAppPage';
 import SettingsPage from './pages/SettingsPage';
 import ActivityLog from './pages/ActivityLog';
 import Reports from './pages/Reports';
+import Registrations from './pages/Registrations';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function App() {
     { to: '/lessons', icon: <FiBookOpen />, label: 'Lessons' },
     { to: '/homeworks', icon: <FiFileText />, label: 'Homeworks' },
     { to: '/payments', icon: <FiDollarSign />, label: 'Payments' },
+    { to: '/registrations', icon: <FiUserPlus />, label: 'Registrations' },
   ];
 
   const nav2 = [
@@ -90,6 +92,7 @@ export default function App() {
           <Route path="/whatsapp" element={<WhatsAppPage />} />
           <Route path="/activity" element={<ActivityLog />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/registrations" element={<Registrations />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </div>

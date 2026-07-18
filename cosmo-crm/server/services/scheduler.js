@@ -367,7 +367,8 @@ function generateWeeklyReport() {
 function start() {
   // Every minute: check reminders, auto-lessons, scheduled sends
   cron.schedule('* * * * *', () => {
-    try { checkLessonReminders(); } catch (e) { console.error('[Scheduler] Reminder error:', e.message); }
+    // Lesson reminders disabled per teacher request
+    // try { checkLessonReminders(); } catch (e) { console.error('[Scheduler] Reminder error:', e.message); }
     try { checkAutoLessons(); } catch (e) { console.error('[Scheduler] Auto-lesson error:', e.message); }
     try { processScheduledSends(); } catch (e) { console.error('[Scheduler] Scheduled send error:', e.message); }
   });

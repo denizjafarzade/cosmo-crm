@@ -3,11 +3,12 @@ import api from '../api';
 
 function timeAgo(iso) {
   if (!iso) return '';
-  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  const utc = iso.endsWith('Z') ? iso : iso.replace(' ', 'T') + 'Z';
+  const s = Math.floor((Date.now() - new Date(utc).getTime()) / 1000);
   if (s < 60) return 'just now';
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return new Date(iso).toLocaleDateString();
+  return new Date(utc).toLocaleDateString();
 }
 
 export default function ActivityLog() {

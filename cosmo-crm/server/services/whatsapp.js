@@ -10,6 +10,8 @@ let status = 'disconnected'; // disconnected | qr | connecting | ready | error
 let statusError = null;
 let cachedGroups = [];
 let lastGroupRefresh = 0;
+let isRefreshing = false;
+let totalChats = 0;
 
 function logSend(type, target, targetName, message, sendStatus, error) {
   db.prepare(`INSERT INTO send_log (type, target, target_name, message, status, error, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`)
@@ -48,13 +50,13 @@ function init() {
   });
 
   client.on('loading_screen', () => {
-    status = 'connecting';
+    if (status !== 'ready') status = 'connecting';
     console.log('[WhatsApp] Loading...');
   });
 
   client.on('authenticated', () => {
     console.log('[WhatsApp] Authenticated');
-    status = 'connecting';
+    if (status !== 'ready') status = 'connecting';
   });
 
   client.on('ready', () => {
@@ -86,17 +88,27 @@ function init() {
 }
 
 async function refreshGroups() {
-  if (status !== 'ready') return cachedGroups;
+  if (status !== 'ready' || isRefreshing) return cachedGroups;
+  isRefreshing = true;
+  cachedGroups = [];
+  totalChats = 0;
   try {
     const chats = await client.getChats();
-    cachedGroups = chats
-      .filter(c => c.isGroup)
-      .map(c => ({ id: c.id._serialized, name: c.name }));
+    totalChats = chats.length;
+    for (const c of chats) {
+      if (c.isGroup) {
+        cachedGroups = [...cachedGroups, { id: c.id._serialized, name: c.name }];
+      }
+      // Yield to event loop so status polls can see partial results
+      await new Promise(resolve => setImmediate(resolve));
+    }
     lastGroupRefresh = Date.now();
     console.log(`[WhatsApp] Cached ${cachedGroups.length} groups`);
   } catch (e) {
     console.error('[WhatsApp] Group refresh error:', e.message);
   }
+  isRefreshing = false;
+  totalChats = 0;
   return cachedGroups;
 }
 
@@ -128,7 +140,7 @@ async function sendFileToNumber(number, filePath, caption) {
 }
 
 function getStatus() {
-  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError };
+  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError, isRefreshing, totalChats };
 }
 
 function getClient() {

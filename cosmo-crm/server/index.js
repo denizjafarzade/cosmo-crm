@@ -19,12 +19,15 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
+app.use('/api/registrations', require('./routes/registrations'));
 
-// Public landing page at / (must be before CRM static mount)
+// Public pages
 const publicDir = path.join(__dirname, '..', 'public');
-app.get('/', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
-});
+app.use('/img', express.static(path.join(publicDir, 'img')));
+app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.get('/news', (req, res) => res.sendFile(path.join(publicDir, 'news.html')));
+app.get('/news-article', (req, res) => res.sendFile(path.join(publicDir, 'news-article.html')));
+app.get('/news-data.js', (req, res) => res.sendFile(path.join(publicDir, 'news-data.js')));
 
 // CRM dashboard at /crm (React SPA — static assets then SPA fallback)
 const clientDist = path.join(__dirname, '..', 'client', 'dist');

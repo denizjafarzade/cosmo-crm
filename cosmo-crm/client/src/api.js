@@ -47,7 +47,9 @@ const api = {
   updateGroup: (id, data) => request(`/groups/${id}`, { method: 'PUT', body: data }),
   deleteGroup: (id) => request(`/groups/${id}`, { method: 'DELETE' }),
   updateSchedules: (id, schedules) => request(`/groups/${id}/schedules`, { method: 'PUT', body: { schedules } }),
-  markLessonDone: (id) => request(`/groups/${id}/lesson-done`, { method: 'POST' }),
+  markLessonDone: (id, absentIds = []) => request(`/groups/${id}/lesson-done`, { method: 'POST', body: { absentIds } }),
+  suspendStudent: (groupId, studentId, lessons) => request(`/groups/${groupId}/suspend-student`, { method: 'POST', body: { student_id: studentId, lessons } }),
+  unsuspendStudent: (groupId, studentId) => request(`/groups/${groupId}/unsuspend-student`, { method: 'POST', body: { student_id: studentId } }),
 
   // Lessons
   getLessons: (params) => {
@@ -81,6 +83,11 @@ const api = {
     const q = new URLSearchParams(params).toString();
     return request(`/settings/send-log?${q}`);
   },
+
+  // Registrations
+  getRegistrations: (status) => request(`/registrations${status ? `?status=${status}` : ''}`),
+  updateRegistration: (id, data) => request(`/registrations/${id}`, { method: 'PUT', body: data }),
+  deleteRegistration: (id) => request(`/registrations/${id}`, { method: 'DELETE' }),
 
   // Reports
   getWeeklyReports: () => request('/reports/weekly'),

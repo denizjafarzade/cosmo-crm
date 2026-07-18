@@ -81,6 +81,9 @@ r.put('/:id/schedules', (req, res) => {
 // Mark lesson done (manual)
 r.post('/:id/lesson-done', (req, res) => {
   const groupId = req.params.id;
+  // absentIds: array of student IDs who were absent (everyone else is present)
+  const absentIds = new Set((req.body.absentIds || []).map(Number));
+
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group) return res.status(404).json({ error: 'Not found' });
 
@@ -90,26 +93,50 @@ r.post('/:id/lesson-done', (req, res) => {
 
   db.transaction(() => {
     db.prepare('UPDATE groups SET current_lesson_number = ?, updated_at = datetime(\'now\') WHERE id = ?').run(newLesson, groupId);
-    const stmtLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at) VALUES (?, ?, ?, ?)');
+    const stmtLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment) VALUES (?, ?, ?, ?, ?, ?)');
     const stmtStudent = db.prepare(`UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?`);
     for (const s of students) {
-      stmtLesson.run(groupId, s.id, newLesson, now);
-      stmtStudent.run(s.id);
+      const suspended = s.suspended_until_lesson != null && newLesson <= s.suspended_until_lesson;
+      const absent = absentIds.has(s.id);
+      const excused = absent || suspended;
+      stmtLesson.run(groupId, s.id, newLesson, now, excused ? 1 : 0, excused ? 0 : 1);
+      if (!excused) stmtStudent.run(s.id);
     }
-    // Update payment statuses
     const cycleLessons = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
     db.prepare(`UPDATE students SET payment_status = 'due' WHERE group_id = ? AND active = 1 AND payment_status = 'paid' AND lessons_since_payment >= ?`)
       .run(groupId, cycleLessons);
   })();
 
-  // Trigger homework send with human-like delay
   const { sendHomeworkForLesson, checkPaymentForGroup } = require('../services/scheduler');
   sendHomeworkForLesson(groupId, newLesson);
-
-  // Check if any students now need a payment reminder
   checkPaymentForGroup(groupId);
 
   res.json({ ok: true, lesson_number: newLesson });
+});
+
+// Suspend a student for N lessons
+r.post('/:id/suspend-student', (req, res) => {
+  const groupId = req.params.id;
+  const { student_id, lessons } = req.body;
+  if (!student_id || !lessons || lessons < 1) return res.status(400).json({ error: 'student_id and lessons (≥1) required' });
+
+  const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
+  if (!group) return res.status(404).json({ error: 'Group not found' });
+
+  const suspendUntil = group.current_lesson_number + Number(lessons);
+  db.prepare(`UPDATE students SET suspended_until_lesson = ?, updated_at = datetime('now') WHERE id = ? AND group_id = ?`)
+    .run(suspendUntil, student_id, groupId);
+
+  res.json({ ok: true, suspended_until_lesson: suspendUntil });
+});
+
+// Unsuspend a student
+r.post('/:id/unsuspend-student', (req, res) => {
+  const { student_id } = req.body;
+  if (!student_id) return res.status(400).json({ error: 'student_id required' });
+  db.prepare(`UPDATE students SET suspended_until_lesson = NULL, updated_at = datetime('now') WHERE id = ? AND group_id = ?`)
+    .run(student_id, req.params.id);
+  res.json({ ok: true });
 });
 
 module.exports = r;

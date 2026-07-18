@@ -72,15 +72,23 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS homeworks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    lesson_number INTEGER NOT NULL,
-    filename TEXT NOT NULL,
-    original_name TEXT NOT NULL,
-    file_path TEXT NOT NULL,
-    sent INTEGER DEFAULT 0,
-    sent_at TEXT,
-    order_index INTEGER NOT NULL,
+    homework_number INTEGER NOT NULL,
+    type TEXT NOT NULL DEFAULT 'file',
+    content TEXT,
+    caption TEXT DEFAULT '',
+    filename TEXT,
+    original_name TEXT,
+    file_path TEXT,
     created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS homework_sends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    homework_id INTEGER NOT NULL REFERENCES homeworks(id) ON DELETE CASCADE,
+    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    sent_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(homework_id, group_id)
   );
 
   CREATE TABLE IF NOT EXISTS scheduled_sends (
@@ -147,7 +155,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_students_payment ON students(payment_status);
   CREATE INDEX IF NOT EXISTS idx_lessons_group ON lessons(group_id);
   CREATE INDEX IF NOT EXISTS idx_lessons_student ON lessons(student_id);
-  CREATE INDEX IF NOT EXISTS idx_homeworks_group ON homeworks(group_id);
+  CREATE INDEX IF NOT EXISTS idx_homeworks_number ON homeworks(homework_number);
   CREATE INDEX IF NOT EXISTS idx_scheduled_sends_time ON scheduled_sends(scheduled_at, sent);
   CREATE INDEX IF NOT EXISTS idx_send_log_created ON send_log(created_at);
 `);
@@ -205,6 +213,73 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_students_coach ON students(coach_id);
   CREATE INDEX IF NOT EXISTS idx_students_payment ON students(payment_status);
 `);
+
+// --- Migration: rebuild homeworks table if it uses the old schema ---
+const hwTableDef = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='homeworks'").get();
+if (hwTableDef && hwTableDef.sql.includes('group_id INTEGER NOT NULL')) {
+  db.transaction(() => {
+    db.exec('DROP TABLE IF EXISTS homeworks');
+    db.exec(`
+      CREATE TABLE homeworks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        homework_number INTEGER NOT NULL,
+        type TEXT NOT NULL DEFAULT 'file',
+        content TEXT,
+        caption TEXT DEFAULT '',
+        filename TEXT,
+        original_name TEXT,
+        file_path TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+  })();
+}
+
+if (!columnExists('homework_sends', 'id') && !db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='homework_sends'").get()) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS homework_sends (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      homework_id INTEGER NOT NULL REFERENCES homeworks(id) ON DELETE CASCADE,
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      sent_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(homework_id, group_id)
+    )
+  `);
+}
+
+// --- Migrations: add missing columns to existing tables ---
+if (!columnExists('groups', 'homework_start_from')) {
+  db.exec('ALTER TABLE groups ADD COLUMN homework_start_from INTEGER DEFAULT 1');
+}
+if (!columnExists('groups', 'homework_enabled')) {
+  db.exec('ALTER TABLE groups ADD COLUMN homework_enabled INTEGER DEFAULT 1');
+}
+if (!columnExists('students', 'payment_delay_until')) {
+  db.exec('ALTER TABLE students ADD COLUMN payment_delay_until TEXT');
+}
+if (!columnExists('students', 'suspended_until_lesson')) {
+  db.exec('ALTER TABLE students ADD COLUMN suspended_until_lesson INTEGER DEFAULT NULL');
+}
+
+// --- Registrations table ---
+db.exec(`
+  CREATE TABLE IF NOT EXISTS registrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    level TEXT,
+    fide_rating INTEGER,
+    message TEXT DEFAULT '',
+    status TEXT CHECK(status IN ('new','contacted','enrolled','rejected')) DEFAULT 'new',
+    notes TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  )
+`);
+if (!columnExists('registrations', 'status')) {
+  db.exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'new'");
+}
 
 // Insert default settings if not present
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
