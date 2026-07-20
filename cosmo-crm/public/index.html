@@ -4001,13 +4001,14 @@
         btn.type = 'button';
         btn.className = 'gallery-item';
         btn.setAttribute('data-category', item.category);
-        btn.setAttribute('data-img', item.image || '');
+        btn.setAttribute('data-img', ''); // placeholder mode: no photos yet
         btn.setAttribute('data-alt', item.alt || item.title || '');
         btn.setAttribute('data-caption', item.caption || '');
         btn.setAttribute('data-title', item.title || '');
-        var mediaHtml = item.image
-          ? '<img src="' + item.image + '" alt="' + (item.alt || item.title || '') + '" loading="lazy" />'
-          : '<span class="gallery-emoji" aria-hidden="true">' + (item.emoji || '♟') + '</span>';
+        // Placeholder mode: show a category emoji instead of photos until real
+        // images are available. To use real photos again, restore the item.image branch.
+        var GALLERY_EMOJI = { training: '♟', tournaments: '🏆', awards: '🏅', camps: '⛺' };
+        var mediaHtml = '<span class="gallery-emoji" aria-hidden="true">' + (item.emoji || GALLERY_EMOJI[item.category] || '♟') + '</span>';
         btn.innerHTML = mediaHtml
           + '<div class="gallery-hover"><span class="gallery-hover-label">' + (item.title || '') + '</span></div>';
         galleryGrid.appendChild(btn);
