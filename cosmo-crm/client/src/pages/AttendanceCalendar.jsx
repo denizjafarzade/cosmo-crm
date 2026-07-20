@@ -21,15 +21,19 @@ export default function AttendanceCalendar({ student, onClose }) {
     api.getLessons({ student_id: student.id }).then(setLessons).catch(() => setLessons([]));
   }, [student.id]);
 
-  // Map date-string -> { attended, excused }
+  // Map date-string -> { attended, excused, unexcused }
   const dayMap = useMemo(() => {
     const map = {};
     for (const l of lessons || []) {
       const day = (l.occurred_at || '').slice(0, 10);
       if (!day) continue;
-      if (!map[day]) map[day] = { attended: false, excused: false };
-      if (l.is_excused) map[day].excused = true;
-      else map[day].attended = true;
+      if (!map[day]) map[day] = { attended: false, excused: false, unexcused: false };
+      if (l.absent) {
+        if (l.is_excused) map[day].excused = true;
+        else map[day].unexcused = true;
+      } else {
+        map[day].attended = true;
+      }
     }
     return map;
   }, [lessons]);
@@ -100,6 +104,12 @@ export default function AttendanceCalendar({ student, onClose }) {
           ctx.fillStyle = '#22c55e';
           ctx.fill();
           ctx.fillStyle = '#ffffff';
+        } else if (info && info.unexcused) {
+          ctx.beginPath();
+          ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
         } else if (info && info.excused) {
           ctx.beginPath();
           ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
@@ -121,7 +131,11 @@ export default function AttendanceCalendar({ student, onClose }) {
     ctx.fillStyle = '#475569'; ctx.font = '13px Arial';
     ctx.fillText('Lesson attended', gridX + 26, ly + 4);
     ctx.beginPath(); ctx.arc(gridX + 190, ly, 8, 0, Math.PI * 2); ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#475569';
     ctx.fillText('Excused absence', gridX + 206, ly + 4);
+    ctx.beginPath(); ctx.arc(gridX + 360, ly, 8, 0, Math.PI * 2); ctx.fillStyle = '#ef4444'; ctx.fill();
+    ctx.fillStyle = '#475569';
+    ctx.fillText('Unexcused', gridX + 376, ly + 4);
 
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
@@ -161,14 +175,15 @@ export default function AttendanceCalendar({ student, onClose }) {
                   const info = dayMap[key];
                   const attended = info && info.attended;
                   const excused = info && info.excused && !attended;
+                  const unexcused = info && info.unexcused && !attended && !excused;
                   return (
                     <div key={i} style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{
                         width: 34, height: 34, borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '0.85rem', fontWeight: attended ? 700 : 500,
-                        background: attended ? '#22c55e' : 'transparent',
-                        color: attended ? '#fff' : excused ? '#f59e0b' : 'var(--text, #334155)',
+                        background: attended ? '#22c55e' : unexcused ? '#ef4444' : 'transparent',
+                        color: attended || unexcused ? '#fff' : excused ? '#f59e0b' : 'var(--text, #334155)',
                         border: excused ? '2px solid #f59e0b' : 'none',
                       }}>{cell}</div>
                     </div>
@@ -182,6 +197,9 @@ export default function AttendanceCalendar({ student, onClose }) {
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #f59e0b', display: 'inline-block' }} /> Excused
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} /> Unexcused
                 </span>
               </div>
 

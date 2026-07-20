@@ -261,6 +261,12 @@ if (!columnExists('students', 'payment_delay_until')) {
 if (!columnExists('students', 'suspended_until_lesson')) {
   db.exec('ALTER TABLE students ADD COLUMN suspended_until_lesson INTEGER DEFAULT NULL');
 }
+// Attendance: distinguish a real absence from a normal (auto-incremented) present lesson.
+// absent=0 present; absent=1 & is_excused=1 → allowed absence (not counted);
+// absent=1 & is_excused=0 → unexcused absence (still counts toward payment).
+if (!columnExists('lessons', 'absent')) {
+  db.exec('ALTER TABLE lessons ADD COLUMN absent INTEGER DEFAULT 0');
+}
 
 // --- Registrations table ---
 db.exec(`

@@ -12,7 +12,14 @@ r.get('/', (req, res) => {
 r.get('/:id', (req, res) => {
   const group = db.prepare(`SELECT g.*, c.name as coach_name FROM groups g LEFT JOIN coaches c ON g.coach_id = c.id WHERE g.id = ?`).get(req.params.id);
   if (!group) return res.status(404).json({ error: 'Not found' });
-  group.students = db.prepare('SELECT * FROM students WHERE group_id = ? AND active = 1 ORDER BY name').all(req.params.id);
+  group.students = db.prepare(`
+    SELECT s.*,
+      l.absent AS current_lesson_absent,
+      l.is_excused AS current_lesson_excused
+    FROM students s
+    LEFT JOIN lessons l ON l.student_id = s.id AND l.group_id = s.group_id AND l.lesson_number = ?
+    WHERE s.group_id = ? AND s.active = 1 ORDER BY s.name
+  `).all(group.current_lesson_number, req.params.id);
   group.schedules = db.prepare('SELECT * FROM group_schedules WHERE group_id = ? ORDER BY day_of_week, time').all(req.params.id);
   // Get homeworks mapped for this group
   const allHw = db.prepare('SELECT * FROM homeworks ORDER BY homework_number').all();
@@ -112,6 +119,59 @@ r.post('/:id/lesson-done', (req, res) => {
   checkPaymentForGroup(groupId);
 
   res.json({ ok: true, lesson_number: newLesson });
+});
+
+// Record (or clear) a student's absence for a lesson.
+// Body: { student_id, excused (bool), lesson_number? , present? }
+// - present:true  → clear any absence, mark present (counts toward payment)
+// - present:false → mark absent; excused=true means "allowed" (does not count)
+r.post('/:id/record-absence', (req, res) => {
+  const groupId = Number(req.params.id);
+  const { student_id, excused = true, present = false } = req.body;
+  const lessonNumber = req.body.lesson_number != null
+    ? Number(req.body.lesson_number)
+    : null;
+
+  const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
+  if (!group) return res.status(404).json({ error: 'Group not found' });
+  if (!student_id) return res.status(400).json({ error: 'student_id required' });
+
+  const ln = lessonNumber != null ? lessonNumber : group.current_lesson_number;
+  if (!ln || ln < 1) return res.status(400).json({ error: 'No lesson to record against yet' });
+
+  const existing = db.prepare(
+    'SELECT * FROM lessons WHERE group_id = ? AND student_id = ? AND lesson_number = ?'
+  ).get(groupId, student_id, ln);
+
+  const wasCounting = existing ? existing.counts_toward_payment === 1 : true; // no row = treated as present (auto)
+  const nowCounts = present ? 1 : (excused ? 0 : 1);
+  const nowAbsent = present ? 0 : 1;
+  const nowExcused = present ? 0 : (excused ? 1 : 0);
+
+  db.transaction(() => {
+    if (existing) {
+      db.prepare(
+        'UPDATE lessons SET absent = ?, is_excused = ?, counts_toward_payment = ? WHERE id = ?'
+      ).run(nowAbsent, nowExcused, nowCounts, existing.id);
+    } else {
+      db.prepare(
+        `INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).run(groupId, student_id, ln, new Date().toISOString(), nowExcused, nowCounts, nowAbsent);
+    }
+    // Keep lessons_since_payment in sync when the "counts" flag flips.
+    if (wasCounting && nowCounts === 0) {
+      db.prepare(
+        "UPDATE students SET lessons_since_payment = MAX(lessons_since_payment - 1, 0), updated_at = datetime('now') WHERE id = ?"
+      ).run(student_id);
+    } else if (!wasCounting && nowCounts === 1) {
+      db.prepare(
+        "UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?"
+      ).run(student_id);
+    }
+  })();
+
+  res.json({ ok: true, lesson_number: ln, absent: nowAbsent === 1, excused: nowExcused === 1 });
 });
 
 // Suspend a student for N lessons

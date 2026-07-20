@@ -35,6 +35,7 @@ export default function GroupDetail() {
   const [confirm, setConfirm] = useState(null); // { message, onConfirm }
   const [suspendModal, setSuspendModal] = useState(null); // { student }
   const [suspendLessons, setSuspendLessons] = useState(4);
+  const [absentModal, setAbsentModal] = useState(null); // { student }
 
   const load = useCallback(() => {
     api.getGroup(id).then(g => {
@@ -93,6 +94,12 @@ export default function GroupDetail() {
     load();
   };
 
+  const recordAbsence = async (opts) => {
+    await api.recordAbsence(id, absentModal.id, opts);
+    setAbsentModal(null);
+    load();
+  };
+
   const filteredStudents = allStudents
     .filter(s => !s.group_id || String(s.group_id) !== String(id))
     .filter(s => {
@@ -136,6 +143,35 @@ export default function GroupDetail() {
               <div className="form-actions">
                 <button className="btn btn-outline" onClick={() => setSuspendModal(null)}>Cancel</button>
                 <button className="btn btn-amber" onClick={doSuspend}><FiPause /> Suspend {suspendLessons} lesson{suspendLessons !== 1 ? 's' : ''}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {absentModal && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <h3>Absence — {absentModal.name} {absentModal.surname}</h3>
+              <button className="modal-close" onClick={() => setAbsentModal(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1.25rem' }}>
+                Recording for <strong>lesson #{group.current_lesson_number}</strong>. Everyone is counted present automatically —
+                only mark the students who were absent.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button className="btn btn-amber" onClick={() => recordAbsence({ present: false, excused: true })}>
+                  Allowed absence <span style={{ opacity: 0.8, fontWeight: 400 }}>— excused, does NOT count toward payment</span>
+                </button>
+                <button className="btn btn-red" onClick={() => recordAbsence({ present: false, excused: false })}>
+                  Not allowed <span style={{ opacity: 0.8, fontWeight: 400 }}>— unexcused, still counts toward payment</span>
+                </button>
+                {absentModal.current_lesson_absent === 1 && (
+                  <button className="btn btn-green" onClick={() => recordAbsence({ present: true })}>
+                    <FiCheck /> Mark present (undo absence)
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -244,7 +280,7 @@ export default function GroupDetail() {
             {group.students?.length ? (
               <div className="table-wrap">
                 <table>
-                  <thead><tr><th>Name</th><th>Level</th><th>Payment</th><th>Lessons</th><th>Status</th><th></th></tr></thead>
+                  <thead><tr><th>Name</th><th>Level</th><th>Payment</th><th>Lessons</th><th>Attendance</th><th>Status</th><th></th></tr></thead>
                   <tbody>
                     {group.students.map(s => {
                       const isSuspended = s.suspended_until_lesson != null && group.current_lesson_number < s.suspended_until_lesson;
@@ -258,6 +294,22 @@ export default function GroupDetail() {
                           <td><span className="badge blue">{s.level}</span></td>
                           <td><span className={`badge ${s.payment_status === 'paid' ? 'green' : s.payment_status === 'due' ? 'amber' : 'red'}`}>{s.payment_status}</span></td>
                           <td>{s.lessons_since_payment}</td>
+                          <td>
+                            {group.current_lesson_number < 1 ? (
+                              <span className="badge slate">No lesson yet</span>
+                            ) : s.current_lesson_absent === 1 ? (
+                              <button
+                                className={`badge ${s.current_lesson_excused === 1 ? 'amber' : 'red'}`}
+                                style={{ cursor: 'pointer', border: 'none' }}
+                                onClick={() => setAbsentModal(s)}
+                                title="Change attendance"
+                              >{s.current_lesson_excused === 1 ? 'Absent (allowed)' : 'Absent (not allowed)'}</button>
+                            ) : (
+                              <button className="btn btn-sm btn-outline" onClick={() => setAbsentModal(s)} title={`Mark absent for lesson #${group.current_lesson_number}`}>
+                                Present · mark absent
+                              </button>
+                            )}
+                          </td>
                           <td>
                             {isSuspended
                               ? <span className="badge amber"><FiPause style={{ marginRight: 3 }} />{lessonsLeft} lesson{lessonsLeft !== 1 ? 's' : ''} left</span>
