@@ -1,11 +1,27 @@
 const BASE = '/api';
+const TOKEN_KEY = 'cosmo_crm_token';
+
+export function getToken() { return localStorage.getItem(TOKEN_KEY); }
+export function setToken(t) { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); }
+
+function authHeaders() {
+  const t = getToken();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+function handleUnauthorized() {
+  setToken(null);
+  // Force back to the login gate.
+  if (typeof window !== 'undefined') window.location.reload();
+}
 
 async function request(path, opts = {}) {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...opts.headers },
     ...opts,
     body: opts.body ? (opts.body instanceof FormData ? opts.body : JSON.stringify(opts.body)) : undefined,
   });
+  if (res.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || res.statusText);
@@ -14,10 +30,16 @@ async function request(path, opts = {}) {
 }
 
 function upload(path, formData) {
-  return fetch(`${BASE}${path}`, { method: 'POST', body: formData }).then(r => r.json());
+  return fetch(`${BASE}${path}`, { method: 'POST', body: formData, headers: authHeaders() }).then(r => {
+    if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
+    return r.json();
+  });
 }
 
 const api = {
+  // Auth
+  login: (username, password) => request('/auth/login', { method: 'POST', body: { username, password } }),
+
   // Dashboard
   dashboard: () => request('/reports/dashboard'),
 

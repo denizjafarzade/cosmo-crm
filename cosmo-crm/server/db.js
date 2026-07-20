@@ -292,6 +292,9 @@ const defaults = {
   weekly_report_day: '1',
   weekly_report_time: '09:00',
   excused_absence_limit_per_month: '1',
+  // CRM login. Password stored as a salted scrypt hash (scrypt$salt$hash), never plaintext.
+  auth_username: process.env.AUTH_USERNAME || 'abdullashabanov',
+  auth_password_hash: process.env.AUTH_PASSWORD_HASH || 'scrypt$94b739374428aef6b0b16ca5278e458a$69e1e47703974fb65e065e1265bfbbb5c8db28159920cc642670c65cd16eebde99fb4ee69e1973ab2f5c35ab15a5237e5e8fc56d2c21a8a7faada2f393985f90',
 };
 
 const insertDefaults = db.transaction(() => {

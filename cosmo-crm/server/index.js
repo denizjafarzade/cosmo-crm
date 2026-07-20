@@ -9,6 +9,11 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
+// Auth (login is public; everything else under /api requires a valid token)
+const { router: authRouter, requireAuth } = require('./auth');
+app.use('/api/auth', authRouter);
+app.use('/api', requireAuth);
+
 // API routes
 app.use('/api/coaches', require('./routes/coaches'));
 app.use('/api/students', require('./routes/students'));

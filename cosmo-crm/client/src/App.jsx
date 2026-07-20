@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus } from 'react-icons/fi';
+import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus, FiLogOut } from 'react-icons/fi';
 import { FaChessKnight } from 'react-icons/fa';
-import api from './api';
+import api, { getToken, setToken } from './api';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Groups from './pages/Groups';
@@ -19,16 +20,22 @@ import Registrations from './pages/Registrations';
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [waStatus, setWaStatus] = useState({ status: 'disconnected' });
+  const [authed, setAuthed] = useState(!!getToken());
   const location = useLocation();
 
   useEffect(() => { setSidebarOpen(false); }, [location]);
 
   useEffect(() => {
+    if (!authed) return;
     const poll = () => api.waStatus().then(setWaStatus).catch(() => {});
     poll();
     const id = setInterval(poll, 10000);
     return () => clearInterval(id);
-  }, []);
+  }, [authed]);
+
+  const logout = () => { setToken(null); setAuthed(false); };
+
+  if (!authed) return <Login onLogin={() => setAuthed(true)} />;
 
   const nav = [
     { to: '/', icon: <FiHome />, label: 'Dashboard' },
@@ -72,6 +79,13 @@ export default function App() {
           <span className={`status-dot ${waStatus.status}`} />
           <span>WhatsApp: {waStatus.status}</span>
         </div>
+        <button className="sidebar-logout" onClick={logout} style={{
+          display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 1rem 1rem',
+          padding: '0.5rem 0.75rem', background: 'none', border: '1px solid var(--border, #e2e8f0)',
+          borderRadius: 8, color: 'inherit', cursor: 'pointer', font: 'inherit', fontSize: '0.85rem',
+        }}>
+          <FiLogOut /> Sign out
+        </button>
       </aside>
       <div className="main-content">
         <div className="mobile-header">
