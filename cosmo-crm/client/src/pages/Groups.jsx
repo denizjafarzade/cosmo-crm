@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiX, FiUsers, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import api from '../api';
 
-const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: false, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1 };
+const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1 };
 
 export default function Groups() {
   const [groups, setGroups] = useState([]);
