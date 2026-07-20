@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar } from 'react-icons/fi';
 import api from '../api';
+import AttendanceCalendar from './AttendanceCalendar';
 
 // Level keys stored in the database. 'beginner', 'intermediate', 'advanced' are the
 // original values kept as-is for backward compatibility with existing student records.
@@ -26,6 +27,7 @@ export default function Students() {
   const [editId, setEditId] = useState(null);
   const [payForm, setPayForm] = useState({ amount: '', notes: '' });
   const [historyStudent, setHistoryStudent] = useState(null); // { student, payments }
+  const [calendarStudent, setCalendarStudent] = useState(null);
 
   const load = useCallback(() => {
     const params = {};
@@ -134,6 +136,7 @@ export default function Students() {
                     <td>{s.lessons_since_payment}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 4 }}>
+                        <button className="btn btn-sm btn-outline btn-icon" onClick={() => setCalendarStudent(s)} title="Attendance calendar"><FiCalendar /></button>
                         <button className="btn btn-sm btn-outline btn-icon" onClick={() => openEdit(s)} title="Edit"><FiEdit2 /></button>
                         <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
                         <button className="btn btn-sm btn-red btn-icon" onClick={() => remove(s.id)} title="Deactivate"><FiTrash2 /></button>
@@ -176,6 +179,10 @@ export default function Students() {
             </div>
           </div>
         </div>
+      )}
+
+      {calendarStudent && (
+        <AttendanceCalendar student={calendarStudent} onClose={() => setCalendarStudent(null)} />
       )}
 
       {historyStudent && (
