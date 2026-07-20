@@ -25,6 +25,7 @@ export default function Students() {
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
   const [payForm, setPayForm] = useState({ amount: '', notes: '' });
+  const [historyStudent, setHistoryStudent] = useState(null); // { student, payments }
 
   const load = useCallback(() => {
     const params = {};
@@ -39,6 +40,11 @@ export default function Students() {
   const openAdd = () => { setForm(EMPTY); setEditId(null); setModal('add'); };
   const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '' }); setEditId(s.id); setModal('edit'); };
   const openPay = (s) => { setEditId(s.id); setPayForm({ amount: '', notes: '' }); setModal('pay'); };
+  const openHistory = async (s) => {
+    setHistoryStudent({ student: s, payments: null });
+    const payments = await api.getPayments({ student_id: s.id });
+    setHistoryStudent({ student: s, payments });
+  };
 
   const save = async (e) => {
     e.preventDefault();
@@ -115,7 +121,12 @@ export default function Students() {
               <tbody>
                 {students.map(s => (
                   <tr key={s.id}>
-                    <td><strong>{s.name} {s.surname}</strong><br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span></td>
+                    <td>
+                      <button type="button" className="link-btn" onClick={() => openHistory(s)} title="View payment records" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', font: 'inherit', color: 'var(--primary, #4f46e5)' }}>
+                        <strong>{s.name} {s.surname}</strong>
+                      </button>
+                      <br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span>
+                    </td>
                     <td><span className="badge blue">{levelLabel(s.level)}</span></td>
                     <td>{s.fide_rating != null ? s.fide_rating : 'No rating'}</td>
                     <td>{s.group_name || '—'}</td>
@@ -162,6 +173,46 @@ export default function Students() {
                 <div className="form-group"><label>Notes</label><textarea className="form-input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>
                 <div className="form-actions"><button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" type="submit">{editId ? 'Update' : 'Add'}</button></div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {historyStudent && (
+        <div className="modal-overlay" onClick={() => setHistoryStudent(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Payment Records — {historyStudent.student.name} {historyStudent.student.surname}</h3>
+              <button className="modal-close" onClick={() => setHistoryStudent(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: 12 }}>
+                {paymentBadge(historyStudent.student)}{' '}
+                <span style={{ fontSize: '0.85rem', color: 'var(--slate-400)' }}>
+                  {historyStudent.student.lessons_since_payment} lessons since last payment
+                </span>
+              </div>
+              {historyStudent.payments === null ? (
+                <p style={{ color: 'var(--slate-400)' }}>Loading…</p>
+              ) : historyStudent.payments.length === 0 ? (
+                <p style={{ color: 'var(--slate-400)' }}>No payment records yet.</p>
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead><tr><th>Date</th><th>Amount</th><th>Lessons</th><th>Notes</th></tr></thead>
+                    <tbody>
+                      {historyStudent.payments.map(p => (
+                        <tr key={p.id}>
+                          <td>{(p.confirmed_at || '').slice(0, 10)}</td>
+                          <td>{p.amount != null ? p.amount : '—'}</td>
+                          <td>{p.lessons_covered != null ? p.lessons_covered : '—'}</td>
+                          <td>{p.notes || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -92,14 +92,8 @@ export default function Groups() {
             <div className="modal-body">
               <form onSubmit={save}>
                 <div className="form-group"><label>Name *</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
-                <div className="form-row">
-                  <div className="form-group"><label>WA Group ID</label><input className="form-input" value={form.whatsapp_group_id} onChange={e => setForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} placeholder="...@g.us" /></div>
-                  <div className="form-group"><label>WA Group Name</label><input className="form-input" value={form.whatsapp_group_name} onChange={e => setForm(f => ({ ...f, whatsapp_group_name: e.target.value }))} /></div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group"><label>Coach</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">None</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                  <div className="form-group"><label>Reminder (min before)</label><input className="form-input" type="number" value={form.reminder_minutes_before} onChange={e => setForm(f => ({ ...f, reminder_minutes_before: e.target.value }))} /></div>
-                </div>
+                <div className="form-group"><label>WA Group ID</label><input className="form-input" value={form.whatsapp_group_id} onChange={e => setForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} placeholder="...@g.us" /></div>
+                <div className="form-group"><label>Coach</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">None</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
                 <div className="form-group">
                   <label>Start from Homework #</label>
                   <input className="form-input" type="number" min="1" value={form.homework_start_from} onChange={e => setForm(f => ({ ...f, homework_start_from: parseInt(e.target.value) || 1 }))} />
