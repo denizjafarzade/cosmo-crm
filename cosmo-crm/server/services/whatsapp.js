@@ -63,7 +63,9 @@ function init() {
     status = 'ready';
     qrDataUrl = null;
     console.log('[WhatsApp] Ready');
-    refreshGroups();
+    // On a fresh connection the chat list is still syncing, so getChats() often
+    // returns 0 groups. Retry with backoff until groups appear (or we give up).
+    refreshGroupsWithRetry();
   });
 
   client.on('disconnected', (reason) => {
@@ -110,6 +112,21 @@ async function refreshGroups() {
   isRefreshing = false;
   totalChats = 0;
   return cachedGroups;
+}
+
+// Retry group refresh after connecting: the chat list syncs asynchronously, so
+// the first getChats() right after 'ready' frequently returns nothing.
+async function refreshGroupsWithRetry(attempt = 0) {
+  const MAX_ATTEMPTS = 8;
+  const DELAY_MS = 5000;
+  if (status !== 'ready') return;
+  const groups = await refreshGroups();
+  if (groups.length > 0 || attempt >= MAX_ATTEMPTS) {
+    if (groups.length === 0) console.log('[WhatsApp] No groups found after retries — chats may still be syncing');
+    return;
+  }
+  console.log(`[WhatsApp] 0 groups yet (attempt ${attempt + 1}/${MAX_ATTEMPTS}), retrying in ${DELAY_MS / 1000}s`);
+  setTimeout(() => refreshGroupsWithRetry(attempt + 1), DELAY_MS);
 }
 
 async function sendMessage(chatId, text) {
