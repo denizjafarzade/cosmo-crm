@@ -137,6 +137,43 @@ function init() {
   });
 }
 
+// Force WhatsApp Web to load the full chat list. The list is virtualized and
+// lazy-loaded, so only chats scrolled into view get created in the store. We
+// scroll the chat pane to the bottom repeatedly until it stops growing, which
+// populates the store with every conversation (models persist even after the
+// DOM row unmounts).
+async function forceLoadAllChats() {
+  const page = client.pupPage;
+  if (!page) return;
+  try {
+    const info = await page.evaluate(async () => {
+      const pane = document.querySelector('#pane-side')
+        || document.querySelector('div[aria-label="Chat list"]')
+        || document.querySelector('[data-testid="chat-list"]');
+      if (!pane) return { error: 'chat pane not found' };
+      let lastHeight = -1;
+      let stable = 0;
+      for (let i = 0; i < 60; i++) {
+        pane.scrollTop = pane.scrollHeight;
+        await new Promise(r => setTimeout(r, 350));
+        if (pane.scrollHeight === lastHeight) {
+          stable++;
+          if (stable >= 3) break; // height unchanged 3x → reached the end
+        } else {
+          stable = 0;
+          lastHeight = pane.scrollHeight;
+        }
+      }
+      pane.scrollTop = 0;
+      return { done: true };
+    });
+    if (info && info.error) console.warn(`[WhatsApp] forceLoadAllChats: ${info.error}`);
+    else console.log('[WhatsApp] Chat list fully scrolled to load all conversations');
+  } catch (e) {
+    console.warn('[WhatsApp] forceLoadAllChats failed:', e.message);
+  }
+}
+
 // Fallback: read groups straight from WhatsApp Web's in-page Store. Used when
 // client.getChats() throws a minified error (library/WA-Web version mismatch).
 async function getGroupsViaStore() {
@@ -215,8 +252,10 @@ async function refreshGroups() {
       }
       console.log(`[WhatsApp] getChats: scanned ${totalChats} chats, ${collected.length} groups`);
     } catch (primaryErr) {
-      // Fallback path: read groups directly from the page Store.
-      console.warn(`[WhatsApp] getChats() failed (${primaryErr.message}), trying Store fallback`);
+      // Fallback path: force the full chat list to load, then read groups
+      // directly from the page Store.
+      console.warn(`[WhatsApp] getChats() failed (${primaryErr.message}), force-loading chats + Store fallback`);
+      await forceLoadAllChats();
       collected = await getGroupsViaStore();
       console.log(`[WhatsApp] Store fallback: ${collected.length} groups`);
     }
