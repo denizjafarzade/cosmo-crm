@@ -119,6 +119,8 @@ const api = {
   // WhatsApp
   waStatus: () => request('/whatsapp/status'),
   waRefreshGroups: () => request('/whatsapp/refresh-groups', { method: 'POST' }),
+  waReconnect: () => request('/whatsapp/reconnect', { method: 'POST' }),
+  waDisconnect: () => request('/whatsapp/disconnect', { method: 'POST' }),
   waSendTest: (data) => request('/whatsapp/send-test', { method: 'POST', body: data }),
 };
 

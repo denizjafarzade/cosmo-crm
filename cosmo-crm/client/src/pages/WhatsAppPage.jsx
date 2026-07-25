@@ -25,10 +25,15 @@ export default function WhatsAppPage() {
 
   const reconnect = async () => {
     setReconnecting(true);
-    try {
-      await fetch('/api/whatsapp/reconnect', { method: 'POST' });
-    } catch (e) {}
+    try { await api.waReconnect(); } catch (e) {}
     setTimeout(() => { load(); setReconnecting(false); }, 3000);
+  };
+
+  const disconnect = async () => {
+    if (!window.confirm('Disconnect WhatsApp? This unlinks the device and clears the session — you will need to scan a new QR code to reconnect.')) return;
+    setReconnecting(true);
+    try { await api.waDisconnect(); } catch (e) {}
+    setTimeout(() => { load(); setReconnecting(false); }, 2000);
   };
 
   const sendTest = async (e) => {
@@ -52,9 +57,16 @@ export default function WhatsAppPage() {
     <>
       <div className="page-header">
         <h1>WhatsApp Connection</h1>
-        <button className="btn btn-outline" onClick={reconnect} disabled={reconnecting}>
-          <FiRefreshCw /> {reconnecting ? 'Reconnecting...' : 'Reconnect'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-outline" onClick={reconnect} disabled={reconnecting}>
+            <FiRefreshCw /> {reconnecting ? 'Working...' : 'Reconnect'}
+          </button>
+          {(wa.status === 'ready' || wa.status === 'qr' || wa.status === 'connecting') && (
+            <button className="btn" style={{ background: 'var(--red, #dc2626)', color: '#fff' }} onClick={disconnect} disabled={reconnecting}>
+              <FiWifiOff /> Disconnect
+            </button>
+          )}
+        </div>
       </div>
       <div className="page-body">
         {/* Status banner */}

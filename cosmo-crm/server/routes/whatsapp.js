@@ -33,4 +33,13 @@ r.post('/reconnect', (req, res) => {
   res.json({ ok: true, message: 'Reconnecting...' });
 });
 
+r.post('/disconnect', async (req, res) => {
+  try {
+    await wa.disconnect();
+    res.json({ ok: true, message: 'Disconnected. Click Reconnect to link a new device.' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = r;

@@ -129,10 +129,28 @@ async function refreshGroupsWithRetry(attempt = 0) {
   setTimeout(() => refreshGroupsWithRetry(attempt + 1), DELAY_MS);
 }
 
+// Simulate a human typing in the chat before a message is sent, so activity
+// looks organic rather than instant/bot-like.
+async function simulateTyping(chatId, text) {
+  try {
+    const chat = await client.getChatById(chatId);
+    await chat.sendStateTyping();
+    // ~40 wpm reading/typing pace, clamped to a sane range.
+    const len = (text || '').length;
+    const typeMs = Math.min(9000, Math.max(1500, len * 60 + Math.random() * 1500));
+    await new Promise(r => setTimeout(r, typeMs));
+    await chat.clearState();
+  } catch (e) {
+    // Typing simulation is best-effort; never block the actual send.
+  }
+}
+
 async function sendMessage(chatId, text) {
   if (status !== 'ready') throw new Error('WhatsApp not connected');
-  await randomDelay();
+  await randomDelay(); // pause before "opening" the chat
+  await simulateTyping(chatId, text);
   const msg = await client.sendMessage(chatId, text);
+  try { const chat = await client.getChatById(chatId); await chat.sendSeen(); } catch {}
   return msg;
 }
 
@@ -140,6 +158,7 @@ async function sendFile(chatId, filePath, caption) {
   if (status !== 'ready') throw new Error('WhatsApp not connected');
   if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
   await randomDelay(3000, 7000);
+  await simulateTyping(chatId, caption || '');
   const media = MessageMedia.fromFilePath(filePath);
   const msg = await client.sendMessage(chatId, media, { caption: caption || '' });
   return msg;
@@ -172,4 +191,28 @@ function destroy() {
   }
 }
 
-module.exports = { init, getStatus, getClient, refreshGroups, sendMessage, sendFile, sendToNumber, sendFileToNumber, logSend, destroy, randomDelay };
+// Full logout: unlink the device and clear the saved session so the next
+// init() shows a fresh QR code (used by the "Disconnect" button).
+async function disconnect() {
+  cachedGroups = [];
+  qrDataUrl = null;
+  try {
+    if (client) {
+      try { await client.logout(); } catch (e) { /* may fail if not ready */ }
+      try { await client.destroy(); } catch (e) {}
+    }
+  } finally {
+    client = null;
+    status = 'disconnected';
+  }
+  // Best-effort: remove the persisted auth session so it can't silently re-link.
+  try {
+    const authDir = path.join(__dirname, '..', '..', '.wwebjs_auth');
+    if (fs.existsSync(authDir)) fs.rmSync(authDir, { recursive: true, force: true });
+  } catch (e) {
+    console.error('[WhatsApp] Could not clear auth session:', e.message);
+  }
+  return { ok: true };
+}
+
+module.exports = { init, getStatus, getClient, refreshGroups, sendMessage, sendFile, sendToNumber, sendFileToNumber, logSend, destroy, disconnect, randomDelay };
