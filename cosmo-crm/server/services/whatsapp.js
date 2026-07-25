@@ -113,14 +113,17 @@ function init() {
   // activity will show up in the list without needing getChats().
   const learnFromMessage = async (msg) => {
     try {
-      const from = msg && (msg.from || (msg.id && msg.id.remote)) || '';
-      if (!from.endsWith('@g.us')) return;
-      if (cachedGroups.some(g => g.id === from)) return;
-      let name = from;
+      // A message in a group can carry the group id in from (incoming), to
+      // (your own outgoing message), or id.remote — check all of them.
+      const candidates = [msg && msg.from, msg && msg.to, msg && msg.id && msg.id.remote];
+      const groupId = candidates.find(x => typeof x === 'string' && x.endsWith('@g.us'));
+      if (!groupId) return;
+      if (cachedGroups.some(g => g.id === groupId)) return;
+      let name = groupId;
       try { const chat = await msg.getChat(); name = chat?.name || name; } catch (e) {}
-      cachedGroups = [...cachedGroups, { id: from, name }];
+      cachedGroups = [...cachedGroups, { id: groupId, name }];
       lastGroupRefresh = Date.now();
-      console.log(`[WhatsApp] Learned group from message: ${name}`);
+      console.log(`[WhatsApp] Learned group from message: ${name} (${groupId})`);
     } catch (e) { /* ignore */ }
   };
   client.on('message', learnFromMessage);

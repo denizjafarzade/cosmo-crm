@@ -156,16 +156,15 @@ export default function WhatsAppPage() {
               ) : !wa.isRefreshing ? (
                 <div className="empty-state">
                   <FiWifiOff style={{ fontSize: '2rem', marginBottom: 8 }} />
-                  <p>{wa.status === 'ready' ? 'Click "Refresh" to load your WhatsApp groups' : 'Connect WhatsApp first to see your groups'}</p>
-                  {wa.status === 'ready' && wa.groupError && (
-                    <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8 }}>
-                      Last scan error: {wa.groupError}
-                    </p>
-                  )}
-                  {wa.status === 'ready' && !wa.groupError && wa.lastGroupRefresh > 0 && (
-                    <p style={{ color: 'var(--slate-400)', fontSize: '0.8rem', marginTop: 8 }}>
-                      Last scan found 0 groups. If your chats were still syncing, wait a moment and Refresh again.
-                    </p>
+                  {wa.status === 'ready' ? (
+                    <>
+                      <p><strong>Send a message in a WhatsApp group</strong> (from your phone) and it will appear here automatically.</p>
+                      <p style={{ color: 'var(--slate-400)', fontSize: '0.8rem', marginTop: 8 }}>
+                        WhatsApp Web changed how the chat list loads, so groups are detected from message activity. Post any message in each group you want to manage, then it shows up here to link.
+                      </p>
+                    </>
+                  ) : (
+                    <p>Connect WhatsApp first to see your groups</p>
                   )}
                 </div>
               ) : null}
