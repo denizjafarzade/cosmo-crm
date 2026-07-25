@@ -12,6 +12,7 @@ let cachedGroups = [];
 let lastGroupRefresh = 0;
 let isRefreshing = false;
 let totalChats = 0;
+let lastGroupError = null;
 
 function logSend(type, target, targetName, message, sendStatus, error) {
   db.prepare(`INSERT INTO send_log (type, target, target_name, message, status, error, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`)
@@ -89,24 +90,67 @@ function init() {
   });
 }
 
+// Fallback: read groups straight from WhatsApp Web's in-page Store. Used when
+// client.getChats() throws a minified error (library/WA-Web version mismatch).
+async function getGroupsViaStore() {
+  const page = client.pupPage;
+  if (!page) throw new Error('no puppeteer page');
+  const result = await page.evaluate(() => {
+    try {
+      const store = window.Store || (window.WWebJS && window.WWebJS.Store);
+      const chatMod = store && store.Chat;
+      if (!chatMod) return { error: 'Store.Chat unavailable' };
+      const models = typeof chatMod.getModelsArray === 'function'
+        ? chatMod.getModelsArray()
+        : (chatMod.models || []);
+      const out = [];
+      for (const c of models) {
+        const id = c && c.id && (c.id._serialized || (typeof c.id.toString === 'function' ? c.id.toString() : ''));
+        if (id && id.endsWith('@g.us')) {
+          out.push({ id, name: c.name || c.formattedTitle || (c.contact && c.contact.name) || id });
+        }
+      }
+      return { groups: out };
+    } catch (e) {
+      return { error: String((e && e.message) || e) };
+    }
+  });
+  if (result && result.error) throw new Error('store: ' + result.error);
+  return (result && result.groups) || [];
+}
+
 async function refreshGroups() {
   if (status !== 'ready' || isRefreshing) return cachedGroups;
   isRefreshing = true;
-  cachedGroups = [];
+  lastGroupError = null;
   totalChats = 0;
   try {
-    const chats = await client.getChats();
-    totalChats = chats.length;
-    for (const c of chats) {
-      if (c.isGroup) {
-        cachedGroups = [...cachedGroups, { id: c.id._serialized, name: c.name }];
+    let collected = [];
+    try {
+      // Primary path: the library's own chat list, raced against a timeout.
+      const chats = await Promise.race([
+        client.getChats(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('getChats() timed out after 60s')), 60000)),
+      ]);
+      totalChats = chats.length;
+      for (const c of chats) {
+        const serialized = c.id?._serialized || '';
+        if (c.isGroup || serialized.endsWith('@g.us')) {
+          collected.push({ id: serialized, name: c.name || c.formattedTitle || serialized });
+        }
+        await new Promise(resolve => setImmediate(resolve));
       }
-      // Yield to event loop so status polls can see partial results
-      await new Promise(resolve => setImmediate(resolve));
+      console.log(`[WhatsApp] getChats: scanned ${totalChats} chats, ${collected.length} groups`);
+    } catch (primaryErr) {
+      // Fallback path: read groups directly from the page Store.
+      console.warn(`[WhatsApp] getChats() failed (${primaryErr.message}), trying Store fallback`);
+      collected = await getGroupsViaStore();
+      console.log(`[WhatsApp] Store fallback: ${collected.length} groups`);
     }
+    cachedGroups = collected;
     lastGroupRefresh = Date.now();
-    console.log(`[WhatsApp] Cached ${cachedGroups.length} groups`);
   } catch (e) {
+    lastGroupError = e.message;
     console.error('[WhatsApp] Group refresh error:', e.message);
   }
   isRefreshing = false;
@@ -176,7 +220,7 @@ async function sendFileToNumber(number, filePath, caption) {
 }
 
 function getStatus() {
-  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError, isRefreshing, totalChats };
+  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError, isRefreshing, totalChats, groupError: lastGroupError };
 }
 
 function getClient() {

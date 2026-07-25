@@ -157,6 +157,16 @@ export default function WhatsAppPage() {
                 <div className="empty-state">
                   <FiWifiOff style={{ fontSize: '2rem', marginBottom: 8 }} />
                   <p>{wa.status === 'ready' ? 'Click "Refresh" to load your WhatsApp groups' : 'Connect WhatsApp first to see your groups'}</p>
+                  {wa.status === 'ready' && wa.groupError && (
+                    <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8 }}>
+                      Last scan error: {wa.groupError}
+                    </p>
+                  )}
+                  {wa.status === 'ready' && !wa.groupError && wa.lastGroupRefresh > 0 && (
+                    <p style={{ color: 'var(--slate-400)', fontSize: '0.8rem', marginTop: 8 }}>
+                      Last scan found 0 groups. If your chats were still syncing, wait a moment and Refresh again.
+                    </p>
+                  )}
                 </div>
               ) : null}
             </div>
