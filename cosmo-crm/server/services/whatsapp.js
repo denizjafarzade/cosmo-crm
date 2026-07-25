@@ -184,24 +184,40 @@ async function getGroupsViaStore() {
   const page = client.pupPage;
   if (!page) throw new Error('no puppeteer page');
   const result = await page.evaluate(() => {
-    const diag = { hasStore: false, storeKeys: [], chatSource: null, chatCount: 0, groupMetaCount: 0 };
     const w = window;
-    diag.hasStore = !!w.Store;
-    if (w.Store) diag.storeKeys = Object.keys(w.Store).slice(0, 60);
+    const diag = {
+      hasStore: !!w.Store, hasRequire: typeof w.require === 'function', hasMR: !!w.mR,
+      storeKeys: w.Store ? Object.keys(w.Store).slice(0, 60) : [],
+      chatSource: null, chatCount: 0, groupMetaCount: 0, loader: null,
+    };
 
     function modelsOf(coll) {
       if (!coll) return null;
-      if (typeof coll.getModelsArray === 'function') return coll.getModelsArray();
-      if (Array.isArray(coll.models)) return coll.models;
-      if (Array.isArray(coll._models)) return coll._models;
+      try {
+        if (typeof coll.getModelsArray === 'function') return coll.getModelsArray();
+        if (Array.isArray(coll.models)) return coll.models;
+        if (Array.isArray(coll._models)) return coll._models;
+      } catch (e) {}
       return null;
     }
 
-    // Try the Chat collection first, then the GroupMetadata collection (which
-    // lists groups you belong to even when the chat row hasn't been opened).
-    const chatColl = w.Store && w.Store.Chat;
+    // Resolve a module by name across the loaders modern WhatsApp Web uses.
+    function req(name) {
+      try { if (typeof w.require === 'function') return w.require(name); } catch (e) {}
+      try { if (w.mR && w.mR.modules) { const m = w.mR.findModule ? w.mR.findModule(name) : null; if (m && m[0]) return m[0]; } } catch (e) {}
+      return null;
+    }
+
+    // Find the Chat collection: window.Store first, then module loader.
+    let chatColl = w.Store && w.Store.Chat;
+    if (chatColl) diag.loader = 'window.Store';
+    if (!modelsOf(chatColl)) {
+      const mod = req('WAWebChatCollection');
+      const c = mod && (mod.ChatCollection || mod.default || mod.Chat);
+      if (modelsOf(c)) { chatColl = c; diag.loader = 'require:WAWebChatCollection'; }
+    }
     let models = modelsOf(chatColl);
-    if (models) { diag.chatSource = 'Store.Chat'; diag.chatCount = models.length; }
+    if (models) { diag.chatSource = diag.loader; diag.chatCount = models.length; }
 
     const out = [];
     const seen = new Set();
@@ -210,37 +226,39 @@ async function getGroupsViaStore() {
       seen.add(id);
       out.push({ id, name: name || id });
     };
+    const readId = (o) => { try { return (o && o.id && (o.id._serialized || (o.id.toString && o.id.toString()))) || ''; } catch (e) { return ''; } };
 
     if (models) {
       for (const c of models) {
-        let id = '';
-        try { id = (c && c.id && (c.id._serialized || (c.id.toString && c.id.toString()))) || ''; } catch (e) { continue; }
+        const id = readId(c);
         if (!id.endsWith('@g.us')) continue;
         let name = id;
-        try {
-          name = c.formattedTitle || c.name
-            || (c.groupMetadata && c.groupMetadata.subject)
-            || (c.contact && (c.contact.name || c.contact.pushname)) || id;
-        } catch (e) {}
+        try { name = c.formattedTitle || c.name || (c.groupMetadata && c.groupMetadata.subject) || (c.contact && (c.contact.name || c.contact.pushname)) || id; } catch (e) {}
         pushGroup(id, name);
       }
     }
 
-    // Also pull from GroupMetadata — this often contains groups the Chat list
-    // hasn't lazily loaded yet.
-    const gmColl = w.Store && (w.Store.GroupMetadata || w.Store.GroupMetadataCollection);
+    // GroupMetadata collection: lists groups you belong to even if the chat row
+    // hasn't loaded. Try window.Store then the module loader.
+    let gmColl = w.Store && (w.Store.GroupMetadata || w.Store.GroupMetadataCollection);
+    if (!modelsOf(gmColl)) {
+      const mod = req('WAWebGroupMetadataCollection');
+      gmColl = mod && (mod.GroupMetadataCollection || mod.default || mod.GroupMetadata);
+    }
     const gmModels = modelsOf(gmColl);
     if (gmModels) {
       diag.groupMetaCount = gmModels.length;
       for (const g of gmModels) {
-        let id = '';
-        try { id = (g && g.id && (g.id._serialized || (g.id.toString && g.id.toString()))) || ''; } catch (e) { continue; }
+        const id = readId(g);
         if (!id.endsWith('@g.us')) continue;
         let name = id;
         try { name = g.subject || (g.groupMetadata && g.groupMetadata.subject) || id; } catch (e) {}
         pushGroup(id, name);
       }
     }
+
+    // Expose a few window keys that look loader-related, to guide the next step.
+    diag.winKeys = Object.keys(w).filter(k => /store|require|webpack|^mR$|wweb|chat|__/i.test(k)).slice(0, 40);
 
     return { groups: out, diag };
   });
