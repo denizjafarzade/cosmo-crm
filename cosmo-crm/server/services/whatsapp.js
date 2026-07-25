@@ -143,26 +143,52 @@ async function getGroupsViaStore() {
   const page = client.pupPage;
   if (!page) throw new Error('no puppeteer page');
   const result = await page.evaluate(() => {
+    // Locate the Chat collection across the store layouts different builds use.
+    function findChatCollection() {
+      const w = window;
+      const candidates = [
+        w.Store && w.Store.Chat,
+        w.WWebJS && w.WWebJS.Store && w.WWebJS.Store.Chat,
+        w.Store && w.Store.Chats,
+      ];
+      for (const c of candidates) {
+        if (c && (typeof c.getModelsArray === 'function' || Array.isArray(c.models) || Array.isArray(c._models))) return c;
+      }
+      // Last resort: some builds expose a modules map with a Chat collection.
+      return null;
+    }
     try {
-      const store = window.Store || (window.WWebJS && window.WWebJS.Store);
-      const chatMod = store && store.Chat;
-      if (!chatMod) return { error: 'Store.Chat unavailable' };
+      const chatMod = findChatCollection();
+      if (!chatMod) return { error: 'Chat collection not found', keys: Object.keys(window.Store || {}).slice(0, 40) };
       const models = typeof chatMod.getModelsArray === 'function'
         ? chatMod.getModelsArray()
-        : (chatMod.models || []);
+        : (chatMod.models || chatMod._models || []);
       const out = [];
+      let total = 0;
       for (const c of models) {
-        const id = c && c.id && (c.id._serialized || (typeof c.id.toString === 'function' ? c.id.toString() : ''));
-        if (id && id.endsWith('@g.us')) {
-          out.push({ id, name: c.name || c.formattedTitle || (c.contact && c.contact.name) || id });
-        }
+        total++;
+        // Read only id + a name field; avoid full serialize (which throws on new WA Web).
+        let id = '';
+        try { id = (c && c.id && (c.id._serialized || (c.id.toString && c.id.toString()))) || ''; } catch (e) { continue; }
+        if (!id.endsWith('@g.us')) continue;
+        let name = id;
+        try {
+          name = c.formattedTitle || c.name
+            || (c.groupMetadata && c.groupMetadata.subject)
+            || (c.contact && (c.contact.name || c.contact.pushname))
+            || id;
+        } catch (e) { /* keep id */ }
+        out.push({ id, name });
       }
-      return { groups: out };
+      return { groups: out, total };
     } catch (e) {
       return { error: String((e && e.message) || e) };
     }
   });
-  if (result && result.error) throw new Error('store: ' + result.error);
+  if (result && result.error) {
+    throw new Error('store: ' + result.error + (result.keys ? ' [Store keys: ' + result.keys.join(',') + ']' : ''));
+  }
+  if (result && typeof result.total === 'number') console.log(`[WhatsApp] Store: ${result.total} chat models, ${result.groups.length} groups`);
   return (result && result.groups) || [];
 }
 
@@ -194,7 +220,11 @@ async function refreshGroups() {
       collected = await getGroupsViaStore();
       console.log(`[WhatsApp] Store fallback: ${collected.length} groups`);
     }
-    cachedGroups = collected;
+    // Merge with anything already discovered (e.g. from messages) so a partial
+    // read never drops known groups. New data wins for the name.
+    const byId = new Map(cachedGroups.map(g => [g.id, g]));
+    for (const g of collected) byId.set(g.id, g);
+    cachedGroups = Array.from(byId.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     lastGroupRefresh = Date.now();
   } catch (e) {
     lastGroupError = e.message;
