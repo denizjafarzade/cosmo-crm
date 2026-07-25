@@ -13,6 +13,7 @@ let lastGroupRefresh = 0;
 let isRefreshing = false;
 let totalChats = 0;
 let lastGroupError = null;
+let lastGroupDiag = null;
 
 function logSend(type, target, targetName, message, sendStatus, error) {
   db.prepare(`INSERT INTO send_log (type, target, target_name, message, status, error, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`)
@@ -119,10 +120,13 @@ function init() {
       const groupId = candidates.find(x => typeof x === 'string' && x.endsWith('@g.us'));
       if (!groupId) return;
       if (cachedGroups.some(g => g.id === groupId)) return;
+      // Reserve the id synchronously so two near-simultaneous messages can't both
+      // pass the check above and create a duplicate row.
+      cachedGroups = [...cachedGroups, { id: groupId, name: groupId }];
+      lastGroupRefresh = Date.now();
       let name = groupId;
       try { const chat = await msg.getChat(); name = chat?.name || name; } catch (e) {}
-      cachedGroups = [...cachedGroups, { id: groupId, name }];
-      lastGroupRefresh = Date.now();
+      cachedGroups = cachedGroups.map(g => (g.id === groupId ? { id: groupId, name } : g));
       console.log(`[WhatsApp] Learned group from message: ${name} (${groupId})`);
     } catch (e) { /* ignore */ }
   };
@@ -180,31 +184,35 @@ async function getGroupsViaStore() {
   const page = client.pupPage;
   if (!page) throw new Error('no puppeteer page');
   const result = await page.evaluate(() => {
-    // Locate the Chat collection across the store layouts different builds use.
-    function findChatCollection() {
-      const w = window;
-      const candidates = [
-        w.Store && w.Store.Chat,
-        w.WWebJS && w.WWebJS.Store && w.WWebJS.Store.Chat,
-        w.Store && w.Store.Chats,
-      ];
-      for (const c of candidates) {
-        if (c && (typeof c.getModelsArray === 'function' || Array.isArray(c.models) || Array.isArray(c._models))) return c;
-      }
-      // Last resort: some builds expose a modules map with a Chat collection.
+    const diag = { hasStore: false, storeKeys: [], chatSource: null, chatCount: 0, groupMetaCount: 0 };
+    const w = window;
+    diag.hasStore = !!w.Store;
+    if (w.Store) diag.storeKeys = Object.keys(w.Store).slice(0, 60);
+
+    function modelsOf(coll) {
+      if (!coll) return null;
+      if (typeof coll.getModelsArray === 'function') return coll.getModelsArray();
+      if (Array.isArray(coll.models)) return coll.models;
+      if (Array.isArray(coll._models)) return coll._models;
       return null;
     }
-    try {
-      const chatMod = findChatCollection();
-      if (!chatMod) return { error: 'Chat collection not found', keys: Object.keys(window.Store || {}).slice(0, 40) };
-      const models = typeof chatMod.getModelsArray === 'function'
-        ? chatMod.getModelsArray()
-        : (chatMod.models || chatMod._models || []);
-      const out = [];
-      let total = 0;
+
+    // Try the Chat collection first, then the GroupMetadata collection (which
+    // lists groups you belong to even when the chat row hasn't been opened).
+    const chatColl = w.Store && w.Store.Chat;
+    let models = modelsOf(chatColl);
+    if (models) { diag.chatSource = 'Store.Chat'; diag.chatCount = models.length; }
+
+    const out = [];
+    const seen = new Set();
+    const pushGroup = (id, name) => {
+      if (!id || !id.endsWith('@g.us') || seen.has(id)) return;
+      seen.add(id);
+      out.push({ id, name: name || id });
+    };
+
+    if (models) {
       for (const c of models) {
-        total++;
-        // Read only id + a name field; avoid full serialize (which throws on new WA Web).
         let id = '';
         try { id = (c && c.id && (c.id._serialized || (c.id.toString && c.id.toString()))) || ''; } catch (e) { continue; }
         if (!id.endsWith('@g.us')) continue;
@@ -212,20 +220,35 @@ async function getGroupsViaStore() {
         try {
           name = c.formattedTitle || c.name
             || (c.groupMetadata && c.groupMetadata.subject)
-            || (c.contact && (c.contact.name || c.contact.pushname))
-            || id;
-        } catch (e) { /* keep id */ }
-        out.push({ id, name });
+            || (c.contact && (c.contact.name || c.contact.pushname)) || id;
+        } catch (e) {}
+        pushGroup(id, name);
       }
-      return { groups: out, total };
-    } catch (e) {
-      return { error: String((e && e.message) || e) };
     }
+
+    // Also pull from GroupMetadata — this often contains groups the Chat list
+    // hasn't lazily loaded yet.
+    const gmColl = w.Store && (w.Store.GroupMetadata || w.Store.GroupMetadataCollection);
+    const gmModels = modelsOf(gmColl);
+    if (gmModels) {
+      diag.groupMetaCount = gmModels.length;
+      for (const g of gmModels) {
+        let id = '';
+        try { id = (g && g.id && (g.id._serialized || (g.id.toString && g.id.toString()))) || ''; } catch (e) { continue; }
+        if (!id.endsWith('@g.us')) continue;
+        let name = id;
+        try { name = g.subject || (g.groupMetadata && g.groupMetadata.subject) || id; } catch (e) {}
+        pushGroup(id, name);
+      }
+    }
+
+    return { groups: out, diag };
   });
-  if (result && result.error) {
-    throw new Error('store: ' + result.error + (result.keys ? ' [Store keys: ' + result.keys.join(',') + ']' : ''));
+  lastGroupDiag = result && result.diag ? result.diag : null;
+  if (lastGroupDiag) {
+    console.log(`[WhatsApp] Store diag: hasStore=${lastGroupDiag.hasStore} chatSrc=${lastGroupDiag.chatSource} chats=${lastGroupDiag.chatCount} groupMeta=${lastGroupDiag.groupMetaCount} → ${result.groups.length} groups`);
+    if (!lastGroupDiag.chatSource) console.log('[WhatsApp] Store keys:', (lastGroupDiag.storeKeys || []).join(','));
   }
-  if (result && typeof result.total === 'number') console.log(`[WhatsApp] Store: ${result.total} chat models, ${result.groups.length} groups`);
   return (result && result.groups) || [];
 }
 
@@ -336,7 +359,7 @@ async function sendFileToNumber(number, filePath, caption) {
 }
 
 function getStatus() {
-  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError, isRefreshing, totalChats, groupError: lastGroupError };
+  return { status, qr: qrDataUrl, groups: cachedGroups, lastGroupRefresh, error: statusError, isRefreshing, totalChats, groupError: lastGroupError, groupDiag: lastGroupDiag };
 }
 
 function getClient() {

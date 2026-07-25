@@ -120,7 +120,15 @@ export default function WhatsAppPage() {
               )}
               {!wa.isRefreshing && wa.groups?.length > 0 && (
                 <div style={{ padding: '0.4rem 0.75rem', marginBottom: '0.75rem', background: 'var(--green-bg)', borderRadius: 8, fontSize: '0.8rem', color: 'var(--green)' }}>
-                  ✓ All chats scanned — {wa.groups.length} groups found
+                  ✓ {wa.groups.length} groups found
+                </div>
+              )}
+              {wa.status === 'ready' && wa.groupDiag && (
+                <div style={{ padding: '0.4rem 0.75rem', marginBottom: '0.75rem', background: 'var(--slate-50)', borderRadius: 8, fontSize: '0.72rem', color: 'var(--slate-500)', fontFamily: 'monospace' }}>
+                  diag: hasStore={String(wa.groupDiag.hasStore)} · chatSrc={String(wa.groupDiag.chatSource)} · chats={wa.groupDiag.chatCount} · groupMeta={wa.groupDiag.groupMetaCount}
+                  {!wa.groupDiag.chatSource && wa.groupDiag.storeKeys?.length > 0 && (
+                    <div style={{ marginTop: 4, wordBreak: 'break-all' }}>StoreKeys: {wa.groupDiag.storeKeys.join(', ')}</div>
+                  )}
                 </div>
               )}
               {wa.groups?.length ? (
