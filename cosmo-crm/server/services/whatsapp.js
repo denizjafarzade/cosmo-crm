@@ -18,7 +18,7 @@ function logSend(type, target, targetName, message, sendStatus, error) {
     .run(type, target, targetName, message?.substring(0, 500), sendStatus, error || null);
 }
 
-function randomDelay(minMs = 2000, maxMs = 5000) {
+function randomDelay(minMs = 4000, maxMs = 9000) {
   return new Promise(resolve => setTimeout(resolve, minMs + Math.random() * (maxMs - minMs)));
 }
 

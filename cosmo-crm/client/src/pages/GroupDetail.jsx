@@ -195,8 +195,6 @@ export default function GroupDetail() {
                 <form onSubmit={saveGroup}>
                   <div className="form-group"><label>Name</label><input className="form-input" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} /></div>
                   <div className="form-group"><label>WA Group ID</label><input className="form-input" value={editForm.whatsapp_group_id} onChange={e => setEditForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} /></div>
-                  <div className="form-group"><label>Reminder (min)</label><input className="form-input" type="number" value={editForm.reminder_minutes_before} onChange={e => setEditForm(f => ({ ...f, reminder_minutes_before: e.target.value }))} /></div>
-                  <div className="form-group"><label>Reminder Target</label><select className="form-input" value={editForm.reminder_target} onChange={e => setEditForm(f => ({ ...f, reminder_target: e.target.value }))}><option value="group">Group</option><option value="parents">Parents</option></select></div>
                   <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={editForm.auto_increment_lessons} onChange={e => setEditForm(f => ({ ...f, auto_increment_lessons: e.target.checked }))} />
                     <label style={{ margin: 0 }}>Auto-increment on schedule</label>
@@ -208,7 +206,6 @@ export default function GroupDetail() {
                   <p><strong>WA ID:</strong> {group.whatsapp_group_id || 'Not linked'}</p>
                   <p><strong>Coach:</strong> {group.coach_name || 'None'}</p>
                   <p><strong>Mode:</strong> {group.auto_increment_lessons ? 'Auto' : 'Manual'}</p>
-                  <p><strong>Reminder:</strong> {group.reminder_minutes_before} min before → {group.reminder_target}</p>
                   <p><strong>Homework starts from:</strong> #{group.homework_start_from || 1}</p>
                 </div>
               )}

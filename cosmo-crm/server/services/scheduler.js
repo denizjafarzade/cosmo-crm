@@ -9,52 +9,20 @@ function getSetting(key) {
   return row?.value;
 }
 
-// ─── Lesson Reminders ───────────────────────────────────────────
-// Runs every minute, checks if any group has a lesson within reminder_minutes_before
-function checkLessonReminders() {
+// ─── Human-behaviour send window ────────────────────────────────
+// Only send automated messages during daytime hours (in the configured
+// timezone). Anything triggered outside the window is deferred until it opens.
+function withinSendWindow() {
   const tz = getSetting('timezone') || 'Asia/Baku';
-  const now = new Date();
-  const currentDay = now.getDay();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  const schedules = db.prepare(`
-    SELECT gs.*, g.name as group_name, g.whatsapp_group_id, g.reminder_minutes_before, g.reminder_target
-    FROM group_schedules gs
-    JOIN groups g ON gs.group_id = g.id
-    WHERE gs.day_of_week = ?
-  `).all(currentDay);
-
-  for (const sched of schedules) {
-    const [h, m] = sched.time.split(':').map(Number);
-    const lessonMinutes = h * 60 + m;
-    const reminderBefore = sched.reminder_minutes_before || 60;
-    const reminderTime = lessonMinutes - reminderBefore;
-
-    if (currentMinutes !== reminderTime) continue;
-
-    const idempKey = `reminder-${sched.group_id}-${now.toISOString().slice(0, 10)}-${sched.time}`;
-    const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
-    if (existing) continue;
-
-    const message = `📋 Reminder: ${sched.group_name} lesson today at ${sched.time}. See you there!`;
-    const chatId = sched.whatsapp_group_id;
-
-    db.prepare(`INSERT INTO scheduled_sends (type, group_id, target_chat_id, message, scheduled_at, sent, idempotency_key)
-      VALUES ('reminder', ?, ?, ?, datetime('now'), 0, ?)`).run(sched.group_id, chatId, message, idempKey);
-
-    if (chatId && wa.getStatus().status === 'ready') {
-      (async () => {
-        try {
-          await wa.sendMessage(chatId, message);
-          db.prepare("UPDATE scheduled_sends SET sent = 1, sent_at = datetime('now') WHERE idempotency_key = ?").run(idempKey);
-          wa.logSend('reminder', `group:${sched.group_id}`, sched.group_name, message, 'success', null);
-        } catch (e) {
-          db.prepare("UPDATE scheduled_sends SET error = ? WHERE idempotency_key = ?").run(e.message, idempKey);
-          wa.logSend('reminder', `group:${sched.group_id}`, sched.group_name, message, 'failed', e.message);
-        }
-      })();
-    }
+  const startH = parseInt(getSetting('send_window_start') || '9', 10);
+  const endH = parseInt(getSetting('send_window_end') || '21', 10);
+  let hour;
+  try {
+    hour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: tz }).format(new Date()), 10) % 24;
+  } catch (e) {
+    hour = new Date().getHours();
   }
+  return hour >= startH && hour < endH;
 }
 
 // ─── Auto-increment lessons ─────────────────────────────────────
@@ -132,6 +100,12 @@ async function sendHomework(groupId, hwId, homeworkNumber) {
   if (!hw) return;
   const already = db.prepare('SELECT id FROM homework_sends WHERE homework_id = ? AND group_id = ?').get(hwId, groupId);
   if (already) return;
+
+  // Human behaviour: defer to the next daytime window instead of sending at night.
+  if (!withinSendWindow()) {
+    setTimeout(() => sendHomework(groupId, hwId, homeworkNumber), 15 * 60 * 1000);
+    return;
+  }
 
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group?.whatsapp_group_id || wa.getStatus().status !== 'ready') {
@@ -257,6 +231,8 @@ function checkPaymentForGroup(groupId) {
 }
 
 async function sendPaymentReminder(student, reminderNumber) {
+  // Human behaviour: never message outside daytime hours; retry next cycle.
+  if (!withinSendWindow()) return;
   const idempKey = `payment-${student.id}-${reminderNumber}-${new Date().toISOString().slice(0, 10)}`;
   const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
   if (existing) return;
@@ -287,12 +263,18 @@ async function sendPaymentReminder(student, reminderNumber) {
 }
 
 // ─── Scheduled one-off sends ────────────────────────────────────
-function processScheduledSends() {
-  const pending = db.prepare(`SELECT * FROM scheduled_sends WHERE sent = 0 AND scheduled_at <= datetime('now') AND type IN ('homework', 'custom')`).all();
+let processingSends = false;
+async function processScheduledSends() {
+  // Human behaviour: only during daytime, and one message at a time with a gap
+  // between them (never a burst).
+  if (processingSends || !withinSendWindow()) return;
+  const pending = db.prepare(`SELECT * FROM scheduled_sends WHERE sent = 0 AND scheduled_at <= datetime('now') AND type IN ('homework', 'custom') ORDER BY scheduled_at`).all();
+  if (!pending.length) return;
 
-  for (const item of pending) {
-    if (wa.getStatus().status !== 'ready') break;
-    (async () => {
+  processingSends = true;
+  try {
+    for (const item of pending) {
+      if (wa.getStatus().status !== 'ready' || !withinSendWindow()) break;
       try {
         if (item.file_path) {
           await wa.sendFile(item.target_chat_id, item.file_path, item.message);
@@ -305,7 +287,11 @@ function processScheduledSends() {
         db.prepare("UPDATE scheduled_sends SET error = ? WHERE id = ?").run(e.message, item.id);
         wa.logSend(item.type, item.target_chat_id, '', item.message, 'failed', e.message);
       }
-    })();
+      // Spread-out gap between consecutive sends (20–45s).
+      await new Promise(r => setTimeout(r, 20000 + Math.random() * 25000));
+    }
+  } finally {
+    processingSends = false;
   }
 }
 
@@ -367,8 +353,6 @@ function generateWeeklyReport() {
 function start() {
   // Every minute: check reminders, auto-lessons, scheduled sends
   cron.schedule('* * * * *', () => {
-    // Lesson reminders disabled per teacher request
-    // try { checkLessonReminders(); } catch (e) { console.error('[Scheduler] Reminder error:', e.message); }
     try { checkAutoLessons(); } catch (e) { console.error('[Scheduler] Auto-lesson error:', e.message); }
     try { processScheduledSends(); } catch (e) { console.error('[Scheduler] Scheduled send error:', e.message); }
   });
