@@ -2,6 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+// Never let an async error from the WhatsApp/puppeteer stack crash the whole
+// server (which would 502 the site). Log and keep running.
+process.on('unhandledRejection', (reason) => {
+  console.error('[Process] Unhandled rejection:', reason && reason.message ? reason.message : reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[Process] Uncaught exception:', err && err.message ? err.message : err);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

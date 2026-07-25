@@ -23,21 +23,17 @@ function randomDelay(minMs = 4000, maxMs = 9000) {
   return new Promise(resolve => setTimeout(resolve, minMs + Math.random() * (maxMs - minMs)));
 }
 
-// Current WhatsApp Web builds break whatsapp-web.js's chat scraping (getChats
-// throws a minified error). Pin an older, still-valid WhatsApp Web snapshot the
-// library can scrape. Override with WA_WEB_VERSION to try a different one.
-const WA_WEB_VERSION = process.env.WA_WEB_VERSION || '2.3000.1040100380-alpha';
+// Pinning an older WhatsApp Web build is OPT-IN only: forcing an old version can
+// make WhatsApp reject the session (LOGOUT). Set WA_WEB_VERSION to experiment;
+// by default we use the library's own version for a stable connection.
+const WA_WEB_VERSION = process.env.WA_WEB_VERSION || null;
 
 function init() {
   if (client) return;
-  console.log(`[WhatsApp] Using pinned web version ${WA_WEB_VERSION}`);
+  if (WA_WEB_VERSION) console.log(`[WhatsApp] Using pinned web version ${WA_WEB_VERSION}`);
 
-  client = new Client({
+  const clientOptions = {
     authStrategy: new LocalAuth({ dataPath: path.join(__dirname, '..', '..', '.wwebjs_auth') }),
-    webVersionCache: {
-      type: 'remote',
-      remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${WA_WEB_VERSION}.html`,
-    },
     puppeteer: {
       headless: true,
       executablePath: process.platform === 'win32'
@@ -52,7 +48,16 @@ function init() {
         '--no-first-run',
       ],
     },
-  });
+  };
+
+  if (WA_WEB_VERSION) {
+    clientOptions.webVersionCache = {
+      type: 'remote',
+      remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${WA_WEB_VERSION}.html`,
+    };
+  }
+
+  client = new Client(clientOptions);
 
   client.on('qr', async (qr) => {
     status = 'qr';
@@ -80,18 +85,46 @@ function init() {
     setTimeout(() => refreshGroupsWithRetry(), 10000);
   });
 
-  client.on('disconnected', (reason) => {
+  client.on('disconnected', async (reason) => {
     status = 'disconnected';
     console.log('[WhatsApp] Disconnected:', reason);
+    // Tear the old client/browser down before reconnecting, otherwise the library
+    // re-injects into a destroyed page and throws an uncaught error.
+    const old = client;
     client = null;
-    // Auto-reconnect after 10s
-    setTimeout(() => init(), 10000);
+    try { if (old) await old.destroy(); } catch (e) { /* ignore */ }
+    // On LOGOUT the saved session is invalid — clear it so a fresh QR is shown.
+    if (reason === 'LOGOUT') {
+      try {
+        const authDir = path.join(__dirname, '..', '..', '.wwebjs_auth');
+        if (fs.existsSync(authDir)) fs.rmSync(authDir, { recursive: true, force: true });
+      } catch (e) { console.error('[WhatsApp] Could not clear session:', e.message); }
+    }
+    setTimeout(() => init(), 12000);
   });
 
   client.on('auth_failure', (msg) => {
     status = 'disconnected';
     console.error('[WhatsApp] Auth failure:', msg);
   });
+
+  // Fallback group discovery: getChats() is broken on current WhatsApp Web, so
+  // learn group ids/names from messages as they arrive. Any group that has recent
+  // activity will show up in the list without needing getChats().
+  const learnFromMessage = async (msg) => {
+    try {
+      const from = msg && (msg.from || (msg.id && msg.id.remote)) || '';
+      if (!from.endsWith('@g.us')) return;
+      if (cachedGroups.some(g => g.id === from)) return;
+      let name = from;
+      try { const chat = await msg.getChat(); name = chat?.name || name; } catch (e) {}
+      cachedGroups = [...cachedGroups, { id: from, name }];
+      lastGroupRefresh = Date.now();
+      console.log(`[WhatsApp] Learned group from message: ${name}`);
+    } catch (e) { /* ignore */ }
+  };
+  client.on('message', learnFromMessage);
+  client.on('message_create', learnFromMessage);
 
   client.initialize().catch(err => {
     console.error('[WhatsApp] Init error:', err.message);
