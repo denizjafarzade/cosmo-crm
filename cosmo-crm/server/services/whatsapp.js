@@ -23,11 +23,21 @@ function randomDelay(minMs = 4000, maxMs = 9000) {
   return new Promise(resolve => setTimeout(resolve, minMs + Math.random() * (maxMs - minMs)));
 }
 
+// Current WhatsApp Web builds break whatsapp-web.js's chat scraping (getChats
+// throws a minified error). Pin an older, still-valid WhatsApp Web snapshot the
+// library can scrape. Override with WA_WEB_VERSION to try a different one.
+const WA_WEB_VERSION = process.env.WA_WEB_VERSION || '2.3000.1040100380-alpha';
+
 function init() {
   if (client) return;
+  console.log(`[WhatsApp] Using pinned web version ${WA_WEB_VERSION}`);
 
   client = new Client({
     authStrategy: new LocalAuth({ dataPath: path.join(__dirname, '..', '..', '.wwebjs_auth') }),
+    webVersionCache: {
+      type: 'remote',
+      remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${WA_WEB_VERSION}.html`,
+    },
     puppeteer: {
       headless: true,
       executablePath: process.platform === 'win32'
