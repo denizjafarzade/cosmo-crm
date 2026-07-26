@@ -24,8 +24,9 @@ export default function Registrations() {
   const [saving, setSaving] = useState(false);
 
   const load = () => {
-    const url = filter ? `/registrations?status=${filter}` : '/registrations';
-    fetch(`/api${url}`).then(r => r.json()).then(setRegs);
+    api.getRegistrations(filter || undefined)
+      .then(rows => setRegs(Array.isArray(rows) ? rows : []))
+      .catch(() => setRegs([]));
   };
 
   useEffect(() => { load(); }, [filter]);
@@ -34,17 +35,14 @@ export default function Registrations() {
 
   const updateStatus = async (id, status) => {
     setSaving(true);
-    await fetch(`/api/registrations/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, notes }),
-    });
+    await api.updateRegistration(id, { status, notes });
     setSaving(false);
     setSelected(null);
     load();
   };
 
   const doDelete = async (id) => {
-    await fetch(`/api/registrations/${id}`, { method: 'DELETE' });
+    await api.deleteRegistration(id);
     setConfirmDelete(null);
     if (selected?.id === id) setSelected(null);
     load();

@@ -121,6 +121,82 @@ r.post('/:id/lesson-done', (req, res) => {
   res.json({ ok: true, lesson_number: newLesson });
 });
 
+// Idempotent daily attendance. Body: { absences: [{ student_id, excused }] }.
+// - If today's lesson doesn't exist yet, create it once (everyone present).
+// - Then reconcile: the students in `absences` are marked absent (excused = does
+//   not count toward payment; unexcused = counts), everyone else present.
+// - Re-submitting the same day updates absences WITHOUT incrementing again.
+r.post('/:id/attendance', (req, res) => {
+  const groupId = Number(req.params.id);
+  const absences = Array.isArray(req.body.absences) ? req.body.absences : [];
+  const absenceMap = new Map(absences.map(a => [Number(a.student_id), a.excused !== false]));
+
+  const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
+  if (!group) return res.status(404).json({ error: 'Group not found' });
+
+  const students = db.prepare('SELECT * FROM students WHERE group_id = ? AND active = 1').all(groupId);
+  const cycle = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
+
+  const todayRow = db.prepare(
+    "SELECT MAX(lesson_number) AS ln, COUNT(*) AS c FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now')"
+  ).get(groupId);
+  const alreadyToday = todayRow && todayRow.c > 0;
+  let lessonNumber;
+  let created = false;
+
+  const run = db.transaction(() => {
+    if (alreadyToday) {
+      lessonNumber = todayRow.ln;
+    } else {
+      lessonNumber = group.current_lesson_number + 1;
+      created = true;
+      db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(lessonNumber, groupId);
+      const insertLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent) VALUES (?, ?, ?, ?, 0, 1, 0)');
+      const incStudent = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
+      const now = new Date().toISOString();
+      for (const s of students) { insertLesson.run(groupId, s.id, lessonNumber, now); incStudent.run(s.id); }
+    }
+
+    // Reconcile each student's row for this lesson to the desired present/absent state.
+    const getRow = db.prepare('SELECT * FROM lessons WHERE group_id = ? AND student_id = ? AND lesson_number = ?');
+    const updRow = db.prepare('UPDATE lessons SET absent = ?, is_excused = ?, counts_toward_payment = ? WHERE id = ?');
+    const insRow = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const decLsp = db.prepare("UPDATE students SET lessons_since_payment = MAX(lessons_since_payment - 1, 0), updated_at = datetime('now') WHERE id = ?");
+    const incLsp = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
+
+    for (const s of students) {
+      const isAbsent = absenceMap.has(s.id);
+      const excused = isAbsent ? absenceMap.get(s.id) : false;
+      const desiredAbsent = isAbsent ? 1 : 0;
+      const desiredExcused = isAbsent && excused ? 1 : 0;
+      const desiredCounts = isAbsent && excused ? 0 : 1; // excused absence doesn't count
+      let row = getRow.get(groupId, s.id, lessonNumber);
+      if (!row) {
+        insRow.run(groupId, s.id, lessonNumber, new Date().toISOString(), desiredExcused, desiredCounts, desiredAbsent);
+        if (desiredCounts === 1) incLsp.run(s.id);
+        continue;
+      }
+      const wasCounting = row.counts_toward_payment === 1;
+      if (row.absent !== desiredAbsent || row.is_excused !== desiredExcused || row.counts_toward_payment !== desiredCounts) {
+        updRow.run(desiredAbsent, desiredExcused, desiredCounts, row.id);
+        if (wasCounting && desiredCounts === 0) decLsp.run(s.id);
+        else if (!wasCounting && desiredCounts === 1) incLsp.run(s.id);
+      }
+    }
+
+    db.prepare("UPDATE students SET payment_status = 'due' WHERE group_id = ? AND active = 1 AND payment_status = 'paid' AND lessons_since_payment >= ?").run(groupId, cycle);
+  });
+  run();
+
+  if (created) {
+    const { sendHomeworkForLesson, checkPaymentForGroup } = require('../services/scheduler');
+    try { sendHomeworkForLesson(groupId, lessonNumber); } catch (e) {}
+    try { checkPaymentForGroup(groupId); } catch (e) {}
+  }
+
+  res.json({ ok: true, lesson_number: lessonNumber, created });
+});
+
 // Record (or clear) a student's absence for a lesson.
 // Body: { student_id, excused (bool), lesson_number? , present? }
 // - present:true  → clear any absence, mark present (counts toward payment)

@@ -70,6 +70,7 @@ const api = {
   deleteGroup: (id) => request(`/groups/${id}`, { method: 'DELETE' }),
   updateSchedules: (id, schedules) => request(`/groups/${id}/schedules`, { method: 'PUT', body: { schedules } }),
   markLessonDone: (id, absentIds = []) => request(`/groups/${id}/lesson-done`, { method: 'POST', body: { absentIds } }),
+  takeAttendance: (id, absences = []) => request(`/groups/${id}/attendance`, { method: 'POST', body: { absences } }),
   recordAbsence: (groupId, studentId, { excused, present, lesson_number } = {}) =>
     request(`/groups/${groupId}/record-absence`, { method: 'POST', body: { student_id: studentId, excused, present, lesson_number } }),
   suspendStudent: (groupId, studentId, lessons) => request(`/groups/${groupId}/suspend-student`, { method: 'POST', body: { student_id: studentId, lessons } }),

@@ -23,36 +23,57 @@ const todayDow = new Date().getDay();
 
 function AttendanceModal({ schedule, onClose, onDone }) {
   const [students, setStudents] = useState([]);
-  const [absentIds, setAbsentIds] = useState(new Set());
+  // state per student: 'present' | 'excused' | 'unexcused'
+  const [marks, setMarks] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    api.getGroup(schedule.group_id).then(g => setStudents(g.students || []));
+    api.getGroup(schedule.group_id).then(g => {
+      const list = g.students || [];
+      setStudents(list);
+      // Pre-fill from today's already-recorded attendance (so re-opening shows it).
+      const init = {};
+      for (const s of list) {
+        if (s.current_lesson_absent === 1) init[s.id] = s.current_lesson_excused === 1 ? 'excused' : 'unexcused';
+        else init[s.id] = 'present';
+      }
+      setMarks(init);
+    });
   }, [schedule.group_id]);
 
-  const toggle = (id) => setAbsentIds(s => {
-    const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n;
-  });
+  const setMark = (id, val) => setMarks(m => ({ ...m, [id]: val }));
 
   const submit = async () => {
     setSubmitting(true);
-    await api.markLessonDone(schedule.group_id, [...absentIds]);
+    const absences = students
+      .filter(s => marks[s.id] && marks[s.id] !== 'present')
+      .map(s => ({ student_id: s.id, excused: marks[s.id] === 'excused' }));
+    await api.takeAttendance(schedule.group_id, absences);
     setSubmitting(false);
     onDone(schedule);
   };
 
-  const presentCount = students.length - absentIds.size;
+  const absentCount = students.filter(s => marks[s.id] && marks[s.id] !== 'present').length;
+
+  const Btn = ({ active, color, onClick, children }) => (
+    <button type="button" onClick={onClick}
+      style={{
+        padding: '0.25rem 0.55rem', fontSize: '0.72rem', fontWeight: 600, borderRadius: 6, cursor: 'pointer',
+        border: `1.5px solid ${active ? color : 'var(--slate-200)'}`,
+        background: active ? color : 'transparent', color: active ? '#fff' : 'var(--slate-500)',
+      }}>{children}</button>
+  );
 
   return (
     <div className="modal-overlay">
-      <div className="modal" style={{ maxWidth: 480 }}>
+      <div className="modal" style={{ maxWidth: 500 }}>
         <div className="modal-header">
           <h3>Attendance — {schedule.group_name}</h3>
           <button className="modal-close" onClick={onClose}><FiX /></button>
         </div>
         <div className="modal-body">
           <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginBottom: '1rem' }}>
-            Lesson #{schedule.current_lesson_number + 1} · {schedule.time} · Click to toggle absent
+            {schedule.time} · Everyone is counted <strong>present</strong> automatically — only mark who was absent, and whether it's allowed.
           </p>
           {students.length === 0 ? (
             <p style={{ color: 'var(--slate-400)', fontSize: '0.9rem' }}>No students in this group.</p>
@@ -61,35 +82,24 @@ function AttendanceModal({ schedule, onClose, onDone }) {
               {students.map(s => {
                 const isSuspended = s.suspended_until_lesson != null &&
                   (schedule.current_lesson_number + 1) <= s.suspended_until_lesson;
-                const absent = absentIds.has(s.id);
+                const mark = marks[s.id] || 'present';
                 return (
-                  <div key={s.id}
-                    onClick={() => !isSuspended && toggle(s.id)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.75rem',
-                      padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)',
-                      cursor: isSuspended ? 'default' : 'pointer',
-                      border: `1.5px solid ${isSuspended ? 'var(--amber)' : absent ? 'var(--red)' : 'var(--green)'}`,
-                      background: isSuspended ? 'var(--amber-bg)' : absent ? 'var(--red-bg)' : 'var(--green-bg)',
-                      transition: 'all 0.15s',
-                      opacity: isSuspended ? 0.8 : 1,
-                    }}>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: 4, flexShrink: 0,
-                      border: `2px solid ${isSuspended ? 'var(--amber)' : absent ? 'var(--red)' : 'var(--green)'}`,
-                      background: isSuspended ? 'var(--amber)' : absent ? 'transparent' : 'var(--green)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {!absent && !isSuspended && <FiCheck style={{ color: '#fff', fontSize: 13 }} />}
-                      {isSuspended && <span style={{ color: '#fff', fontSize: 10, fontWeight: 700 }}>⏸</span>}
-                    </div>
+                  <div key={s.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)',
+                    border: `1.5px solid ${mark === 'present' ? 'var(--green)' : mark === 'excused' ? 'var(--amber)' : 'var(--red)'}`,
+                    background: mark === 'present' ? 'var(--green-bg)' : mark === 'excused' ? 'var(--amber-bg)' : 'var(--red-bg)',
+                    opacity: isSuspended ? 0.7 : 1,
+                  }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{s.name} {s.surname}</div>
-                      {s.whatsapp_number && <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)' }}>{s.whatsapp_number}</div>}
+                      {isSuspended && <div style={{ fontSize: '0.72rem', color: 'var(--amber)' }}>Suspended</div>}
                     </div>
-                    <span className={`badge ${isSuspended ? 'amber' : absent ? 'red' : 'green'}`}>
-                      {isSuspended ? 'Suspended' : absent ? 'Absent' : 'Present'}
-                    </span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <Btn active={mark === 'present'} color="var(--green)" onClick={() => setMark(s.id, 'present')}>Present</Btn>
+                      <Btn active={mark === 'excused'} color="var(--amber)" onClick={() => setMark(s.id, 'excused')}>Absent · allowed</Btn>
+                      <Btn active={mark === 'unexcused'} color="var(--red)" onClick={() => setMark(s.id, 'unexcused')}>Not allowed</Btn>
+                    </div>
                   </div>
                 );
               })}
@@ -97,7 +107,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>
-              {presentCount} present · {absentIds.size} absent
+              {students.length - absentCount} present · {absentCount} absent
             </span>
             <div className="form-actions" style={{ margin: 0 }}>
               <button className="btn btn-outline" onClick={onClose}>Cancel</button>
@@ -115,7 +125,6 @@ function AttendanceModal({ schedule, onClose, onDone }) {
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [attendanceFor, setAttendanceFor] = useState(null);
-  const [markedToday, setMarkedToday] = useState({});
   const [selectedDay, setSelectedDay] = useState(todayDow);
   const [now, setNow] = useState(new Date());
 
@@ -123,10 +132,11 @@ export default function Dashboard() {
   useEffect(() => { load(); }, []);
   useEffect(() => { const id = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(id); }, []);
 
-  const slotKey = (s) => `${s.group_id}_${s.time}`;
+  // "Done" is derived from the data (a lesson exists for that group today), so it
+  // survives navigating away and back — no stale in-memory flag.
+  const isMarked = (s) => !!s.marked_today;
 
-  const onAttendanceDone = (schedule) => {
-    setMarkedToday(m => ({ ...m, [slotKey(schedule)]: true }));
+  const onAttendanceDone = () => {
     setAttendanceFor(null);
     load();
   };
@@ -156,7 +166,7 @@ export default function Dashboard() {
   const selectedSchedule = scheduleByDay[selectedDay] || [];
   const todaySchedule = scheduleByDay[todayDow] || [];
   const todayTotal = todaySchedule.length;
-  const todayDone = todaySchedule.filter(s => markedToday[slotKey(s)]).length;
+  const todayDone = todaySchedule.filter(isMarked).length;
 
   const payTotal = data.payment.paid + data.payment.due + data.payment.overdue;
   const paidPct = payTotal > 0 ? Math.round((data.payment.paid / payTotal) * 100) : 0;
@@ -274,7 +284,7 @@ export default function Dashboard() {
               {selectedSchedule.length ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {selectedSchedule.map((s, i) => {
-                    const done = markedToday[slotKey(s)];
+                    const done = isMarked(s);
                     const isToday = selectedDay === todayDow;
                     const timePassed = isTimePassed(s.time);
                     return (
@@ -297,7 +307,10 @@ export default function Dashboard() {
                           </div>
                         </div>
                         {done ? (
-                          <span className="badge green"><FiCheck /> Done</span>
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <span className="badge green"><FiCheck /> Done</span>
+                            {isToday && <button className="btn btn-sm btn-outline" onClick={() => setAttendanceFor(s)}>Edit</button>}
+                          </div>
                         ) : isToday && timePassed ? (
                           <button className="btn btn-sm btn-primary" onClick={() => setAttendanceFor(s)}>
                             <FiCheck /> Attendance
