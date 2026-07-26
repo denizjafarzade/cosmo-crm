@@ -47,6 +47,19 @@ function checkAutoLessons() {
     const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
     if (existing) continue;
 
+    // One lesson per group per day: if this group already has a lesson today
+    // (another schedule slot, or a manually recorded attendance), don't create
+    // a second one — attendance/payment must only count once per day.
+    const lessonToday = db.prepare(
+      "SELECT 1 FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') LIMIT 1"
+    ).get(sched.gid);
+    if (lessonToday) {
+      // Mark this slot handled so we don't re-check it every minute.
+      db.prepare(`INSERT OR IGNORE INTO scheduled_sends (type, group_id, message, scheduled_at, sent, idempotency_key)
+        VALUES ('auto-lesson', ?, 'Skipped — already has a lesson today', datetime('now'), 1, ?)`).run(sched.gid, idempKey);
+      continue;
+    }
+
     db.prepare(`INSERT INTO scheduled_sends (type, group_id, message, scheduled_at, sent, idempotency_key)
       VALUES ('auto-lesson', ?, 'Auto lesson increment', datetime('now'), 1, ?)`).run(sched.gid, idempKey);
 

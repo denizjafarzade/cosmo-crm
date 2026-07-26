@@ -94,6 +94,15 @@ r.post('/:id/lesson-done', (req, res) => {
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group) return res.status(404).json({ error: 'Not found' });
 
+  // One lesson per group per day — don't create a second lesson if today already
+  // has one (from another slot, auto-increment, or dashboard attendance).
+  const lessonToday = db.prepare(
+    "SELECT MAX(lesson_number) AS ln FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now')"
+  ).get(groupId);
+  if (lessonToday && lessonToday.ln != null) {
+    return res.json({ ok: true, lesson_number: lessonToday.ln, already: true });
+  }
+
   const newLesson = group.current_lesson_number + 1;
   const now = new Date().toISOString();
   const students = db.prepare('SELECT * FROM students WHERE group_id = ? AND active = 1').all(groupId);
