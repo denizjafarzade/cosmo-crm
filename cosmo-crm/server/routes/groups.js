@@ -38,15 +38,15 @@ r.get('/:id', (req, res) => {
 });
 
 r.post('/', (req, res) => {
-  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from } = req.body;
+  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from, lesson_duration_minutes } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO groups (name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(name, whatsapp_group_id || '', whatsapp_group_name || '', coach_id || null, auto_increment_lessons ? 1 : 0, reminder_minutes_before || 60, reminder_target || 'group', homework_start_from || 1);
+  const result = db.prepare(`INSERT INTO groups (name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from, lesson_duration_minutes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, whatsapp_group_id || '', whatsapp_group_name || '', coach_id || null, auto_increment_lessons ? 1 : 0, reminder_minutes_before || 60, reminder_target || 'group', homework_start_from || 1, parseInt(lesson_duration_minutes) || 60);
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
 r.put('/:id', (req, res) => {
-  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, current_lesson_number, homework_start_from, homework_enabled } = req.body;
+  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, current_lesson_number, homework_start_from, homework_enabled, lesson_duration_minutes } = req.body;
   db.prepare(`UPDATE groups SET
     name = COALESCE(?, name),
     whatsapp_group_id = COALESCE(?, whatsapp_group_id),
@@ -58,11 +58,14 @@ r.put('/:id', (req, res) => {
     current_lesson_number = COALESCE(?, current_lesson_number),
     homework_start_from = COALESCE(?, homework_start_from),
     homework_enabled = COALESCE(?, homework_enabled),
+    lesson_duration_minutes = COALESCE(?, lesson_duration_minutes),
     updated_at = datetime('now')
     WHERE id = ?`).run(name, whatsapp_group_id, whatsapp_group_name, coach_id,
       auto_increment_lessons !== undefined ? (auto_increment_lessons ? 1 : 0) : null,
       reminder_minutes_before, reminder_target, current_lesson_number, homework_start_from,
-      homework_enabled !== undefined ? (homework_enabled ? 1 : 0) : null, req.params.id);
+      homework_enabled !== undefined ? (homework_enabled ? 1 : 0) : null,
+      lesson_duration_minutes !== undefined ? (parseInt(lesson_duration_minutes) || 60) : null,
+      req.params.id);
   res.json({ ok: true });
 });
 
@@ -93,15 +96,6 @@ r.post('/:id/lesson-done', (req, res) => {
 
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group) return res.status(404).json({ error: 'Not found' });
-
-  // One lesson per group per day — don't create a second lesson if today already
-  // has one (from another slot, auto-increment, or dashboard attendance).
-  const lessonToday = db.prepare(
-    "SELECT MAX(lesson_number) AS ln FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now')"
-  ).get(groupId);
-  if (lessonToday && lessonToday.ln != null) {
-    return res.json({ ok: true, lesson_number: lessonToday.ln, already: true });
-  }
 
   const newLesson = group.current_lesson_number + 1;
   const now = new Date().toISOString();
@@ -139,6 +133,7 @@ r.post('/:id/attendance', (req, res) => {
   const groupId = Number(req.params.id);
   const absences = Array.isArray(req.body.absences) ? req.body.absences : [];
   const absenceMap = new Map(absences.map(a => [Number(a.student_id), a.excused !== false]));
+  const slotTime = req.body.slot_time || null; // e.g. "16:00" — identifies the slot
 
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group) return res.status(404).json({ error: 'Group not found' });
@@ -146,9 +141,10 @@ r.post('/:id/attendance', (req, res) => {
   const students = db.prepare('SELECT * FROM students WHERE group_id = ? AND active = 1').all(groupId);
   const cycle = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
 
-  const todayRow = db.prepare(
-    "SELECT MAX(lesson_number) AS ln, COUNT(*) AS c FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now')"
-  ).get(groupId);
+  // A slot is its own lesson: match today's lesson for THIS slot_time only.
+  const todayRow = slotTime
+    ? db.prepare("SELECT MAX(lesson_number) AS ln, COUNT(*) AS c FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') AND slot_time = ?").get(groupId, slotTime)
+    : db.prepare("SELECT MAX(lesson_number) AS ln, COUNT(*) AS c FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') AND slot_time IS NULL").get(groupId);
   const alreadyToday = todayRow && todayRow.c > 0;
   let lessonNumber;
   let created = false;
@@ -160,10 +156,10 @@ r.post('/:id/attendance', (req, res) => {
       lessonNumber = group.current_lesson_number + 1;
       created = true;
       db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(lessonNumber, groupId);
-      const insertLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent) VALUES (?, ?, ?, ?, 0, 1, 0)');
+      const insertLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent, slot_time) VALUES (?, ?, ?, ?, 0, 1, 0, ?)');
       const incStudent = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
       const now = new Date().toISOString();
-      for (const s of students) { insertLesson.run(groupId, s.id, lessonNumber, now); incStudent.run(s.id); }
+      for (const s of students) { insertLesson.run(groupId, s.id, lessonNumber, now, slotTime); incStudent.run(s.id); }
     }
 
     // Reconcile each student's row for this lesson to the desired present/absent state.

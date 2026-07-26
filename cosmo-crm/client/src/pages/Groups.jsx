@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiX, FiUsers, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import api from '../api';
 
-const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1 };
+const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1, lesson_duration_minutes: 60 };
 
 export default function Groups() {
   const [groups, setGroups] = useState([]);
@@ -94,11 +94,17 @@ export default function Groups() {
                 <div className="form-group"><label>Name *</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
                 <div className="form-group"><label>WA Group ID</label><input className="form-input" value={form.whatsapp_group_id} onChange={e => setForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} placeholder="...@g.us" /></div>
                 <div className="form-group"><label>Coach</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">None</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                <div className="form-group">
-                  <label>Start from Homework #</label>
-                  <input className="form-input" type="number" min="1" value={form.homework_start_from} onChange={e => setForm(f => ({ ...f, homework_start_from: parseInt(e.target.value) || 1 }))} />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>This group's lesson 1 will get homework #{form.homework_start_from}, lesson 2 → #{(form.homework_start_from || 1) + 1}, etc.</span>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Start from Homework #</label>
+                    <input className="form-input" type="number" min="1" value={form.homework_start_from} onChange={e => setForm(f => ({ ...f, homework_start_from: parseInt(e.target.value) || 1 }))} />
+                  </div>
+                  <div className="form-group">
+                    <label>Lesson duration (min)</label>
+                    <input className="form-input" type="number" min="15" step="5" value={form.lesson_duration_minutes} onChange={e => setForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} />
+                  </div>
                 </div>
+                <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)', display: 'block', marginTop: -6, marginBottom: 8 }}>After the duration ends, homework auto-sends and the lesson locks on the dashboard.</span>
                 <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <input type="checkbox" checked={form.auto_increment_lessons} onChange={e => setForm(f => ({ ...f, auto_increment_lessons: e.target.checked }))} />
                   <label style={{ margin: 0 }}>Auto-increment lessons on schedule</label>

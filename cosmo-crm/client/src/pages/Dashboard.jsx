@@ -48,7 +48,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
     const absences = students
       .filter(s => marks[s.id] && marks[s.id] !== 'present')
       .map(s => ({ student_id: s.id, excused: marks[s.id] === 'excused' }));
-    await api.takeAttendance(schedule.group_id, absences);
+    await api.takeAttendance(schedule.group_id, absences, schedule.time);
     setSubmitting(false);
     onDone(schedule);
   };
@@ -141,9 +141,15 @@ export default function Dashboard() {
     load();
   };
 
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isTimePassed = (time) => {
     const [h, m] = time.split(':').map(Number);
-    return now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
+    return nowMinutes >= h * 60 + m;
+  };
+  // The lesson is "finished" once its start time + duration has elapsed.
+  const isDurationOver = (s) => {
+    const [h, m] = s.time.split(':').map(Number);
+    return nowMinutes >= h * 60 + m + (s.duration || 60);
   };
 
   if (!data) return (
@@ -286,35 +292,47 @@ export default function Dashboard() {
                   {selectedSchedule.map((s, i) => {
                     const done = isMarked(s);
                     const isToday = selectedDay === todayDow;
-                    const timePassed = isTimePassed(s.time);
+                    const started = isTimePassed(s.time);
+                    const finished = isToday && isDurationOver(s);
+                    // Once the duration is over the slot is locked (disabled green)
+                    // so it can't be clicked by mistake. During the lesson it's
+                    // active and attendance can be taken/edited.
+                    const locked = finished;
+                    const active = isToday && started && !finished;
+                    const green = done || finished;
                     return (
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: '0.85rem',
                         padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)',
-                        border: `1.5px solid ${done ? 'var(--green)' : isToday && timePassed ? 'var(--primary)' : 'var(--slate-200)'}`,
-                        background: done ? 'var(--green-bg)' : isToday && timePassed ? 'var(--primary-bg)' : 'var(--white)',
+                        border: `1.5px solid ${green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-200)'}`,
+                        background: green ? 'var(--green-bg)' : active ? 'var(--primary-bg)' : 'var(--white)',
+                        opacity: locked ? 0.7 : 1,
                       }}>
                         <div style={{
                           minWidth: 52, fontWeight: 800, fontSize: '0.9rem',
-                          color: done ? 'var(--green)' : timePassed && isToday ? 'var(--primary)' : 'var(--slate-400)',
+                          color: green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-400)',
                           fontVariantNumeric: 'tabular-nums',
                         }}>{s.time}</div>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{s.group_name}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: 1 }}>
-                            {s.student_count} student{s.student_count !== 1 ? 's' : ''} · Lesson #{s.current_lesson_number + 1}
+                            {s.student_count} student{s.student_count !== 1 ? 's' : ''} · Lesson #{s.current_lesson_number + 1} · {s.duration || 60}min
                             {s.coach_name && ` · ${s.coach_name}`}
                           </div>
                         </div>
-                        {done ? (
-                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                            <span className="badge green"><FiCheck /> Done</span>
-                            {isToday && <button className="btn btn-sm btn-outline" onClick={() => setAttendanceFor(s)}>Edit</button>}
-                          </div>
-                        ) : isToday && timePassed ? (
-                          <button className="btn btn-sm btn-primary" onClick={() => setAttendanceFor(s)}>
-                            <FiCheck /> Attendance
-                          </button>
+                        {locked ? (
+                          <span className="badge green" style={{ opacity: 0.85 }}><FiCheck /> Done</span>
+                        ) : active ? (
+                          done ? (
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <span className="badge green"><FiCheck /> Marked</span>
+                              <button className="btn btn-sm btn-outline" onClick={() => setAttendanceFor(s)}>Edit</button>
+                            </div>
+                          ) : (
+                            <button className="btn btn-sm btn-primary" onClick={() => setAttendanceFor(s)}>
+                              <FiCheck /> Attendance
+                            </button>
+                          )
                         ) : isToday ? (
                           <span className="badge slate"><FiClock /> {s.time}</span>
                         ) : (

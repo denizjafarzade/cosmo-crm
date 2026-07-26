@@ -267,6 +267,17 @@ if (!columnExists('students', 'suspended_until_lesson')) {
 if (!columnExists('lessons', 'absent')) {
   db.exec('ALTER TABLE lessons ADD COLUMN absent INTEGER DEFAULT 0');
 }
+// Each timetable slot (group + day + time) is an independent lesson. slot_time
+// ties a lesson to the schedule slot it belongs to, so a group with two slots in
+// one day gets two separate lessons.
+if (!columnExists('lessons', 'slot_time')) {
+  db.exec('ALTER TABLE lessons ADD COLUMN slot_time TEXT');
+}
+// Lesson length in minutes — after it elapses, homework auto-sends and the slot
+// locks on the dashboard.
+if (!columnExists('groups', 'lesson_duration_minutes')) {
+  db.exec('ALTER TABLE groups ADD COLUMN lesson_duration_minutes INTEGER DEFAULT 60');
+}
 
 // --- Registrations table ---
 db.exec(`

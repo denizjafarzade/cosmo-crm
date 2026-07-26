@@ -47,16 +47,15 @@ function checkAutoLessons() {
     const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
     if (existing) continue;
 
-    // One lesson per group per day: if this group already has a lesson today
-    // (another schedule slot, or a manually recorded attendance), don't create
-    // a second one — attendance/payment must only count once per day.
-    const lessonToday = db.prepare(
-      "SELECT 1 FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') LIMIT 1"
-    ).get(sched.gid);
-    if (lessonToday) {
-      // Mark this slot handled so we don't re-check it every minute.
+    // One lesson per SLOT per day: only skip if this exact slot (same start time)
+    // already has a lesson today. Different slots of the same group are separate
+    // lessons.
+    const slotDone = db.prepare(
+      "SELECT 1 FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') AND slot_time = ? LIMIT 1"
+    ).get(sched.gid, sched.time);
+    if (slotDone) {
       db.prepare(`INSERT OR IGNORE INTO scheduled_sends (type, group_id, message, scheduled_at, sent, idempotency_key)
-        VALUES ('auto-lesson', ?, 'Skipped — already has a lesson today', datetime('now'), 1, ?)`).run(sched.gid, idempKey);
+        VALUES ('auto-lesson', ?, 'Skipped — slot already has a lesson today', datetime('now'), 1, ?)`).run(sched.gid, idempKey);
       continue;
     }
 
@@ -69,10 +68,10 @@ function checkAutoLessons() {
 
     db.transaction(() => {
       db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(newLesson, sched.gid);
-      const stmtL = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at) VALUES (?, ?, ?, ?)');
+      const stmtL = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, slot_time) VALUES (?, ?, ?, ?, ?)');
       const stmtS = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
       for (const s of students) {
-        stmtL.run(sched.gid, s.id, newLesson, isoNow);
+        stmtL.run(sched.gid, s.id, newLesson, isoNow, sched.time);
         stmtS.run(s.id);
       }
       const cycle = parseInt(getSetting('payment_cycle_lessons') || '8', 10);
@@ -80,10 +79,10 @@ function checkAutoLessons() {
         .run(sched.gid, cycle);
     })();
 
-    // Schedule homework send 61-63 min after lesson start (1h lesson + 1-3 min human delay)
+    // After the lesson's duration ends, send homework at a random human-like time.
     scheduleHomeworkAfterLesson(sched.gid, newLesson, sched.time);
 
-    console.log(`[Scheduler] Auto-lesson #${newLesson} for ${sched.group_name}`);
+    console.log(`[Scheduler] Auto-lesson #${newLesson} (${sched.time}) for ${sched.group_name}`);
   }
 }
 
@@ -97,11 +96,15 @@ function scheduleHomeworkAfterLesson(groupId, lessonNumber, lessonTime) {
   const already = db.prepare('SELECT id FROM homework_sends WHERE homework_id = ? AND group_id = ?').get(hw.id, groupId);
   if (already) return;
 
-  // 60 min (lesson) + 1-3 min random delay
-  const delayMs = (60 + 1 + Math.random() * 2) * 60 * 1000;
+  // Send after the lesson's duration ends, then at a random human-like time
+  // (not a fixed offset): duration + a random 10–90 min. The send itself is also
+  // gated to daytime hours inside sendHomework().
+  const duration = group.lesson_duration_minutes || 60;
+  const randomAfter = 10 + Math.random() * 80;
+  const delayMs = (duration + randomAfter) * 60 * 1000;
   const sendAt = new Date(Date.now() + delayMs);
 
-  console.log(`[Scheduler] Homework #${hwNum} for group ${groupId} scheduled at ${sendAt.toLocaleTimeString()}`);
+  console.log(`[Scheduler] Homework #${hwNum} for group ${groupId} (${duration}min lesson) scheduled ~${sendAt.toLocaleTimeString()}`);
 
   setTimeout(() => {
     sendHomework(groupId, hw.id, hwNum);

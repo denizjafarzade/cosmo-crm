@@ -40,9 +40,9 @@ r.get('/dashboard', (req, res) => {
   // Full weekly timetable (all days)
   const todaySchedule = db.prepare(`
     SELECT gs.time, gs.day_of_week, g.id as group_id, g.name as group_name,
-           g.current_lesson_number, g.auto_increment_lessons,
+           g.current_lesson_number, g.auto_increment_lessons, g.lesson_duration_minutes as duration,
            (SELECT COUNT(*) FROM students s WHERE s.group_id = g.id AND s.active = 1) as student_count,
-           (SELECT COUNT(*) FROM lessons l WHERE l.group_id = g.id AND date(l.occurred_at) = date('now')) > 0 as marked_today,
+           (SELECT COUNT(*) FROM lessons l WHERE l.group_id = g.id AND date(l.occurred_at) = date('now') AND l.slot_time = gs.time) > 0 as marked_today,
            c.name as coach_name
     FROM group_schedules gs
     JOIN groups g ON gs.group_id = g.id

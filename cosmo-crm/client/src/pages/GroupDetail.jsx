@@ -41,7 +41,7 @@ export default function GroupDetail() {
     api.getGroup(id).then(g => {
       setGroup(g);
       setSchedules(g.schedules || []);
-      setEditForm({ name: g.name, whatsapp_group_id: g.whatsapp_group_id, auto_increment_lessons: !!g.auto_increment_lessons, reminder_minutes_before: g.reminder_minutes_before, reminder_target: g.reminder_target });
+      setEditForm({ name: g.name, whatsapp_group_id: g.whatsapp_group_id, auto_increment_lessons: !!g.auto_increment_lessons, lesson_duration_minutes: g.lesson_duration_minutes || 60 });
     });
   }, [id]);
 
@@ -195,6 +195,7 @@ export default function GroupDetail() {
                 <form onSubmit={saveGroup}>
                   <div className="form-group"><label>Name</label><input className="form-input" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} /></div>
                   <div className="form-group"><label>WA Group ID</label><input className="form-input" value={editForm.whatsapp_group_id} onChange={e => setEditForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} /></div>
+                  <div className="form-group"><label>Lesson duration (min)</label><input className="form-input" type="number" min="15" step="5" value={editForm.lesson_duration_minutes} onChange={e => setEditForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} /></div>
                   <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={editForm.auto_increment_lessons} onChange={e => setEditForm(f => ({ ...f, auto_increment_lessons: e.target.checked }))} />
                     <label style={{ margin: 0 }}>Auto-increment on schedule</label>
@@ -206,6 +207,7 @@ export default function GroupDetail() {
                   <p><strong>WA ID:</strong> {group.whatsapp_group_id || 'Not linked'}</p>
                   <p><strong>Coach:</strong> {group.coach_name || 'None'}</p>
                   <p><strong>Mode:</strong> {group.auto_increment_lessons ? 'Auto' : 'Manual'}</p>
+                  <p><strong>Lesson duration:</strong> {group.lesson_duration_minutes || 60} min</p>
                   <p><strong>Homework starts from:</strong> #{group.homework_start_from || 1}</p>
                 </div>
               )}
