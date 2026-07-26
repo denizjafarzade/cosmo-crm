@@ -98,13 +98,7 @@ export default function AttendanceCalendar({ student, onClose }) {
       if (cell != null) {
         const key = `${view.year}-${String(view.month + 1).padStart(2, '0')}-${String(cell).padStart(2, '0')}`;
         const info = dayMap[key];
-        if (info && info.attended) {
-          ctx.beginPath();
-          ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
-          ctx.fillStyle = '#22c55e';
-          ctx.fill();
-          ctx.fillStyle = '#ffffff';
-        } else if (info && info.unexcused) {
+        if (info && info.unexcused) {
           ctx.beginPath();
           ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
           ctx.fillStyle = '#ef4444';
@@ -115,6 +109,12 @@ export default function AttendanceCalendar({ student, onClose }) {
           ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
           ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.stroke();
           ctx.fillStyle = '#f59e0b';
+        } else if (info && info.attended) {
+          ctx.beginPath();
+          ctx.arc(cx, cy - 4, 20, 0, Math.PI * 2);
+          ctx.fillStyle = '#22c55e';
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
         } else {
           ctx.fillStyle = '#334155';
         }
@@ -173,9 +173,11 @@ export default function AttendanceCalendar({ student, onClose }) {
                   if (cell == null) return <div key={i} />;
                   const key = `${view.year}-${String(view.month + 1).padStart(2, '0')}-${String(cell).padStart(2, '0')}`;
                   const info = dayMap[key];
-                  const attended = info && info.attended;
-                  const excused = info && info.excused && !attended;
-                  const unexcused = info && info.unexcused && !attended && !excused;
+                  // A recorded absence takes priority over a present row on the
+                  // same day, so absences are never hidden as green.
+                  const unexcused = info && info.unexcused;
+                  const excused = info && info.excused && !unexcused;
+                  const attended = info && info.attended && !unexcused && !excused;
                   return (
                     <div key={i} style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{
