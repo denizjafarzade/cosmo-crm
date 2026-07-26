@@ -1,6 +1,7 @@
 node_modules/
 .wwebjs_auth/
 .wwebjs_cache/
+.baileys_auth/
 data/
 uploads/homeworks/*
 !uploads/homeworks/.gitkeep

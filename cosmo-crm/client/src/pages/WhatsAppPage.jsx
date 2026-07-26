@@ -123,14 +123,6 @@ export default function WhatsAppPage() {
                   ✓ {wa.groups.length} groups found
                 </div>
               )}
-              {wa.status === 'ready' && wa.groupDiag && (
-                <div style={{ padding: '0.4rem 0.75rem', marginBottom: '0.75rem', background: 'var(--slate-50)', borderRadius: 8, fontSize: '0.72rem', color: 'var(--slate-500)', fontFamily: 'monospace' }}>
-                  diag: hasStore={String(wa.groupDiag.hasStore)} · hasRequire={String(wa.groupDiag.hasRequire)} · hasMR={String(wa.groupDiag.hasMR)} · loader={String(wa.groupDiag.loader)} · chats={wa.groupDiag.chatCount} · groupMeta={wa.groupDiag.groupMetaCount}
-                  {wa.groupDiag.winKeys?.length > 0 && (
-                    <div style={{ marginTop: 4, wordBreak: 'break-all' }}>winKeys: {wa.groupDiag.winKeys.join(', ')}</div>
-                  )}
-                </div>
-              )}
               {wa.groups?.length ? (
                 <>
                   <input
@@ -165,14 +157,12 @@ export default function WhatsAppPage() {
                 <div className="empty-state">
                   <FiWifiOff style={{ fontSize: '2rem', marginBottom: 8 }} />
                   {wa.status === 'ready' ? (
-                    <>
-                      <p><strong>Send a message in a WhatsApp group</strong> (from your phone) and it will appear here automatically.</p>
-                      <p style={{ color: 'var(--slate-400)', fontSize: '0.8rem', marginTop: 8 }}>
-                        WhatsApp Web changed how the chat list loads, so groups are detected from message activity. Post any message in each group you want to manage, then it shows up here to link.
-                      </p>
-                    </>
+                    <p>Click <strong>Refresh</strong> to load all your WhatsApp groups.</p>
                   ) : (
                     <p>Connect WhatsApp first to see your groups</p>
+                  )}
+                  {wa.status === 'ready' && wa.groupError && (
+                    <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8 }}>Error: {wa.groupError}</p>
                   )}
                 </div>
               ) : null}
