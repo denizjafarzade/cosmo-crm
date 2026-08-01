@@ -534,6 +534,40 @@
     .contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { border-color: var(--primary); }
     .contact-form textarea { resize: vertical; min-height: 70px; }
     .contact-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .field-hint { display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
+    .acct-row { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 0.6rem; }
+    .acct-row input:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* FIDE rating tucked away so it doesn't dominate the form */
+    .fide-details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.75rem; }
+    .fide-details summary { cursor: pointer; font-size: 0.8rem; color: var(--text-muted); list-style: none; }
+    .fide-details summary::-webkit-details-marker { display: none; }
+    .fide-details summary::before { content: '＋ '; color: var(--primary); font-weight: 700; }
+    .fide-details[open] summary::before { content: '－ '; }
+    .fide-details .form-group { margin-bottom: 0 !important; }
+    /* Availability picker: days x 3-hour blocks */
+    .avail-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .avail-grid { width: 100%; border-collapse: separate; border-spacing: 4px; min-width: 320px; }
+    .avail-grid th {
+      font-size: 0.66rem; font-weight: 600; color: var(--text-muted);
+      text-align: center; padding: 0 0 2px; white-space: nowrap;
+    }
+    .avail-grid td:first-child {
+      font-size: 0.72rem; font-weight: 600; color: var(--text);
+      text-align: left; white-space: nowrap; padding-right: 4px; width: 1%;
+    }
+    /* Scoped under .contact-form to beat the form's generic button styling */
+    .contact-form .avail-cell {
+      width: 100%; min-height: 32px; padding: 0; margin: 0;
+      border-radius: 7px; cursor: pointer;
+      border: 1px solid var(--border); background: transparent;
+      font-family: inherit; font-size: 0.7rem; font-weight: 500;
+      color: var(--text-muted); letter-spacing: 0;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .contact-form .avail-cell:hover { border-color: var(--primary); background: var(--icon-bg); transform: none; }
+    .contact-form .avail-cell[aria-pressed="true"] {
+      background: var(--primary); border-color: var(--primary); color: var(--white); font-weight: 700;
+    }
     .contact-form button {
       width: 100%; padding: 0.85rem; background: var(--primary); color: var(--white);
       border: none; border-radius: 50px; font-size: 1rem; font-weight: 600;
@@ -562,6 +596,22 @@
       display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem;
     }
     .footer-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; color: var(--white); margin-bottom: 0.5rem; }
+    .social-links { display: flex; gap: 0.6rem; margin-top: 1rem; }
+    .social-link {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .social-link svg { width: 19px; height: 19px; fill: rgba(255,255,255,0.85); }
+    .social-link:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+    .social-link:hover svg { fill: #fff; }
+    /* Same icons rendered inside the contact card */
+    .contact-socials { display: flex; gap: 0.6rem; margin-top: 1.25rem; }
+    .contact-socials .social-link { background: var(--icon-bg); border-color: var(--border); }
+    .contact-socials .social-link svg { fill: var(--primary); }
+    .contact-socials .social-link:hover { background: var(--primary); border-color: var(--primary); }
+    .contact-socials .social-link:hover svg { fill: #fff; }
     .footer-brand em { color: var(--accent); font-style: normal; }
     .footer p { font-size: 0.85rem; max-width: 280px; }
     .footer h4 { color: var(--white); font-size: 0.95rem; margin-bottom: 0.75rem; }
@@ -1923,18 +1973,39 @@
           <div class="contact-icon">🕐</div>
           <div class="contact-text"><strong data-i18n="contact.hoursLabel">Hours</strong><span data-i18n="contact.hoursValue">Mon–Sat, 10:00 – 20:00</span></div>
         </div>
+        <div class="contact-socials">
+          <a href="https://instagram.com/cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.12 1.38C1.36 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.12.66.66 1.33 1.08 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.72 2.12-1.38.66-.66 1.08-1.33 1.38-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.72-1.46-1.38-2.12C21.32 1.36 20.65.94 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/><path d="M12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8z"/><circle cx="18.41" cy="5.59" r="1.44"/></svg>
+          </a>
+          <a href="https://youtube.com/@cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.08 0 12 0 12s0 3.92.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+          </a>
+        </div>
       </div>
       <div class="contact-form">
-        <form id="contactForm" onsubmit="(async function(e){e.preventDefault();var d=Object.fromEntries(new FormData(e.target));var noFide=document.getElementById('noFideRating').checked;var payload={name:d.name,phone:d.phone,level:d.level||'',fide_rating:noFide||!d.fideRating?null:Number(d.fideRating),message:d.message||''};var btn=e.target.querySelector('[type=submit]');btn.disabled=true;btn.textContent='Sending...';try{var r=await fetch('/api/registrations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(r.ok){window.showContactThankYou(e.target);}else{alert('Something went wrong, please try again.');btn.disabled=false;btn.textContent='Send Message';}}catch(err){alert('Network error, please try again.');btn.disabled=false;btn.textContent='Send Message';}})(event);return false;">
+        <form id="contactForm" onsubmit="window.submitContactForm(event);return false;">
           <div class="form-row">
             <div class="form-group"><label data-i18n="contact.name">Name *</label><input name="name" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Your name" /></div>
             <div class="form-group"><label data-i18n="contact.phone">Phone *</label><input name="phone" required data-i18n-placeholder="contact.phonePlaceholder" placeholder="+994 XX XXX XX XX" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="contact.birthDate">Date of Birth *</label><input type="date" name="birthDate" required /></div>
+            <div class="form-group">
+              <label data-i18n="contact.sector">Sector *</label>
+              <select name="sector" required>
+                <option value="" disabled selected data-i18n="contact.sectorPlaceholder">Select sector</option>
+                <option value="az" data-i18n="sector.az">Azerbaijani</option>
+                <option value="ru" data-i18n="sector.ru">Russian</option>
+                <option value="en" data-i18n="sector.en">English</option>
+                <option value="tr" data-i18n="sector.tr">Turkish</option>
+              </select>
+            </div>
           </div>
           <div class="form-group">
             <label data-i18n="contact.level">Chess Level *</label>
             <select name="level" required>
               <option value="" disabled selected data-i18n="contact.levelPlaceholder">Select your chess level</option>
-              <option value="New to Chess" data-i18n="chessLevel.newToChess">New to Chess</option>
+              <option value="New to Chess" data-i18n="chessLevel.newToChess">Starting chess from zero</option>
               <option value="Beginner" data-i18n="chessLevel.beginner">Beginner</option>
               <option value="Intermediate" data-i18n="chessLevel.intermediate">Intermediate</option>
               <option value="Advanced" data-i18n="chessLevel.advanced">Advanced</option>
@@ -1942,15 +2013,50 @@
               <option value="Not Sure" data-i18n="chessLevel.notSure">Not Sure</option>
             </select>
           </div>
+
+          <!-- Online chess account: ratings are pulled automatically -->
           <div class="form-group">
-            <label data-i18n="contact.fideRating">FIDE Rating (Optional)</label>
-            <input type="number" name="fideRating" id="fideRating" data-i18n-placeholder="contact.fideRatingPlaceholder" placeholder="e.g. 1650" min="0" max="3000" />
-            <label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;font-weight:400;cursor:pointer;">
-              <input type="checkbox" id="noFideRating" name="noFideRating" style="width:auto;accent-color:var(--primary);cursor:pointer;" onchange="var inp=document.getElementById('fideRating'); if(this.checked){inp.value='';inp.disabled=true;inp.style.opacity='0.5';}else{inp.disabled=false;inp.style.opacity='1';}">
-              <span data-i18n="contact.noFideRating">I don't have an official FIDE rating</span>
-            </label>
+            <label data-i18n="contact.onlineAccount">Online Chess Account (optional)</label>
+            <div class="acct-row">
+              <select name="chessPlatform" id="chessPlatform">
+                <option value="" data-i18n="contact.platformNone">No account</option>
+                <option value="lichess">Lichess.org</option>
+                <option value="chesscom">Chess.com</option>
+              </select>
+              <input name="chessUsername" id="chessUsername" data-i18n-placeholder="contact.usernamePlaceholder" placeholder="username" disabled />
+            </div>
+            <span class="field-hint" data-i18n="contact.onlineAccountHint">Choose one platform — we'll read your blitz &amp; rapid ratings automatically.</span>
           </div>
+
+          <!-- Availability: days x 3-hour blocks -->
+          <div class="form-group">
+            <label data-i18n="contact.availability">When are you available? *</label>
+            <div class="avail-wrap">
+              <table class="avail-grid" id="availGrid">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th data-i18n="slot.morning">09–12</th>
+                    <th data-i18n="slot.midday">12–15</th>
+                    <th data-i18n="slot.afternoon">15–18</th>
+                    <th data-i18n="slot.evening">18–21</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <span class="field-hint" data-i18n="contact.availabilityHint">Tap the time blocks that work for you.</span>
+          </div>
+
           <div class="form-group"><label data-i18n="contact.message">Message</label><textarea name="message" data-i18n-placeholder="contact.messagePlaceholder" placeholder="Any questions or requests..."></textarea></div>
+
+          <!-- FIDE rating is a niche detail, kept collapsed so it doesn't dominate -->
+          <details class="fide-details">
+            <summary data-i18n="contact.fideToggle">I have an official FIDE rating</summary>
+            <div class="form-group" style="margin-top:0.65rem;">
+              <input type="number" name="fideRating" id="fideRating" data-i18n-placeholder="contact.fideRatingPlaceholder" placeholder="e.g. 1650" min="0" max="3000" />
+            </div>
+          </details>
           <button type="submit" data-i18n="contact.submit">Send & Contact via WhatsApp</button>
         </form>
       </div>
@@ -1964,6 +2070,14 @@
     <div>
       <div class="footer-brand">Cosmo <em>Chess</em> Academy</div>
       <p data-i18n="footer.tagline">Professional chess training for all ages. Building champions one move at a time.</p>
+      <div class="social-links">
+        <a href="https://instagram.com/cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.12 1.38C1.36 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.12.66.66 1.33 1.08 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.72 2.12-1.38.66-.66 1.08-1.33 1.38-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.72-1.46-1.38-2.12C21.32 1.36 20.65.94 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/><path d="M12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8z"/><circle cx="18.41" cy="5.59" r="1.44"/></svg>
+        </a>
+        <a href="https://youtube.com/@cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.08 0 12 0 12s0 3.92.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+        </a>
+      </div>
     </div>
     <div>
       <h4 data-i18n="footer.linksTitle">Links</h4>
@@ -2317,13 +2431,31 @@
       'contact.fideRating': 'FIDE Rating (Optional)',
       'contact.fideRatingPlaceholder': 'e.g. 1650',
       'contact.noFideRating': "I don't have an official FIDE rating",
+      'contact.fideToggle': 'I have an official FIDE rating',
+      'contact.birthDate': 'Date of Birth *',
+      'contact.sector': 'Sector *',
+      'contact.sectorPlaceholder': 'Select sector',
+      'contact.onlineAccount': 'Online Chess Account (optional)',
+      'contact.onlineAccountHint': "Choose one platform — we'll read your blitz & rapid ratings automatically.",
+      'contact.platformNone': 'No account',
+      'contact.usernamePlaceholder': 'username',
+      'contact.availability': 'When are you available? *',
+      'contact.availabilityHint': 'Tap the time blocks that work for you.',
+      'contact.availabilityRequired': 'Please select at least one available time block.',
+      'sector.az': 'Azerbaijani',
+      'sector.ru': 'Russian',
+      'sector.en': 'English',
+      'sector.tr': 'Turkish',
+      'day.mon': 'Mon', 'day.tue': 'Tue', 'day.wed': 'Wed', 'day.thu': 'Thu',
+      'day.fri': 'Fri', 'day.sat': 'Sat', 'day.sun': 'Sun',
+      'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Message',
       'contact.messagePlaceholder': 'Any questions or requests...',
       'contact.submit': 'Send & Contact via WhatsApp',
       'contact.thankYouTitle': 'Thank you!',
       'contact.thankYouText': 'We will contact you shortly via WhatsApp.',
 
-      'chessLevel.newToChess': 'New to Chess',
+      'chessLevel.newToChess': 'Starting chess from zero',
       'chessLevel.beginner': 'Beginner',
       'chessLevel.intermediate': 'Intermediate',
       'chessLevel.advanced': 'Advanced',
@@ -2558,13 +2690,31 @@
       'contact.fideRating': 'FIDE Reytinqi (İstəyə bağlı)',
       'contact.fideRatingPlaceholder': 'məsələn, 1650',
       'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
+      'contact.fideToggle': 'Rəsmi FIDE reytinqim var',
+      'contact.birthDate': 'Təvəllüd *',
+      'contact.sector': 'Sektor *',
+      'contact.sectorPlaceholder': 'Sektoru seçin',
+      'contact.onlineAccount': 'Onlayn şahmat hesabı (istəyə bağlı)',
+      'contact.onlineAccountHint': 'Bir platforma seçin — blits və rapid reytinqlərinizi avtomatik oxuyacağıq.',
+      'contact.platformNone': 'Hesabım yoxdur',
+      'contact.usernamePlaceholder': 'istifadəçi adı',
+      'contact.availability': 'Hansı vaxtlar sizə uyğundur? *',
+      'contact.availabilityHint': 'Sizə uyğun olan vaxt aralıqlarına toxunun.',
+      'contact.availabilityRequired': 'Zəhmət olmasa, ən azı bir vaxt aralığı seçin.',
+      'sector.az': 'Azərbaycan',
+      'sector.ru': 'Rus',
+      'sector.en': 'İngilis',
+      'sector.tr': 'Türk',
+      'day.mon': 'B.e', 'day.tue': 'Ç.a', 'day.wed': 'Çər', 'day.thu': 'C.a',
+      'day.fri': 'Cüm', 'day.sat': 'Şən', 'day.sun': 'Baz',
+      'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Mesaj',
       'contact.messagePlaceholder': 'Suallarınızı və ya istəklərinizi qeyd edin...',
       'contact.submit': 'Göndərin və WhatsApp vasitəsilə əlaqə saxlayın',
       'contact.thankYouTitle': 'Təşəkkür edirik!',
       'contact.thankYouText': 'Tezliklə WhatsApp vasitəsilə sizinlə əlaqə saxlayacağıq.',
 
-      'chessLevel.newToChess': 'Şahmata yeni başlayan',
+      'chessLevel.newToChess': 'Şahmata sıfırdan başlayan',
       'chessLevel.beginner': 'Başlanğıc Səviyyə',
       'chessLevel.intermediate': 'Orta Səviyyə',
       'chessLevel.advanced': 'Yüksək Səviyyə',
@@ -2799,13 +2949,31 @@
       'contact.fideRating': 'Рейтинг FIDE (необязательно)',
       'contact.fideRatingPlaceholder': 'например, 1650',
       'contact.noFideRating': 'У меня нет официального рейтинга FIDE',
+      'contact.fideToggle': 'У меня есть официальный рейтинг FIDE',
+      'contact.birthDate': 'Дата рождения *',
+      'contact.sector': 'Сектор *',
+      'contact.sectorPlaceholder': 'Выберите сектор',
+      'contact.onlineAccount': 'Онлайн-аккаунт (необязательно)',
+      'contact.onlineAccountHint': 'Выберите одну платформу — мы автоматически считаем ваш блиц и рапид рейтинг.',
+      'contact.platformNone': 'Нет аккаунта',
+      'contact.usernamePlaceholder': 'имя пользователя',
+      'contact.availability': 'Когда вам удобно? *',
+      'contact.availabilityHint': 'Отметьте подходящие интервалы времени.',
+      'contact.availabilityRequired': 'Пожалуйста, выберите хотя бы один интервал.',
+      'sector.az': 'Азербайджанский',
+      'sector.ru': 'Русский',
+      'sector.en': 'Английский',
+      'sector.tr': 'Турецкий',
+      'day.mon': 'Пн', 'day.tue': 'Вт', 'day.wed': 'Ср', 'day.thu': 'Чт',
+      'day.fri': 'Пт', 'day.sat': 'Сб', 'day.sun': 'Вс',
+      'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Сообщение',
       'contact.messagePlaceholder': 'Напишите ваши вопросы или пожелания...',
       'contact.submit': 'Отправить и связаться через WhatsApp',
       'contact.thankYouTitle': 'Спасибо!',
       'contact.thankYouText': 'Мы свяжемся с вами в ближайшее время через WhatsApp.',
 
-      'chessLevel.newToChess': 'Новичок',
+      'chessLevel.newToChess': 'Начинаю с нуля',
       'chessLevel.beginner': 'Начальный уровень',
       'chessLevel.intermediate': 'Средний уровень',
       'chessLevel.advanced': 'Продвинутый уровень',
@@ -3094,7 +3262,7 @@
       : (initMonth + ' ' + lpmLbl);
 
     return '<div class="pcv2" data-card-type="group" data-sub-idx="0" data-tid="' + esc((firstFmt.teachers||[{teacherId:''}])[0].teacherId) + '" data-opt-idx="0" data-formats="' + dataJson + '">' +
-      '<div class="pcv2-header"><span class="pcv2-icon">♟ ♟</span><span class="pcv2-title">Group Lessons</span></div>' +
+      '<div class="pcv2-header"><span class="pcv2-icon">♟ ♟</span><span class="pcv2-title">' + esc(dict['pricing.format.groupLessons'] || 'Group Lessons') + '</span></div>' +
       '<div class="pcv2-subtabs">' + subTabsHtml + '</div>' +
       '<div class="pcv2-section">' +
         '<span class="pcv2-section-label">' + esc(teacherLbl) + '</span>' +
@@ -3149,7 +3317,7 @@
     }).join('');
 
     return '<div class="pcv2" data-card-type="indiv" data-tid="' + esc(firstTb.teacherId || '') + '" data-count="' + DEFAULT + '" data-base-price="' + (firstT.basePrice||0) + '" data-base-lessons="' + (firstT.baseLessons||1) + '">' +
-      '<div class="pcv2-header"><span class="pcv2-icon">♛</span><span class="pcv2-title">Individual Lessons</span></div>' +
+      '<div class="pcv2-header"><span class="pcv2-icon">♛</span><span class="pcv2-title">' + esc(dict['pricing.format.individual'] || 'Individual Lessons') + '</span></div>' +
       '<div class="pcv2-section">' +
         '<span class="pcv2-section-label">' + esc(teacherLbl) + '</span>' +
         '<div class="pcv2-teacher-pills" data-role="teacher-pills">' + teacherPills + '</div>' +
@@ -4085,6 +4253,101 @@
       else if (e.key === 'ArrowLeft') openLightbox(currentIndex - 1);
       else if (e.key === 'ArrowRight') openLightbox(currentIndex + 1);
     });
+  })();
+
+  // ===== Contact form: availability grid, chess account, submit =====
+  (function(){
+    var SLOTS = ['09:00-12:00', '12:00-15:00', '15:00-18:00', '18:00-21:00'];
+    // Mon-first ordering; values follow JS getDay() (Sun = 0).
+    var DAYS = [
+      { i: 1, key: 'day.mon', label: 'Mon' }, { i: 2, key: 'day.tue', label: 'Tue' },
+      { i: 3, key: 'day.wed', label: 'Wed' }, { i: 4, key: 'day.thu', label: 'Thu' },
+      { i: 5, key: 'day.fri', label: 'Fri' }, { i: 6, key: 'day.sat', label: 'Sat' },
+      { i: 0, key: 'day.sun', label: 'Sun' }
+    ];
+
+    var grid = document.getElementById('availGrid');
+    if (grid) {
+      var tbody = grid.querySelector('tbody');
+      DAYS.forEach(function(d){
+        var tr = document.createElement('tr');
+        var th = document.createElement('td');
+        th.setAttribute('data-i18n', d.key);
+        th.textContent = d.label;
+        tr.appendChild(th);
+        SLOTS.forEach(function(slot){
+          var td = document.createElement('td');
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'avail-cell';
+          btn.setAttribute('aria-pressed', 'false');
+          btn.setAttribute('data-slot', d.i + '|' + slot);
+          btn.setAttribute('aria-label', d.label + ' ' + slot);
+          btn.addEventListener('click', function(){
+            var on = btn.getAttribute('aria-pressed') === 'true';
+            btn.setAttribute('aria-pressed', on ? 'false' : 'true');
+          });
+          td.appendChild(btn);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Username only makes sense once a platform is picked.
+    var platform = document.getElementById('chessPlatform');
+    var username = document.getElementById('chessUsername');
+    if (platform && username) {
+      platform.addEventListener('change', function(){
+        username.disabled = !platform.value;
+        if (!platform.value) username.value = '';
+      });
+    }
+
+    function selectedAvailability() {
+      return Array.prototype.slice
+        .call(document.querySelectorAll('#availGrid .avail-cell[aria-pressed="true"]'))
+        .map(function(b){ return b.getAttribute('data-slot'); });
+    }
+
+    window.submitContactForm = async function(e){
+      e.preventDefault();
+      var form = e.target;
+      var d = Object.fromEntries(new FormData(form));
+      var availability = selectedAvailability();
+      if (!availability.length) {
+        alert(window.__t ? window.__t('contact.availabilityRequired') : 'Please select at least one available time block.');
+        return;
+      }
+      var payload = {
+        name: d.name,
+        phone: d.phone,
+        level: d.level || '',
+        birth_date: d.birthDate || null,
+        sector: d.sector || null,
+        availability: availability,
+        chess_platform: d.chessPlatform || null,
+        chess_username: (d.chessPlatform && d.chessUsername) ? String(d.chessUsername).trim() : null,
+        fide_rating: d.fideRating ? Number(d.fideRating) : null,
+        message: d.message || ''
+      };
+      var btn = form.querySelector('[type=submit]');
+      var original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      try {
+        var r = await fetch('/api/registrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (r.ok) { window.showContactThankYou(form); }
+        else { alert('Something went wrong, please try again.'); btn.disabled = false; btn.textContent = original; }
+      } catch (err) {
+        alert('Network error, please try again.');
+        btn.disabled = false; btn.textContent = original;
+      }
+    };
   })();
 
   // Subtle scroll-reveal animations

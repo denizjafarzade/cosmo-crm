@@ -393,6 +393,13 @@ function start() {
     Promise.resolve().then(checkPaymentReminders).catch(e => console.error('[Scheduler] Payment reminder error:', e.message));
   });
 
+  // Nightly: refresh Lichess/Chess.com ratings for students with a linked account
+  cron.schedule('30 3 * * *', () => {
+    require('./chessRatings').refreshAllStudents()
+      .then(n => console.log(`[Scheduler] Refreshed ratings for ${n} students`))
+      .catch(e => console.error('[Scheduler] Ratings refresh error:', e.message));
+  });
+
   // Every minute (for weekly report — checks day/time internally)
   cron.schedule('* * * * *', () => {
     try { generateWeeklyReport(); } catch (e) { console.error('[Scheduler] Report error:', e.message); }

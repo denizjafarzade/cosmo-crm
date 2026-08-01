@@ -298,6 +298,24 @@ if (!columnExists('registrations', 'status')) {
   db.exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'new'");
 }
 
+// --- Registration/student profile fields collected by the landing page form ---
+// birth_date: YYYY-MM-DD, sector: az|ru|en|tr, availability: JSON array of
+// "<dayIndex>|<HH:MM-HH:MM>" slots the family is free.
+const REG_COLUMNS = {
+  birth_date: 'TEXT',
+  sector: 'TEXT',
+  availability: 'TEXT',
+  chess_platform: 'TEXT',
+  chess_username: 'TEXT',
+  blitz_rating: 'INTEGER',
+  rapid_rating: 'INTEGER',
+  ratings_updated_at: 'TEXT',
+};
+for (const [col, type] of Object.entries(REG_COLUMNS)) {
+  if (!columnExists('registrations', col)) db.exec(`ALTER TABLE registrations ADD COLUMN ${col} ${type}`);
+  if (!columnExists('students', col)) db.exec(`ALTER TABLE students ADD COLUMN ${col} ${type}`);
+}
+
 // Insert default settings if not present
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 const defaults = {

@@ -39,15 +39,32 @@ function parseFideRating(value) {
 }
 
 r.post('/', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes } = req.body;
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes,
+    birth_date, sector, chess_platform, chess_username } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '');
+  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, birth_date, sector, chess_platform, chess_username)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '',
+    birth_date || null, sector || null, chess_platform || null, chess_username || null);
+  if (chess_platform && chess_username) {
+    require('../services/chessRatings').updateRatingsFor('students', result.lastInsertRowid, chess_platform, chess_username).catch(() => {});
+  }
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
+// Re-fetch a student's online ratings on demand.
+r.post('/:id/refresh-ratings', async (req, res) => {
+  const s = db.prepare('SELECT chess_platform, chess_username FROM students WHERE id = ?').get(req.params.id);
+  if (!s) return res.status(404).json({ error: 'Not found' });
+  if (!s.chess_username) return res.status(400).json({ error: 'No chess account linked for this student' });
+  const r2 = await require('../services/chessRatings').updateRatingsFor('students', req.params.id, s.chess_platform, s.chess_username);
+  if (!r2) return res.status(404).json({ error: `Account "${s.chess_username}" not found on ${s.chess_platform}` });
+  res.json({ ok: true, ...r2 });
+});
+
 r.put('/:id', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active } = req.body;
+  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active,
+    birth_date, sector, chess_platform, chess_username } = req.body;
+  const before = db.prepare('SELECT chess_platform, chess_username FROM students WHERE id = ?').get(req.params.id);
   db.prepare(`UPDATE students SET
     name = COALESCE(?, name),
     surname = COALESCE(?, surname),
@@ -59,8 +76,18 @@ r.put('/:id', (req, res) => {
     group_id = COALESCE(?, group_id),
     notes = COALESCE(?, notes),
     active = COALESCE(?, active),
+    birth_date = COALESCE(?, birth_date),
+    sector = COALESCE(?, sector),
+    chess_platform = COALESCE(?, chess_platform),
+    chess_username = COALESCE(?, chess_username),
     updated_at = datetime('now')
-    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, parseFideRating(fide_rating), coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null, req.params.id);
+    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, parseFideRating(fide_rating), coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null,
+      birth_date || null, sector || null, chess_platform || null, chess_username || null, req.params.id);
+
+  // Re-fetch ratings when the linked account changed.
+  if (chess_username && (chess_username !== before?.chess_username || chess_platform !== before?.chess_platform)) {
+    require('../services/chessRatings').updateRatingsFor('students', req.params.id, chess_platform || before?.chess_platform, chess_username).catch(() => {});
+  }
   res.json({ ok: true });
 });
 
