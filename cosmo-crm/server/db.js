@@ -334,6 +334,27 @@ function setSetting(key, value) {
   db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, String(value));
 }
 
+// Recompute a student's lessons_since_payment from the lesson rows that actually
+// count toward payment since their last confirmed payment.
+//
+// Deriving the counter instead of incrementing/decrementing it makes attendance
+// idempotent: re-confirming or editing the same lesson can never inflate the
+// count. datetime() is used on both sides because payments.confirmed_at is
+// 'YYYY-MM-DD HH:MM:SS' while lessons.occurred_at is an ISO string.
+function recomputeLessonsSincePayment(studentId) {
+  const last = db.prepare('SELECT MAX(confirmed_at) AS t FROM payments WHERE student_id = ?').get(studentId);
+  const since = last && last.t ? last.t : null;
+  const row = db.prepare(`
+    SELECT COUNT(*) AS c FROM lessons
+    WHERE student_id = ? AND counts_toward_payment = 1
+      AND (? IS NULL OR datetime(occurred_at) > datetime(?))
+  `).get(studentId, since, since);
+  db.prepare("UPDATE students SET lessons_since_payment = ?, updated_at = datetime('now') WHERE id = ?")
+    .run(row.c, studentId);
+  return row.c;
+}
+
 module.exports = db;
 module.exports.getSetting = getSetting;
 module.exports.setSetting = setSetting;
+module.exports.recomputeLessonsSincePayment = recomputeLessonsSincePayment;

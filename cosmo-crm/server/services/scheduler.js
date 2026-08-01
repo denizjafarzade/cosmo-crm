@@ -69,11 +69,10 @@ function checkAutoLessons() {
     db.transaction(() => {
       db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(newLesson, sched.gid);
       const stmtL = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, slot_time) VALUES (?, ?, ?, ?, ?)');
-      const stmtS = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
-      for (const s of students) {
-        stmtL.run(sched.gid, s.id, newLesson, isoNow, sched.time);
-        stmtS.run(s.id);
-      }
+      for (const s of students) stmtL.run(sched.gid, s.id, newLesson, isoNow, sched.time);
+      // Derive counters from lesson rows (never increment) so they stay correct
+      // no matter how attendance is later edited.
+      for (const s of students) db.recomputeLessonsSincePayment(s.id);
       const cycle = parseInt(getSetting('payment_cycle_lessons') || '8', 10);
       db.prepare(`UPDATE students SET payment_status = 'due' WHERE group_id = ? AND active = 1 AND payment_status = 'paid' AND lessons_since_payment >= ?`)
         .run(sched.gid, cycle);
@@ -107,7 +106,7 @@ function scheduleHomeworkAfterLesson(groupId, lessonNumber, lessonTime) {
   console.log(`[Scheduler] Homework #${hwNum} for group ${groupId} (${duration}min lesson) scheduled ~${sendAt.toLocaleTimeString()}`);
 
   setTimeout(() => {
-    sendHomework(groupId, hw.id, hwNum);
+    sendHomework(groupId, hw.id, hwNum).catch(e => console.error('[Scheduler] Homework send error:', e.message));
   }, delayMs);
 }
 
@@ -119,7 +118,9 @@ async function sendHomework(groupId, hwId, homeworkNumber) {
 
   // Human behaviour: defer to the next daytime window instead of sending at night.
   if (!withinSendWindow()) {
-    setTimeout(() => sendHomework(groupId, hwId, homeworkNumber), 15 * 60 * 1000);
+    setTimeout(() => {
+      sendHomework(groupId, hwId, homeworkNumber).catch(e => console.error('[Scheduler] Homework retry error:', e.message));
+    }, 15 * 60 * 1000);
     return;
   }
 
@@ -143,7 +144,9 @@ async function sendHomework(groupId, hwId, homeworkNumber) {
       await wa.sendFile(chatId, hw.file_path, cap);
     }
 
-    db.prepare("INSERT INTO homework_sends (homework_id, group_id, lesson_number) VALUES (?, ?, ?)").run(hw.id, groupId, homeworkNumber);
+    // homework_sends has (homework_id, group_id, sent_at) — sent_at is NOT NULL.
+    // Recording the send is what stops it being sent again, so it must not throw.
+    db.prepare("INSERT OR IGNORE INTO homework_sends (homework_id, group_id, sent_at) VALUES (?, ?, datetime('now'))").run(hw.id, groupId);
     wa.logSend('homework', `group:${groupId}`, group.name, `Homework #${homeworkNumber} sent (${hw.type})`, 'success', null);
   } catch (e) {
     wa.logSend('homework', `group:${groupId}`, group.name, `Homework #${homeworkNumber} failed`, 'failed', e.message);
@@ -246,7 +249,17 @@ function checkPaymentForGroup(groupId) {
   }
 }
 
+// Never rejects: callers fire-and-forget this from cron/route paths, where an
+// unhandled rejection would otherwise take the process down.
 async function sendPaymentReminder(student, reminderNumber) {
+  try {
+    await _sendPaymentReminder(student, reminderNumber);
+  } catch (e) {
+    console.error('[Scheduler] Payment reminder error:', e.message);
+  }
+}
+
+async function _sendPaymentReminder(student, reminderNumber) {
   // Human behaviour: never message outside daytime hours; retry next cycle.
   if (!withinSendWindow()) return;
   const idempKey = `payment-${student.id}-${reminderNumber}-${new Date().toISOString().slice(0, 10)}`;
@@ -368,14 +381,16 @@ function generateWeeklyReport() {
 // ─── Start all cron jobs ────────────────────────────────────────
 function start() {
   // Every minute: check reminders, auto-lessons, scheduled sends
+  // NOTE: async functions must be .catch()'d — a sync try/catch does not catch
+  // their rejections, which would surface as unhandled rejections.
   cron.schedule('* * * * *', () => {
     try { checkAutoLessons(); } catch (e) { console.error('[Scheduler] Auto-lesson error:', e.message); }
-    try { processScheduledSends(); } catch (e) { console.error('[Scheduler] Scheduled send error:', e.message); }
+    Promise.resolve().then(processScheduledSends).catch(e => console.error('[Scheduler] Scheduled send error:', e.message));
   });
 
   // Every 15 minutes: check payment reminders and escalations
   cron.schedule('*/15 * * * *', () => {
-    try { checkPaymentReminders(); } catch (e) { console.error('[Scheduler] Payment reminder error:', e.message); }
+    Promise.resolve().then(checkPaymentReminders).catch(e => console.error('[Scheduler] Payment reminder error:', e.message));
   });
 
   // Every minute (for weekly report — checks day/time internally)

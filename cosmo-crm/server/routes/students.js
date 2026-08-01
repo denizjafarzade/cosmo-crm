@@ -88,9 +88,8 @@ r.post('/:id/excuse', (req, res) => {
   }
 
   if (lesson_id) {
-    db.prepare('UPDATE lessons SET is_excused = 1, counts_toward_payment = 0 WHERE id = ? AND student_id = ?').run(lesson_id, studentId);
-    // Decrement lessons_since_payment
-    db.prepare('UPDATE students SET lessons_since_payment = MAX(0, lessons_since_payment - 1), updated_at = datetime(\'now\') WHERE id = ?').run(studentId);
+    db.prepare('UPDATE lessons SET is_excused = 1, counts_toward_payment = 0, absent = 1 WHERE id = ? AND student_id = ?').run(lesson_id, studentId);
+    db.recomputeLessonsSincePayment(studentId);
   }
 
   res.json({ ok: true });

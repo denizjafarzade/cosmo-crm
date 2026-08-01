@@ -5,11 +5,17 @@ const path = require('path');
 // Never let an async error from the WhatsApp/puppeteer stack crash the whole
 // server (which would 502 the site). Log and keep running.
 process.on('unhandledRejection', (reason) => {
-  console.error('[Process] Unhandled rejection:', reason && reason.message ? reason.message : reason);
+  console.error('[Process] Unhandled rejection:', (reason && reason.stack) || reason);
 });
 process.on('uncaughtException', (err) => {
-  console.error('[Process] Uncaught exception:', err && err.message ? err.message : err);
+  console.error('[Process] Uncaught exception:', (err && err.stack) || err);
 });
+// If the process ever does go down, record why — a silent exit is what surfaces
+// to users as a 502 Bad Gateway from nginx.
+process.on('exit', (code) => console.error(`[Process] Exiting with code ${code} at ${new Date().toISOString()}`));
+for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP']) {
+  process.on(sig, () => { console.error(`[Process] Received ${sig}`); process.exit(0); });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,14 +56,30 @@ app.get(/^\/crm(?:\/.*)?$/, (req, res) => {
   res.sendFile(path.join(clientDist, 'index.html'));
 });
 
-app.listen(PORT, () => {
+// Any error thrown in a route lands here as JSON instead of a dead connection.
+app.use((err, req, res, next) => {
+  console.error(`[Server] Error on ${req.method} ${req.originalUrl}:`, (err && err.stack) || err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: (err && err.message) || 'Internal error' });
+});
+
+const server = app.listen(PORT, () => {
   console.log(`[Server] Running on http://localhost:${PORT}`);
 
-  // Initialize WhatsApp
-  const wa = require('./services/whatsapp');
-  wa.init();
+  // Initialize WhatsApp — must never take the HTTP server down with it.
+  try {
+    const wa = require('./services/whatsapp');
+    Promise.resolve(wa.init()).catch(e => console.error('[Server] WhatsApp init failed:', e.message));
+  } catch (e) {
+    console.error('[Server] WhatsApp init failed:', e.message);
+  }
 
   // Start scheduler
-  const scheduler = require('./services/scheduler');
-  scheduler.start();
+  try {
+    require('./services/scheduler').start();
+  } catch (e) {
+    console.error('[Server] Scheduler start failed:', e.message);
+  }
 });
+
+server.on('error', (e) => console.error('[Server] Listen error:', e.message));

@@ -103,15 +103,14 @@ r.post('/:id/lesson-done', (req, res) => {
 
   db.transaction(() => {
     db.prepare('UPDATE groups SET current_lesson_number = ?, updated_at = datetime(\'now\') WHERE id = ?').run(newLesson, groupId);
-    const stmtLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment) VALUES (?, ?, ?, ?, ?, ?)');
-    const stmtStudent = db.prepare(`UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?`);
+    const stmtLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent) VALUES (?, ?, ?, ?, ?, ?, ?)');
     for (const s of students) {
       const suspended = s.suspended_until_lesson != null && newLesson <= s.suspended_until_lesson;
       const absent = absentIds.has(s.id);
       const excused = absent || suspended;
-      stmtLesson.run(groupId, s.id, newLesson, now, excused ? 1 : 0, excused ? 0 : 1);
-      if (!excused) stmtStudent.run(s.id);
+      stmtLesson.run(groupId, s.id, newLesson, now, excused ? 1 : 0, excused ? 0 : 1, absent || suspended ? 1 : 0);
     }
+    for (const s of students) db.recomputeLessonsSincePayment(s.id);
     const cycleLessons = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
     db.prepare(`UPDATE students SET payment_status = 'due' WHERE group_id = ? AND active = 1 AND payment_status = 'paid' AND lessons_since_payment >= ?`)
       .run(groupId, cycleLessons);
@@ -157,37 +156,36 @@ r.post('/:id/attendance', (req, res) => {
       created = true;
       db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(lessonNumber, groupId);
       const insertLesson = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent, slot_time) VALUES (?, ?, ?, ?, 0, 1, 0, ?)');
-      const incStudent = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
       const now = new Date().toISOString();
-      for (const s of students) { insertLesson.run(groupId, s.id, lessonNumber, now, slotTime); incStudent.run(s.id); }
+      for (const s of students) insertLesson.run(groupId, s.id, lessonNumber, now, slotTime);
     }
 
     // Reconcile each student's row for this lesson to the desired present/absent state.
     const getRow = db.prepare('SELECT * FROM lessons WHERE group_id = ? AND student_id = ? AND lesson_number = ?');
     const updRow = db.prepare('UPDATE lessons SET absent = ?, is_excused = ?, counts_toward_payment = ? WHERE id = ?');
-    const insRow = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    const decLsp = db.prepare("UPDATE students SET lessons_since_payment = MAX(lessons_since_payment - 1, 0), updated_at = datetime('now') WHERE id = ?");
-    const incLsp = db.prepare("UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?");
+    const insRow = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent, slot_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 
     for (const s of students) {
       const isAbsent = absenceMap.has(s.id);
       const excused = isAbsent ? absenceMap.get(s.id) : false;
       const desiredAbsent = isAbsent ? 1 : 0;
       const desiredExcused = isAbsent && excused ? 1 : 0;
-      const desiredCounts = isAbsent && excused ? 0 : 1; // excused absence doesn't count
-      let row = getRow.get(groupId, s.id, lessonNumber);
+      // An absent student is never charged for the lesson — allowed or not. The
+      // allowed/not-allowed distinction drives warnings, not the lesson count.
+      const desiredCounts = isAbsent ? 0 : 1;
+      const row = getRow.get(groupId, s.id, lessonNumber);
       if (!row) {
-        insRow.run(groupId, s.id, lessonNumber, new Date().toISOString(), desiredExcused, desiredCounts, desiredAbsent);
-        if (desiredCounts === 1) incLsp.run(s.id);
+        insRow.run(groupId, s.id, lessonNumber, new Date().toISOString(), desiredExcused, desiredCounts, desiredAbsent, slotTime);
         continue;
       }
-      const wasCounting = row.counts_toward_payment === 1;
       if (row.absent !== desiredAbsent || row.is_excused !== desiredExcused || row.counts_toward_payment !== desiredCounts) {
         updRow.run(desiredAbsent, desiredExcused, desiredCounts, row.id);
-        if (wasCounting && desiredCounts === 0) decLsp.run(s.id);
-        else if (!wasCounting && desiredCounts === 1) incLsp.run(s.id);
       }
     }
+
+    // Derive each counter from the lesson rows rather than incrementing, so
+    // re-confirming or editing this lesson can never inflate the count.
+    for (const s of students) db.recomputeLessonsSincePayment(s.id);
 
     db.prepare("UPDATE students SET payment_status = 'due' WHERE group_id = ? AND active = 1 AND payment_status = 'paid' AND lessons_since_payment >= ?").run(groupId, cycle);
   });
