@@ -122,6 +122,16 @@ r.post('/:id/excuse', (req, res) => {
   res.json({ ok: true });
 });
 
+// Record (or clear) a reason for a late payment. A reason stops the student
+// being escalated to red and suppresses the automatic warning message.
+r.post('/:id/payment-reason', (req, res) => {
+  const { reason } = req.body;
+  const text = (reason || '').trim();
+  db.prepare("UPDATE students SET payment_excuse_reason = ?, updated_at = datetime('now') WHERE id = ?")
+    .run(text || null, req.params.id);
+  res.json({ ok: true, payment_excuse_reason: text || null });
+});
+
 // Confirm payment
 r.post('/:id/pay', (req, res) => {
   const { amount, notes } = req.body;
@@ -131,7 +141,7 @@ r.post('/:id/pay', (req, res) => {
 
   db.prepare(`INSERT INTO payments (student_id, amount, lessons_covered, confirmed_at, notes) VALUES (?, ?, ?, datetime('now'), ?)`)
     .run(studentId, amount || 0, student.lessons_since_payment, notes || '');
-  db.prepare(`UPDATE students SET lessons_since_payment = 0, payment_status = 'paid', updated_at = datetime('now') WHERE id = ?`)
+  db.prepare(`UPDATE students SET lessons_since_payment = 0, payment_status = 'paid', payment_excuse_reason = NULL, overdue_warned_at_lessons = NULL, updated_at = datetime('now') WHERE id = ?`)
     .run(studentId);
   // Clear pending reminders
   db.prepare('DELETE FROM payment_reminders WHERE student_id = ?').run(studentId);

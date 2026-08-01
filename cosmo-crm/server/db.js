@@ -316,6 +316,17 @@ for (const [col, type] of Object.entries(REG_COLUMNS)) {
   if (!columnExists('students', col)) db.exec(`ALTER TABLE students ADD COLUMN ${col} ${type}`);
 }
 
+// A recorded reason (agreed delay, illness, ...) suppresses overdue escalation
+// and the automatic "lessons will be stopped" warning.
+if (!columnExists('students', 'payment_excuse_reason')) {
+  db.exec('ALTER TABLE students ADD COLUMN payment_excuse_reason TEXT');
+}
+// Remembers the last overdue count we warned about, so the same warning is not
+// re-sent on every scheduler tick.
+if (!columnExists('students', 'overdue_warned_at_lessons')) {
+  db.exec('ALTER TABLE students ADD COLUMN overdue_warned_at_lessons INTEGER');
+}
+
 // Insert default settings if not present
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 const defaults = {

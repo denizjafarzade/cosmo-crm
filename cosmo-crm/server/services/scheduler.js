@@ -220,6 +220,40 @@ function checkPaymentReminders() {
   }
 }
 
+// Once a student is more than OVERDUE_WARN_AT lessons past their payment cycle
+// with no reason recorded, warn that lessons will stop if it is not settled
+// within the next two lessons. Sent once per overdue count.
+const OVERDUE_WARN_AT = 2;
+async function checkOverdueWarnings() {
+  const cycle = parseInt(getSetting('payment_cycle_lessons') || '8', 10);
+  const rows = db.prepare(`
+    SELECT * FROM students
+    WHERE active = 1
+      AND lessons_since_payment > ?
+      AND (payment_excuse_reason IS NULL OR payment_excuse_reason = '')
+  `).all(cycle + OVERDUE_WARN_AT);
+
+  for (const s of rows) {
+    if (s.overdue_warned_at_lessons === s.lessons_since_payment) continue;
+    const over = s.lessons_since_payment - cycle;
+    const message =
+      `⚠️ ${s.name} ${s.surname} — ödəniş gecikir\n\n` +
+      `Ödənişsiz keçilən dərs sayı: ${over}.\n` +
+      `Əgər növbəti 2 dərs ərzində ödəniş tamamlanmasa və ya keçərli bir səbəb bildirilməsə, ` +
+      `dərsləriniz müvəqqəti dayandırılacaq.\n\nAnlayışınız üçün təşəkkür edirik.`;
+    const target = s.parent_whatsapp || s.whatsapp_number;
+    if (target && withinSendWindow() && wa.getStatus().status === 'ready') {
+      try {
+        await wa.sendToNumber(target, message);
+        wa.logSend('payment', `student:${s.id}`, `${s.name} ${s.surname}`, message, 'success', null);
+        db.prepare('UPDATE students SET overdue_warned_at_lessons = ? WHERE id = ?').run(s.lessons_since_payment, s.id);
+      } catch (e) {
+        wa.logSend('payment', `student:${s.id}`, `${s.name} ${s.surname}`, message, 'failed', e.message);
+      }
+    }
+  }
+}
+
 // Called immediately after lesson-done
 function checkPaymentForGroup(groupId) {
   const cycle = parseInt(getSetting('payment_cycle_lessons') || '8', 10);
@@ -391,6 +425,7 @@ function start() {
   // Every 15 minutes: check payment reminders and escalations
   cron.schedule('*/15 * * * *', () => {
     Promise.resolve().then(checkPaymentReminders).catch(e => console.error('[Scheduler] Payment reminder error:', e.message));
+    Promise.resolve().then(checkOverdueWarnings).catch(e => console.error('[Scheduler] Overdue warning error:', e.message));
   });
 
   // Nightly: refresh Lichess/Chess.com ratings for students with a linked account

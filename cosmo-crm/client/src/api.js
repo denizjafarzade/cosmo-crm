@@ -60,6 +60,8 @@ const api = {
   deleteStudent: (id) => request(`/students/${id}`, { method: 'DELETE' }),
   excuseStudent: (id, lessonId) => request(`/students/${id}/excuse`, { method: 'POST', body: { lesson_id: lessonId } }),
   confirmPayment: (id, data) => request(`/students/${id}/pay`, { method: 'POST', body: data }),
+  setPaymentReason: (id, reason) => request(`/students/${id}/payment-reason`, { method: 'POST', body: { reason } }),
+  refreshRatings: (id) => request(`/students/${id}/refresh-ratings`, { method: 'POST' }),
   delayPayment: (id, days) => request(`/students/${id}/delay`, { method: 'POST', body: { days } }),
 
   // Groups

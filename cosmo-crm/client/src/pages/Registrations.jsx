@@ -3,6 +3,30 @@ import { FiUserPlus, FiCheck, FiX, FiTrash2, FiMessageCircle, FiFilter } from 'r
 import api from '../api';
 
 const STATUS_LABELS = { new: 'New', contacted: 'Contacted', enrolled: 'Enrolled', rejected: 'Rejected' };
+const SECTORS = { az: 'Azerbaijani', ru: 'Russian', en: 'English', tr: 'Turkish' };
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function ratingsText(r) {
+  if (!r.chess_username) return '—';
+  const platform = r.chess_platform === 'lichess' ? 'Lichess' : 'Chess.com';
+  const b = r.blitz_rating ?? '—';
+  const rp = r.rapid_rating ?? '—';
+  return `${platform} ${r.chess_username} · B ${b} / R ${rp}`;
+}
+
+// Stored as JSON array of "<dayIndex>|<HH:MM-HH:MM>".
+function availabilityList(raw) {
+  if (!raw) return [];
+  let arr = raw;
+  if (typeof raw === 'string') {
+    try { arr = JSON.parse(raw); } catch { return []; }
+  }
+  if (!Array.isArray(arr)) return [];
+  return arr.map(s => {
+    const [d, slot] = String(s).split('|');
+    return `${DAY_NAMES[Number(d)] ?? '?'} ${slot ?? ''}`.trim();
+  });
+}
 const STATUS_BADGE = { new: 'blue', contacted: 'amber', enrolled: 'green', rejected: 'red' };
 
 function timeAgo(iso) {
@@ -84,9 +108,22 @@ export default function Registrations() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div><div className="form-label">Phone</div><div style={{ fontWeight: 600 }}>{selected.phone}</div></div>
                 <div><div className="form-label">Level</div><div>{selected.level || '—'}</div></div>
+                <div><div className="form-label">Date of Birth</div><div>{selected.birth_date || '—'}</div></div>
+                <div><div className="form-label">Sector</div><div>{SECTORS[selected.sector] || '—'}</div></div>
+                <div><div className="form-label">Online Ratings</div><div>{ratingsText(selected)}</div></div>
                 <div><div className="form-label">FIDE Rating</div><div>{selected.fide_rating || '—'}</div></div>
                 <div><div className="form-label">Received</div><div>{timeAgo(selected.created_at)}</div></div>
               </div>
+              {availabilityList(selected.availability).length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div className="form-label">Available</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                    {availabilityList(selected.availability).map((a, i) => (
+                      <span key={i} className="badge blue" style={{ fontSize: '0.7rem' }}>{a}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {selected.message && (
                 <div style={{ marginBottom: '1rem' }}>
                   <div className="form-label">Message</div>
