@@ -545,15 +545,69 @@
     .fide-details[open] summary::before { content: '－ '; }
     .fide-details .form-group { margin-bottom: 0 !important; }
     /* Availability picker: days x 3-hour blocks */
-    .avail-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .avail-grid { width: 100%; border-collapse: separate; border-spacing: 4px; min-width: 320px; }
+    /* ===== Mobile compaction =====
+       The page ran ~21 screens tall on a phone. Tighten section rhythm, card
+       padding and grid gaps so it reads compactly without dropping content. */
+    @media (max-width: 768px) {
+      .section { padding: 2.25rem 1.1rem !important; }
+      .section-header { margin-bottom: 1.4rem; }
+      .section-header h2 { font-size: 1.55rem; line-height: 1.25; margin-bottom: 0.4rem; }
+      .section-header p { font-size: 0.86rem; line-height: 1.5; }
+      .section-header .divider { margin: 0.6rem auto; }
+      .section-tag { margin-bottom: 0.4rem; }
+
+      .levels-grid, .features-grid, .steps-grid, .news-grid,
+      .pricing-formats, .testimonials-grid { gap: 0.75rem; }
+      /* Feature tiles are icon + short copy, so two per row reads fine and
+         roughly halves the tallest section on a phone. */
+      .features-grid { grid-template-columns: 1fr 1fr !important; }
+      .feature-card { padding: 0.9rem 0.8rem !important; }
+      .feature-card h3 { font-size: 0.92rem; }
+      .feature-card p { font-size: 0.78rem !important; line-height: 1.45; }
+      .level-card, .feature-card, .step-card, .news-card,
+      .faq-item, .tourn-card { padding: 1.1rem !important; }
+      .level-card p, .feature-card p, .step-card p { font-size: 0.85rem; line-height: 1.5; }
+
+      .hero { padding-top: 5rem !important; padding-bottom: 2.5rem !important; }
+      .hero-stats { margin-top: 1.75rem; }
+      .about-grid, .contact-grid { gap: 1.5rem; }
+      .footer-inner { padding-top: 2rem; padding-bottom: 1.25rem; }
+      /* Contact form: stack the paired controls so nothing gets squeezed */
+      .acct-row { grid-template-columns: 1fr; gap: 0.5rem; }
+      .contact-form { padding: 1.25rem !important; }
+      .contact-form .form-group { margin-bottom: 0.8rem; }
+    }
+    @media (max-width: 420px) {
+      .section { padding: 2rem 0.9rem !important; }
+      .section-header h2 { font-size: 1.4rem; }
+      .avail-grid td:first-child, .avail-grid th:first-child { width: 36px; font-size: 0.68rem; }
+      .avail-grid { border-spacing: 3px; }
+      .contact-form .avail-cell { min-height: 28px; font-size: 0.65rem; }
+    }
+
+    /* Safari/iOS give several chess codepoints emoji presentation, which paints
+       them as heavy solid-black glyphs. Force text presentation so they inherit
+       the design's colour and weight. (The runtime pass below adds U+FE0E for
+       Safari versions that predate font-variant-emoji.) */
+    .ms-piece, .level-icon, .pcv2-icon, .pcv2-tournament-icon, .hero-badge,
+    .vcall-chess-badge, .eval-label, .sidebar-title, .coach-tip-label, .ms-prompt,
+    .btn-tourn, .step-icon, .about-photo-icon, .gallery-emoji, .brand-mark {
+      font-variant-emoji: text;
+    }
+
+    .avail-wrap { display: flex; flex-direction: column; gap: 0.9rem; }
+    .avail-block-title {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 0.3rem;
+    }
+    .avail-grid { width: 100%; border-collapse: separate; border-spacing: 4px; table-layout: fixed; }
     .avail-grid th {
-      font-size: 0.66rem; font-weight: 600; color: var(--text-muted);
+      font-size: 0.64rem; font-weight: 600; color: var(--text-muted);
       text-align: center; padding: 0 0 2px; white-space: nowrap;
     }
-    .avail-grid td:first-child {
+    .avail-grid td:first-child, .avail-grid th:first-child {
       font-size: 0.72rem; font-weight: 600; color: var(--text);
-      text-align: left; white-space: nowrap; padding-right: 4px; width: 1%;
+      text-align: left; white-space: nowrap; padding-right: 4px; width: 44px;
     }
     /* Scoped under .contact-form to beat the form's generic button styling */
     .contact-form .avail-cell {
@@ -1214,7 +1268,7 @@
     <div class="hero-stats">
       <div class="hero-stat"><div class="num">8+</div><div class="label" data-i18n="stats.experience">Years Experience</div></div>
       <div class="hero-stat"><div class="num">200+</div><div class="label" data-i18n="stats.students">Students Trained</div></div>
-      <div class="hero-stat"><div class="num">50+</div><div class="label" data-i18n="stats.tournaments">Tournament Wins</div></div>
+      <div class="hero-stat"><div class="num">600+</div><div class="label" data-i18n="stats.tournaments">Tournament Achievements</div></div>
       <div class="hero-stat"><div class="num">4.9</div><div class="label" data-i18n="stats.rating">Average Rating</div></div>
     </div>
   </div>
@@ -1598,6 +1652,49 @@
   </div>
 </div>
 
+<!-- PRICING -->
+<div class="section-alt" id="pricing">
+  <div class="section">
+    <div class="section-header reveal">
+      <span class="section-tag" data-i18n="pricing.tag">Packages</span>
+      <h2 data-i18n="pricing.title">Lesson Packages</h2>
+      <hr class="divider" />
+      <p data-i18n="pricing.subtitle">Choose the lesson format, teacher, and schedule that best fits your goals.</p>
+    </div>
+
+    <p class="pricing-online-note reveal" data-i18n="pricing.onlineNote">All lessons are held online.</p>
+
+    <div class="pricing-tabs reveal" role="tablist" aria-label="Audience">
+      <button class="pricing-tab active" role="tab" aria-selected="true" data-audience="children" data-i18n="pricing.tab.children">Children</button>
+      <button class="pricing-tab" role="tab" aria-selected="false" data-audience="adults" data-i18n="pricing.tab.adults">Adults</button>
+    </div>
+
+    <div class="pricing-formats reveal" id="pricing-formats"></div>
+
+    <p class="pricing-note reveal" data-i18n="pricing.note">Contact us for current availability — we'll help you choose the right package.</p>
+
+    <!-- SUNDAY TOURNAMENT CARD -->
+    <div class="tourn-wrap reveal" id="tournament">
+      <div class="tourn-card">
+        <div>
+          <span class="tourn-label" data-i18n="tournament.tag">Free Trial Experience</span>
+          <h3 data-i18n="tournament.title">Free Online Tournament Every Sunday</h3>
+          <p data-i18n="tournament.desc">Join a free online tournament, meet other students, and experience our learning environment before choosing a package.</p>
+          <div class="tourn-details">
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill2">Every Sunday</span></span>
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill1">Online</span></span>
+            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill3">Free to join</span></span>
+          </div>
+        </div>
+        <a href="https://wa.me/994XXXXXXXXX" class="btn-tourn" target="_blank" rel="noopener noreferrer">
+          ♟ <span data-i18n="tournament.cta">Join Free Tournament</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- HOW IT WORKS -->
 <div class="section-alt" id="how">
   <div class="section">
@@ -1846,49 +1943,6 @@
   Add teachers to TEACHERS, then reference them by id in PRICING_DATA.
   Prices are in AZN integers. The popular flag marks the Most Popular badge.
 -->
-<!-- PRICING -->
-<div class="section-alt" id="pricing">
-  <div class="section">
-    <div class="section-header reveal">
-      <span class="section-tag" data-i18n="pricing.tag">Packages</span>
-      <h2 data-i18n="pricing.title">Lesson Packages</h2>
-      <hr class="divider" />
-      <p data-i18n="pricing.subtitle">Choose the lesson format, teacher, and schedule that best fits your goals.</p>
-    </div>
-
-    <p class="pricing-online-note reveal" data-i18n="pricing.onlineNote">All lessons are held online.</p>
-
-    <div class="pricing-tabs reveal" role="tablist" aria-label="Audience">
-      <button class="pricing-tab active" role="tab" aria-selected="true" data-audience="children" data-i18n="pricing.tab.children">Children</button>
-      <button class="pricing-tab" role="tab" aria-selected="false" data-audience="adults" data-i18n="pricing.tab.adults">Adults</button>
-    </div>
-
-    <div class="pricing-formats reveal" id="pricing-formats"></div>
-
-    <p class="pricing-note reveal" data-i18n="pricing.note">Contact us for current availability — we'll help you choose the right package.</p>
-
-    <!-- SUNDAY TOURNAMENT CARD -->
-    <div class="tourn-wrap reveal" id="tournament">
-      <div class="tourn-card">
-        <div>
-          <span class="tourn-label" data-i18n="tournament.tag">Free Trial Experience</span>
-          <h3 data-i18n="tournament.title">Free Online Tournament Every Sunday</h3>
-          <p data-i18n="tournament.desc">Join a free online tournament, meet other students, and experience our learning environment before choosing a package.</p>
-          <div class="tourn-details">
-            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill2">Every Sunday</span></span>
-            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill1">Online</span></span>
-            <span class="tourn-detail"><span class="tourn-detail-dot"></span><span data-i18n="tournament.pill3">Free to join</span></span>
-          </div>
-        </div>
-        <a href="https://wa.me/994XXXXXXXXX" class="btn-tourn" target="_blank" rel="noopener noreferrer">
-          ♟ <span data-i18n="tournament.cta">Join Free Tournament</span>
-        </a>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 <!-- FAQ -->
 <div id="faq">
   <div class="section">
@@ -2031,20 +2085,7 @@
           <!-- Availability: days x 3-hour blocks -->
           <div class="form-group">
             <label data-i18n="contact.availability">When are you available? *</label>
-            <div class="avail-wrap">
-              <table class="avail-grid" id="availGrid">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th data-i18n="slot.morning">09–12</th>
-                    <th data-i18n="slot.midday">12–15</th>
-                    <th data-i18n="slot.afternoon">15–18</th>
-                    <th data-i18n="slot.evening">18–21</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
+            <div class="avail-wrap" id="availGrid"></div>
             <span class="field-hint" data-i18n="contact.availabilityHint">Tap the time blocks that work for you.</span>
           </div>
 
@@ -2239,7 +2280,7 @@
 
       'stats.experience': 'Years Experience',
       'stats.students': 'Students Trained',
-      'stats.tournaments': 'Tournament Wins',
+      'stats.tournaments': 'Tournament Achievements',
       'stats.rating': 'Average Rating',
 
       'levels.tag': 'Programs',
@@ -2441,6 +2482,8 @@
       'contact.usernamePlaceholder': 'username',
       'contact.availability': 'When are you available? *',
       'contact.availabilityHint': 'Tap the time blocks that work for you.',
+      'avail.weekdays': 'Weekdays',
+      'avail.weekend': 'Weekend',
       'contact.availabilityRequired': 'Please select at least one available time block.',
       'sector.az': 'Azerbaijani',
       'sector.ru': 'Russian',
@@ -2700,6 +2743,8 @@
       'contact.usernamePlaceholder': 'istifadəçi adı',
       'contact.availability': 'Hansı vaxtlar sizə uyğundur? *',
       'contact.availabilityHint': 'Sizə uyğun olan vaxt aralıqlarına toxunun.',
+      'avail.weekdays': 'Həftə içi',
+      'avail.weekend': 'Həftə sonu',
       'contact.availabilityRequired': 'Zəhmət olmasa, ən azı bir vaxt aralığı seçin.',
       'sector.az': 'Azərbaycan',
       'sector.ru': 'Rus',
@@ -2959,6 +3004,8 @@
       'contact.usernamePlaceholder': 'имя пользователя',
       'contact.availability': 'Когда вам удобно? *',
       'contact.availabilityHint': 'Отметьте подходящие интервалы времени.',
+      'avail.weekdays': 'Будни',
+      'avail.weekend': 'Выходные',
       'contact.availabilityRequired': 'Пожалуйста, выберите хотя бы один интервал.',
       'sector.az': 'Азербайджанский',
       'sector.ru': 'Русский',
@@ -3019,6 +3066,13 @@
     window.__cosmoLang = lang;
     try { localStorage.setItem('cosmo-lang', lang); } catch (e) {}
   }
+  // Exposed so DOM built after the initial pass (e.g. the availability grid)
+  // can be translated once it exists.
+  window.__applyTranslations = applyTranslations;
+  window.__t = function (key) {
+    var dict = I18N[window.__cosmoLang || 'en'] || I18N.en;
+    return dict[key] != null ? dict[key] : key;
+  };
 
   // Called from the contact form's inline onsubmit handler to show a
   // translated thank-you message instead of a hardcoded English one.
@@ -4257,25 +4311,48 @@
 
   // ===== Contact form: availability grid, chess account, submit =====
   (function(){
-    var SLOTS = ['09:00-12:00', '12:00-15:00', '15:00-18:00', '18:00-21:00'];
-    // Mon-first ordering; values follow JS getDay() (Sun = 0).
-    var DAYS = [
+    // Lessons run afternoon/evening on weekdays (school hours), and morning
+    // through early afternoon at the weekend.
+    var WEEKDAY_SLOTS = ['12:00-15:00', '15:00-18:00', '18:00-21:00', '21:00-23:00'];
+    var WEEKEND_SLOTS = ['09:00-12:00', '12:00-15:00'];
+    // Values follow JS getDay() (Sun = 0).
+    var WEEKDAYS = [
       { i: 1, key: 'day.mon', label: 'Mon' }, { i: 2, key: 'day.tue', label: 'Tue' },
       { i: 3, key: 'day.wed', label: 'Wed' }, { i: 4, key: 'day.thu', label: 'Thu' },
-      { i: 5, key: 'day.fri', label: 'Fri' }, { i: 6, key: 'day.sat', label: 'Sat' },
-      { i: 0, key: 'day.sun', label: 'Sun' }
+      { i: 5, key: 'day.fri', label: 'Fri' }
     ];
+    var WEEKEND = [{ i: 6, key: 'day.sat', label: 'Sat' }, { i: 0, key: 'day.sun', label: 'Sun' }];
 
-    var grid = document.getElementById('availGrid');
-    if (grid) {
-      var tbody = grid.querySelector('tbody');
-      DAYS.forEach(function(d){
+    function buildAvailBlock(titleKey, titleText, days, slots) {
+      var wrap = document.createElement('div');
+      wrap.className = 'avail-block';
+      var h = document.createElement('div');
+      h.className = 'avail-block-title';
+      h.setAttribute('data-i18n', titleKey);
+      h.textContent = titleText;
+      wrap.appendChild(h);
+
+      var table = document.createElement('table');
+      table.className = 'avail-grid';
+      var thead = document.createElement('thead');
+      var htr = document.createElement('tr');
+      htr.appendChild(document.createElement('th'));
+      slots.forEach(function(slot){
+        var th = document.createElement('th');
+        th.textContent = slot.replace(/:00/g, '').replace('-', '–');
+        htr.appendChild(th);
+      });
+      thead.appendChild(htr);
+      table.appendChild(thead);
+
+      var tbody = document.createElement('tbody');
+      days.forEach(function(d){
         var tr = document.createElement('tr');
-        var th = document.createElement('td');
-        th.setAttribute('data-i18n', d.key);
-        th.textContent = d.label;
-        tr.appendChild(th);
-        SLOTS.forEach(function(slot){
+        var lbl = document.createElement('td');
+        lbl.setAttribute('data-i18n', d.key);
+        lbl.textContent = d.label;
+        tr.appendChild(lbl);
+        slots.forEach(function(slot){
           var td = document.createElement('td');
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -4292,6 +4369,17 @@
         });
         tbody.appendChild(tr);
       });
+      table.appendChild(tbody);
+      wrap.appendChild(table);
+      return wrap;
+    }
+
+    var grid = document.getElementById('availGrid');
+    if (grid) {
+      grid.appendChild(buildAvailBlock('avail.weekdays', 'Weekdays', WEEKDAYS, WEEKDAY_SLOTS));
+      grid.appendChild(buildAvailBlock('avail.weekend', 'Weekend', WEEKEND, WEEKEND_SLOTS));
+      // Built after the initial translation pass, so translate it now.
+      if (window.__applyTranslations) window.__applyTranslations(window.__cosmoLang || 'en');
     }
 
     // Username only makes sense once a platform is picked.
@@ -4348,6 +4436,38 @@
         btn.disabled = false; btn.textContent = original;
       }
     };
+  })();
+
+  // ===== Safari chess-glyph fix =====
+  // Older Safari has no font-variant-emoji, so chess codepoints (U+2654–U+265F)
+  // render as solid black emoji. Appending the text variation selector U+FE0E
+  // forces the outline/text form. Applied to DOM text only, so JS lookups that
+  // compare piece characters are unaffected. A MutationObserver keeps
+  // late-rendered content (pricing cards, gallery) covered.
+  (function(){
+    var CHESS = /[♔-♟](?!︎)/g;
+    function fixNode(node){
+      if (node.nodeType === 3) {
+        if (CHESS.test(node.nodeValue)) {
+          node.nodeValue = node.nodeValue.replace(CHESS, function(c){ return c + '︎'; });
+        }
+        return;
+      }
+      if (node.nodeType !== 1) return;
+      if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+      var w = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      var batch = [], t;
+      while ((t = w.nextNode())) batch.push(t);
+      batch.forEach(fixNode);
+    }
+    fixNode(document.body);
+    try {
+      new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          Array.prototype.forEach.call(m.addedNodes, fixNode);
+        });
+      }).observe(document.body, { childList: true, subtree: true });
+    } catch (e) { /* observer is a progressive enhancement */ }
   })();
 
   // Subtle scroll-reveal animations
