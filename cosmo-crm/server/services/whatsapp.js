@@ -16,6 +16,11 @@ const AUTH_DIR = path.join(__dirname, '..', '..', '.baileys_auth');
 
 let sock = null;
 let starting = false;
+// Every init() claims a generation. Events from an older socket are ignored, so
+// an orphaned connection can never clobber the live one's state.
+let generation = 0;
+let reconnectTimer = null;
+let reconnectAttempts = 0;
 let qrDataUrl = null;
 let status = 'disconnected'; // disconnected | qr | connecting | ready | error
 let statusError = null;
@@ -49,9 +54,30 @@ function toJid(id) {
   return `${digits}@s.whatsapp.net`;
 }
 
+// Fully release a socket: detach listeners first (so its own close event can't
+// re-enter this module) and then close the underlying connection. Without this
+// each disconnect leaks a live socket with its keep-alive timers and buffers.
+function teardown(s) {
+  if (!s) return;
+  try { s.ev.removeAllListeners(); } catch (e) { /* already gone */ }
+  try { s.end(undefined); } catch (e) { /* already closed */ }
+  try { if (s.ws && typeof s.ws.close === 'function') s.ws.close(); } catch (e) { /* already closed */ }
+}
+
+// At most one pending reconnect, with backoff, so repeated close events cannot
+// multiply into a reconnect storm.
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  const delay = Math.min(3000 * Math.pow(2, reconnectAttempts), 60000);
+  reconnectAttempts++;
+  console.log(`[WhatsApp] Reconnecting in ${Math.round(delay / 1000)}s`);
+  reconnectTimer = setTimeout(() => { reconnectTimer = null; init(); }, delay);
+}
+
 async function init() {
   if (sock || starting) return;
   starting = true;
+  const myGen = ++generation;
   try {
     const baileys = await import('@whiskeysockets/baileys');
     const makeWASocket = baileys.default || baileys.makeWASocket;
@@ -62,7 +88,7 @@ async function init() {
     let version;
     try { ({ version } = await fetchLatestBaileysVersion()); } catch (e) { /* use bundled */ }
 
-    sock = makeWASocket({
+    const s = makeWASocket({
       auth: state,
       version,
       logger: silentLogger,
@@ -71,10 +97,13 @@ async function init() {
       syncFullHistory: false,
       markOnlineOnConnect: false,
     });
+    sock = s;
 
-    sock.ev.on('creds.update', saveCreds);
+    s.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('connection.update', async (update) => {
+    s.ev.on('connection.update', async (update) => {
+      // Ignore anything from a socket we have already replaced.
+      if (myGen !== generation) return;
       const { connection, lastDisconnect, qr } = update;
       if (qr) {
         status = 'qr';
@@ -89,6 +118,7 @@ async function init() {
         status = 'ready';
         qrDataUrl = null;
         statusError = null;
+        reconnectAttempts = 0; // healthy again — reset the backoff
         console.log('[WhatsApp] Ready');
         refreshGroups().catch(() => {});
       }
@@ -96,15 +126,17 @@ async function init() {
         const code = lastDisconnect?.error?.output?.statusCode;
         const loggedOut = code === DisconnectReason.loggedOut;
         console.log(`[WhatsApp] Connection closed (code=${code}, loggedOut=${loggedOut})`);
-        sock = null;
+        // Release this socket completely before starting another one.
+        teardown(s);
+        if (sock === s) sock = null;
         if (loggedOut) {
           status = 'disconnected';
+          reconnectAttempts = 0;
           try { if (fs.existsSync(AUTH_DIR)) fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
-          setTimeout(() => init(), 3000); // fresh QR
         } else {
           status = 'connecting';
-          setTimeout(() => init(), 3000); // reconnect with saved creds
         }
+        scheduleReconnect();
       }
     });
   } catch (err) {
@@ -209,10 +241,11 @@ function getClient() {
 }
 
 function destroy() {
-  if (sock) {
-    try { sock.end(undefined); } catch (e) {}
-    sock = null;
-  }
+  generation++; // invalidate the current socket's events
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  teardown(sock);
+  sock = null;
+  reconnectAttempts = 0;
   status = 'disconnected';
   qrDataUrl = null;
 }
@@ -222,9 +255,13 @@ function destroy() {
 async function disconnect() {
   cachedGroups = [];
   qrDataUrl = null;
-  try { if (sock) await sock.logout(); } catch (e) { /* may fail if not connected */ }
-  try { if (sock) sock.end(undefined); } catch (e) {}
+  generation++; // stop the current socket's events from scheduling a reconnect
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  const s = sock;
   sock = null;
+  reconnectAttempts = 0;
+  try { if (s) await s.logout(); } catch (e) { /* may fail if not connected */ }
+  teardown(s);
   status = 'disconnected';
   try { if (fs.existsSync(AUTH_DIR)) fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {
     console.error('[WhatsApp] Could not clear session:', e.message);

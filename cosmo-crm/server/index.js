@@ -13,9 +13,24 @@ process.on('uncaughtException', (err) => {
 // If the process ever does go down, record why — a silent exit is what surfaces
 // to users as a 502 Bad Gateway from nginx.
 process.on('exit', (code) => console.error(`[Process] Exiting with code ${code} at ${new Date().toISOString()}`));
-for (const sig of ['SIGTERM', 'SIGINT', 'SIGHUP']) {
-  process.on(sig, () => { console.error(`[Process] Received ${sig}`); process.exit(0); });
+
+// SIGHUP is delivered when the launching terminal/SSH session goes away.
+// `nohup` protects against it by setting the signal to "ignore", but registering
+// ANY handler replaces that disposition — so handling it here and exiting would
+// kill the server the moment the operator closes their SSH session. Log and stay
+// up instead; only SIGTERM/SIGINT (a deliberate stop) end the process.
+process.on('SIGHUP', () => console.error('[Process] SIGHUP received (terminal closed) — staying up'));
+for (const sig of ['SIGTERM', 'SIGINT']) {
+  process.on(sig, () => { console.error(`[Process] Received ${sig} — shutting down`); process.exit(0); });
 }
+
+// Periodic heartbeat so a slow memory climb is visible in server.log before the
+// kernel OOM-killer steps in (which nginx surfaces as 502).
+setInterval(() => {
+  const m = process.memoryUsage();
+  const mb = (v) => Math.round(v / 1048576);
+  console.log(`[Health] uptime=${Math.round(process.uptime() / 60)}min rss=${mb(m.rss)}MB heap=${mb(m.heapUsed)}/${mb(m.heapTotal)}MB`);
+}, 30 * 60 * 1000).unref();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
