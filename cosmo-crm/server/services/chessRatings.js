@@ -7,16 +7,30 @@ const db = require('../db');
 
 const TIMEOUT_MS = 10000;
 
+// Chess.com's edge sometimes answers every path with an HTML 404 when it is
+// throttling or blocking the caller. Treating that as "account not found" would
+// wrongly tell a user their username is wrong, so only a JSON 404 counts as
+// not-found; anything non-JSON is reported as an upstream failure.
 async function getJson(url) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'CosmoChessAcademy-CRM/1.0' },
+      headers: {
+        'User-Agent': 'CosmoChessAcademy/1.0 (+https://cosmo.talentigo.net)',
+        'Accept': 'application/json',
+      },
     });
-    if (res.status === 404) return { notFound: true };
+    const type = res.headers.get('content-type') || '';
+    const isJson = type.includes('json');
+    if (res.status === 404) {
+      if (isJson) return { notFound: true };
+      throw new Error('upstream refused the request (404 without JSON) — likely rate-limited');
+    }
+    if (res.status === 429) throw new Error('rate limited by the provider');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!isJson) throw new Error('unexpected non-JSON response');
     return { data: await res.json() };
   } finally {
     clearTimeout(timer);
@@ -28,17 +42,32 @@ async function fetchLichess(username) {
   if (notFound || !data || data.closed) return null;
   const perfs = data.perfs || {};
   return {
-    blitz: perfs.blitz && !perfs.blitz.prov ? perfs.blitz.rating : (perfs.blitz ? perfs.blitz.rating : null),
+    username: data.username || username,
+    blitz: perfs.blitz ? perfs.blitz.rating : null,
     rapid: perfs.rapid ? perfs.rapid.rating : null,
+    blitzGames: perfs.blitz ? perfs.blitz.games : null,
+    rapidGames: perfs.rapid ? perfs.rapid.games : null,
   };
 }
 
+// Chess.com reports wins/losses/draws rather than a total, so sum them.
+function ccGames(section) {
+  if (!section || !section.record) return null;
+  const r = section.record;
+  const total = (r.win || 0) + (r.loss || 0) + (r.draw || 0);
+  return total || null;
+}
+
 async function fetchChessCom(username) {
-  const { notFound, data } = await getJson(`https://api.chess.com/pub/player/${encodeURIComponent(username.toLowerCase())}/stats`);
+  const name = encodeURIComponent(username.toLowerCase());
+  const { notFound, data } = await getJson(`https://api.chess.com/pub/player/${name}/stats`);
   if (notFound || !data) return null;
   return {
+    username,
     blitz: data.chess_blitz && data.chess_blitz.last ? data.chess_blitz.last.rating : null,
     rapid: data.chess_rapid && data.chess_rapid.last ? data.chess_rapid.last.rating : null,
+    blitzGames: ccGames(data.chess_blitz),
+    rapidGames: ccGames(data.chess_rapid),
   };
 }
 
@@ -62,9 +91,9 @@ async function updateRatingsFor(table, id, platform, username) {
       return null;
     }
     db.prepare(
-      `UPDATE ${table} SET blitz_rating = ?, rapid_rating = ?, ratings_updated_at = datetime('now') WHERE id = ?`
-    ).run(r.blitz ?? null, r.rapid ?? null, id);
-    console.log(`[Ratings] ${platform}/${username}: blitz=${r.blitz ?? '-'} rapid=${r.rapid ?? '-'}`);
+      `UPDATE ${table} SET blitz_rating = ?, rapid_rating = ?, blitz_games = ?, rapid_games = ?, ratings_updated_at = datetime('now') WHERE id = ?`
+    ).run(r.blitz ?? null, r.rapid ?? null, r.blitzGames ?? null, r.rapidGames ?? null, id);
+    console.log(`[Ratings] ${platform}/${username}: blitz=${r.blitz ?? '-'} (${r.blitzGames ?? 0}g) rapid=${r.rapid ?? '-'} (${r.rapidGames ?? 0}g)`);
     return r;
   } catch (e) {
     console.error(`[Ratings] ${platform}/${username} failed:`, e.message);

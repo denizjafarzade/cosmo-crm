@@ -107,13 +107,26 @@ export default function Students() {
 
   const ratingCell = (s) => {
     if (!s.chess_username) return <span style={{ color: 'var(--slate-300)' }}>—</span>;
+    const pill = (label, rating, games) => (
+      <div style={{
+        background: 'var(--slate-50)', border: '1px solid var(--slate-200)',
+        borderRadius: 7, padding: '2px 7px', textAlign: 'center', minWidth: 52,
+      }}>
+        <div style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase', color: 'var(--slate-400)' }}>{label}</div>
+        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: rating != null ? 'var(--primary)' : 'var(--slate-300)', lineHeight: 1.2 }}>
+          {rating ?? '—'}
+        </div>
+        {games != null && <div style={{ fontSize: '0.58rem', color: 'var(--slate-400)' }}>{games} {t('students.games')}</div>}
+      </div>
+    );
     return (
-      <div style={{ fontSize: '0.78rem', lineHeight: 1.35 }}>
-        <div style={{ color: 'var(--slate-400)' }}>
+      <div>
+        <div style={{ fontSize: '0.7rem', color: 'var(--slate-400)', marginBottom: 3 }}>
           {s.chess_platform === 'lichess' ? 'Lichess' : 'Chess.com'} · {s.chess_username}
         </div>
-        <div>
-          <strong>B</strong> {s.blitz_rating ?? '—'} &nbsp; <strong>R</strong> {s.rapid_rating ?? '—'}
+        <div style={{ display: 'flex', gap: 4 }}>
+          {pill(t('students.blitz'), s.blitz_rating, s.blitz_games)}
+          {pill(t('students.rapid'), s.rapid_rating, s.rapid_games)}
         </div>
       </div>
     );

@@ -75,6 +75,9 @@ const EN = {
   'students.actions': 'Actions',
   'students.onlineRatings': 'Online Ratings',
   'students.fide': 'FIDE',
+  'students.blitz': 'Blitz',
+  'students.rapid': 'Rapid',
+  'students.games': 'games',
   'students.notes': 'Notes',
   'students.allLevels': 'All Levels',
   'students.allGroups': 'All Groups',
@@ -199,6 +202,9 @@ const RU = {
   'students.actions': 'Действия',
   'students.onlineRatings': 'Онлайн-рейтинги',
   'students.fide': 'FIDE',
+  'students.blitz': 'Блиц',
+  'students.rapid': 'Рапид',
+  'students.games': 'партий',
   'students.notes': 'Заметки',
   'students.allLevels': 'Все уровни',
   'students.allGroups': 'Все группы',
@@ -258,8 +264,10 @@ export const LANGUAGES = [
   { code: 'ru', label: 'Русский' },
 ];
 
+// Russian is the default for this academy; the switcher stores any override.
+const DEFAULT_LANG = 'ru';
 let current = (() => {
-  try { return localStorage.getItem(KEY) || 'en'; } catch { return 'en'; }
+  try { return localStorage.getItem(KEY) || DEFAULT_LANG; } catch { return DEFAULT_LANG; }
 })();
 
 const listeners = new Set();

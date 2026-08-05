@@ -309,6 +309,8 @@ const REG_COLUMNS = {
   chess_username: 'TEXT',
   blitz_rating: 'INTEGER',
   rapid_rating: 'INTEGER',
+  blitz_games: 'INTEGER',
+  rapid_games: 'INTEGER',
   ratings_updated_at: 'TEXT',
 };
 for (const [col, type] of Object.entries(REG_COLUMNS)) {

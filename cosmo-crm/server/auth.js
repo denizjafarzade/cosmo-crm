@@ -61,6 +61,8 @@ function verifyToken(token) {
 function isPublic(req) {
   // Public landing-page registration form submits here.
   if (req.method === 'POST' && req.path === '/registrations') return true;
+  // …and previews the applicant's online chess ratings from here.
+  if (req.method === 'GET' && req.path === '/registrations/chess-rating') return true;
   if (req.method === 'OPTIONS') return true;
   return false;
 }

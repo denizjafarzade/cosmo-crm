@@ -61,6 +61,13 @@ r.post('/:id/refresh-ratings', async (req, res) => {
   res.json({ ok: true, ...r2 });
 });
 
+// Adopt a registration's details (including fetched ratings) onto a student.
+r.get('/:id/ratings', (req, res) => {
+  const s = db.prepare('SELECT chess_platform, chess_username, blitz_rating, rapid_rating, blitz_games, rapid_games, ratings_updated_at FROM students WHERE id = ?').get(req.params.id);
+  if (!s) return res.status(404).json({ error: 'Not found' });
+  res.json(s);
+});
+
 r.put('/:id', (req, res) => {
   const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active,
     birth_date, sector, chess_platform, chess_username } = req.body;

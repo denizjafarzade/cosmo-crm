@@ -10,9 +10,9 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 function ratingsText(r) {
   if (!r.chess_username) return '—';
   const platform = r.chess_platform === 'lichess' ? 'Lichess' : 'Chess.com';
-  const b = r.blitz_rating ?? '—';
-  const rp = r.rapid_rating ?? '—';
-  return `${platform} ${r.chess_username} · B ${b} / R ${rp}`;
+  const part = (label, rating, games) =>
+    `${label} ${rating ?? '—'}${games != null ? ` (${games})` : ''}`;
+  return `${platform} ${r.chess_username} · ${part('Blitz', r.blitz_rating, r.blitz_games)} · ${part('Rapid', r.rapid_rating, r.rapid_games)}`;
 }
 
 // Stored as JSON array of "<dayIndex>|<HH:MM-HH:MM>".

@@ -537,6 +537,45 @@
     .field-hint { display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
     .acct-row { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 0.6rem; }
     .acct-row input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Live rating card shown once an account name resolves */
+    .rating-preview:empty { display: none; }
+    .rating-preview {
+      margin-top: 0.65rem; border: 1px solid var(--border); border-radius: 12px;
+      padding: 0.75rem 0.85rem; background: var(--icon-bg);
+      animation: ratingIn 0.25s ease;
+    }
+    @keyframes ratingIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .rp-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .rp-avatar {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      background: var(--primary); color: #fff; font-weight: 700; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rp-name { font-weight: 700; font-size: 0.85rem; color: var(--text); line-height: 1.2; }
+    .rp-platform { font-size: 0.7rem; color: var(--text-muted); }
+    .rp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .rp-stat {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 9px; padding: 0.5rem 0.6rem; text-align: center;
+    }
+    .rp-stat-label {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .rp-stat-value {
+      font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700;
+      color: var(--primary); line-height: 1.15; margin: 1px 0;
+    }
+    .rp-stat-games { font-size: 0.65rem; color: var(--text-muted); }
+    .rp-msg { font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+    .rp-msg.error { color: #dc2626; }
+    .rp-spinner {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border); border-top-color: var(--primary);
+      animation: rpSpin 0.7s linear infinite;
+    }
+    @keyframes rpSpin { to { transform: rotate(360deg); } }
     /* FIDE rating tucked away so it doesn't dominate the form */
     .fide-details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.75rem; }
     .fide-details summary { cursor: pointer; font-size: 0.8rem; color: var(--text-muted); list-style: none; }
@@ -2080,6 +2119,7 @@
               <input name="chessUsername" id="chessUsername" data-i18n-placeholder="contact.usernamePlaceholder" placeholder="username" disabled />
             </div>
             <span class="field-hint" data-i18n="contact.onlineAccountHint">Choose one platform — we'll read your blitz &amp; rapid ratings automatically.</span>
+            <div class="rating-preview" id="ratingPreview" aria-live="polite"></div>
           </div>
 
           <!-- Availability: days x 3-hour blocks -->
@@ -2478,6 +2518,13 @@
       'contact.sectorPlaceholder': 'Select sector',
       'contact.onlineAccount': 'Online Chess Account (optional)',
       'contact.onlineAccountHint': "Choose one platform — we'll read your blitz & rapid ratings automatically.",
+      'contact.games': 'games',
+      'contact.blitz': 'Blitz',
+      'contact.rapid': 'Rapid',
+      'contact.ratingChecking': 'Checking account…',
+      'contact.ratingNotFound': 'No such account on this platform.',
+      'contact.ratingBusy': 'Too many checks — please wait a moment.',
+      'contact.ratingUnavailable': "Couldn't check right now — you can still submit.",
       'contact.platformNone': 'No account',
       'contact.usernamePlaceholder': 'username',
       'contact.availability': 'When are you available? *',
@@ -2739,6 +2786,13 @@
       'contact.sectorPlaceholder': 'Sektoru seçin',
       'contact.onlineAccount': 'Onlayn şahmat hesabı (istəyə bağlı)',
       'contact.onlineAccountHint': 'Bir platforma seçin — blits və rapid reytinqlərinizi avtomatik oxuyacağıq.',
+      'contact.games': 'oyun',
+      'contact.blitz': 'Blits',
+      'contact.rapid': 'Rapid',
+      'contact.ratingChecking': 'Hesab yoxlanılır…',
+      'contact.ratingNotFound': 'Bu platformada belə hesab tapılmadı.',
+      'contact.ratingBusy': 'Çox sorğu — bir az gözləyin.',
+      'contact.ratingUnavailable': 'Hazırda yoxlamaq alınmadı — formu yenə göndərə bilərsiniz.',
       'contact.platformNone': 'Hesabım yoxdur',
       'contact.usernamePlaceholder': 'istifadəçi adı',
       'contact.availability': 'Hansı vaxtlar sizə uyğundur? *',
@@ -3000,6 +3054,13 @@
       'contact.sectorPlaceholder': 'Выберите сектор',
       'contact.onlineAccount': 'Онлайн-аккаунт (необязательно)',
       'contact.onlineAccountHint': 'Выберите одну платформу — мы автоматически считаем ваш блиц и рапид рейтинг.',
+      'contact.games': 'партий',
+      'contact.blitz': 'Блиц',
+      'contact.rapid': 'Рапид',
+      'contact.ratingChecking': 'Проверяем аккаунт…',
+      'contact.ratingNotFound': 'Такой аккаунт не найден на этой платформе.',
+      'contact.ratingBusy': 'Слишком много запросов — подождите немного.',
+      'contact.ratingUnavailable': 'Сейчас не удалось проверить — вы всё равно можете отправить форму.',
       'contact.platformNone': 'Нет аккаунта',
       'contact.usernamePlaceholder': 'имя пользователя',
       'contact.availability': 'Когда вам удобно? *',
@@ -4385,12 +4446,83 @@
     // Username only makes sense once a platform is picked.
     var platform = document.getElementById('chessPlatform');
     var username = document.getElementById('chessUsername');
+    var preview = document.getElementById('ratingPreview');
+
+    // ── Live rating preview ──────────────────────────────────────
+    var lookupTimer = null;
+    var lookupSeq = 0;          // guards against out-of-order responses
+    var lastRatings = null;     // sent with the form so we store what was shown
+
+    function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+
+    function tr(key, fallback){ return (window.__t ? window.__t(key) : null) || fallback; }
+
+    function showMessage(text, isError, spinner){
+      preview.innerHTML = '<div class="rp-msg' + (isError ? ' error' : '') + '">'
+        + (spinner ? '<span class="rp-spinner"></span>' : '')
+        + '<span>' + esc(text) + '</span></div>';
+    }
+
+    function renderRatings(d){
+      var label = d.platform === 'lichess' ? 'Lichess.org' : 'Chess.com';
+      function stat(name, rating, games){
+        return '<div class="rp-stat">'
+          + '<div class="rp-stat-label">' + esc(name) + '</div>'
+          + '<div class="rp-stat-value">' + (rating != null ? esc(rating) : '—') + '</div>'
+          + '<div class="rp-stat-games">' + (games != null ? esc(games) + ' ' + tr('contact.games', 'games') : '—') + '</div>'
+          + '</div>';
+      }
+      preview.innerHTML =
+        '<div class="rp-head">'
+          + '<div class="rp-avatar">' + esc((d.username || '?').charAt(0).toUpperCase()) + '</div>'
+          + '<div><div class="rp-name">' + esc(d.username || '') + '</div>'
+          + '<div class="rp-platform">' + esc(label) + '</div></div>'
+        + '</div>'
+        + '<div class="rp-stats">'
+          + stat(tr('contact.blitz', 'Blitz'), d.blitz, d.blitzGames)
+          + stat(tr('contact.rapid', 'Rapid'), d.rapid, d.rapidGames)
+        + '</div>';
+    }
+
+    function lookup(){
+      if (!platform || !username) return;
+      var p = platform.value, u = username.value.trim();
+      lastRatings = null;
+      if (!p || !u) { preview.innerHTML = ''; return; }
+      var seq = ++lookupSeq;
+      showMessage(tr('contact.ratingChecking', 'Checking account…'), false, true);
+      fetch('/api/registrations/chess-rating?platform=' + encodeURIComponent(p) + '&username=' + encodeURIComponent(u))
+        .then(function(r){ return r.json().then(function(j){ return { status: r.status, body: j }; }); })
+        .then(function(res){
+          if (seq !== lookupSeq) return;           // a newer lookup superseded this
+          if (res.status === 200) { lastRatings = res.body; renderRatings(res.body); }
+          else if (res.status === 404) showMessage(tr('contact.ratingNotFound', 'No such account on this platform.'), true);
+          else if (res.status === 429) showMessage(tr('contact.ratingBusy', 'Too many checks — please wait a moment.'), true);
+          else showMessage(tr('contact.ratingUnavailable', "Couldn't check right now — you can still submit."), true);
+        })
+        .catch(function(){
+          if (seq !== lookupSeq) return;
+          showMessage(tr('contact.ratingUnavailable', "Couldn't check right now — you can still submit."), true);
+        });
+    }
+
     if (platform && username) {
       platform.addEventListener('change', function(){
         username.disabled = !platform.value;
-        if (!platform.value) username.value = '';
+        if (!platform.value) { username.value = ''; preview.innerHTML = ''; lastRatings = null; }
+        else if (username.value.trim()) lookup();
       });
+      // Debounced so we don't fire a request on every keystroke.
+      username.addEventListener('input', function(){
+        clearTimeout(lookupTimer);
+        lookupSeq++;                 // cancel any in-flight render
+        preview.innerHTML = '';
+        lookupTimer = setTimeout(lookup, 700);
+      });
+      username.addEventListener('blur', function(){ clearTimeout(lookupTimer); lookup(); });
     }
+    window.__lastRatings = function(){ return lastRatings; };
 
     function selectedAvailability() {
       return Array.prototype.slice
@@ -4416,6 +4548,7 @@
         availability: availability,
         chess_platform: d.chessPlatform || null,
         chess_username: (d.chessPlatform && d.chessUsername) ? String(d.chessUsername).trim() : null,
+        ratings: (window.__lastRatings && window.__lastRatings()) || null,
         fide_rating: d.fideRating ? Number(d.fideRating) : null,
         message: d.message || ''
       };
