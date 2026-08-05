@@ -47,6 +47,8 @@ export default function Registrations() {
   const [notes, setNotes] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [noteSaved, setNoteSaved] = useState(false);
+  const [noteError, setNoteError] = useState('');
 
   const load = () => {
     api.getRegistrations(filter || undefined)
@@ -56,14 +58,36 @@ export default function Registrations() {
 
   useEffect(() => { load(); }, [filter]);
 
-  const openDetail = (r) => { setSelected(r); setNotes(r.notes || ''); };
+  const openDetail = (r) => { setSelected(r); setNotes(r.notes || ''); setNoteSaved(false); setNoteError(''); };
 
   const updateStatus = async (id, status) => {
     setSaving(true);
-    await api.updateRegistration(id, { status, notes });
+    try {
+      await api.updateRegistration(id, { status, notes });
+      setSelected(null);
+      load();
+    } catch (e) {
+      setNoteError(e.message || 'Could not save');
+    }
     setSaving(false);
-    setSelected(null);
-    load();
+  };
+
+  // Notes have their own save so they can be kept without touching the status
+  // or closing the dialog.
+  const saveNotes = async () => {
+    if (!selected) return;
+    setSaving(true);
+    setNoteError('');
+    try {
+      await api.updateRegistration(selected.id, { notes });
+      setNoteSaved(true);
+      setSelected(s => (s ? { ...s, notes } : s));
+      setRegs(rs => rs.map(r => (r.id === selected.id ? { ...r, notes } : r)));
+      setTimeout(() => setNoteSaved(false), 2000);
+    } catch (e) {
+      setNoteError(e.message || 'Could not save');
+    }
+    setSaving(false);
   };
 
   const doDelete = async (id) => {
@@ -133,7 +157,25 @@ export default function Registrations() {
               )}
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label className="form-label">Internal Notes</label>
-                <textarea className="form-control" rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add notes about this inquiry..." />
+                <textarea
+                  className="form-control" rows={3} value={notes}
+                  onChange={e => { setNotes(e.target.value); setNoteSaved(false); setNoteError(''); }}
+                  placeholder="Add notes about this inquiry..."
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+                  <button
+                    type="button" className="btn btn-sm btn-primary"
+                    onClick={saveNotes}
+                    disabled={saving || notes === (selected.notes || '')}
+                  >
+                    {saving ? 'Saving…' : 'Save notes'}
+                  </button>
+                  {noteSaved && <span style={{ fontSize: '0.8rem', color: 'var(--green)' }}>✓ Saved</span>}
+                  {noteError && <span style={{ fontSize: '0.8rem', color: 'var(--red)' }}>{noteError}</span>}
+                  {!noteSaved && !noteError && notes !== (selected.notes || '') && (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--slate-400)' }}>Unsaved changes</span>
+                  )}
+                </div>
               </div>
               <div style={{ marginBottom: '1rem' }}>
                 <div className="form-label" style={{ marginBottom: '0.5rem' }}>Update Status</div>
