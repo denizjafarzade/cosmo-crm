@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus, FiLogOut, FiImage } from 'react-icons/fi';
 import { FaChessKnight } from 'react-icons/fa';
 import api, { getToken, setToken } from './api';
+import { t, useLang, setLang, getLang, LANGUAGES } from './i18n';
 import Login from './pages/Login';
+import Content from './pages/Content';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Groups from './pages/Groups';
@@ -22,6 +24,7 @@ export default function App() {
   const [waStatus, setWaStatus] = useState({ status: 'disconnected' });
   const [authed, setAuthed] = useState(!!getToken());
   const location = useLocation();
+  useLang(); // re-render the whole shell when the language changes
 
   useEffect(() => { setSidebarOpen(false); }, [location]);
 
@@ -38,20 +41,21 @@ export default function App() {
   if (!authed) return <Login onLogin={() => setAuthed(true)} />;
 
   const nav = [
-    { to: '/', icon: <FiHome />, label: 'Dashboard' },
-    { to: '/students', icon: <FiUsers />, label: 'Students' },
-    { to: '/groups', icon: <FiLayers />, label: 'Groups' },
-    { to: '/lessons', icon: <FiBookOpen />, label: 'Lessons' },
-    { to: '/homeworks', icon: <FiFileText />, label: 'Homeworks' },
-    { to: '/payments', icon: <FiDollarSign />, label: 'Payments' },
-    { to: '/registrations', icon: <FiUserPlus />, label: 'Registrations' },
+    { to: '/', icon: <FiHome />, label: t('nav.dashboard') },
+    { to: '/students', icon: <FiUsers />, label: t('nav.students') },
+    { to: '/groups', icon: <FiLayers />, label: t('nav.groups') },
+    { to: '/lessons', icon: <FiBookOpen />, label: t('nav.lessons') },
+    { to: '/homeworks', icon: <FiFileText />, label: t('nav.homeworks') },
+    { to: '/payments', icon: <FiDollarSign />, label: t('nav.payments') },
+    { to: '/registrations', icon: <FiUserPlus />, label: t('nav.registrations') },
+    { to: '/content', icon: <FiImage />, label: t('nav.content') },
   ];
 
   const nav2 = [
-    { to: '/whatsapp', icon: <FiMessageCircle />, label: 'WhatsApp' },
-    { to: '/activity', icon: <FiActivity />, label: 'Activity Log' },
-    { to: '/reports', icon: <FiBarChart2 />, label: 'Reports' },
-    { to: '/settings', icon: <FiSettings />, label: 'Settings' },
+    { to: '/whatsapp', icon: <FiMessageCircle />, label: t('nav.whatsapp') },
+    { to: '/activity', icon: <FiActivity />, label: t('nav.activity') },
+    { to: '/reports', icon: <FiBarChart2 />, label: t('nav.reports') },
+    { to: '/settings', icon: <FiSettings />, label: t('nav.settings') },
   ];
 
   return (
@@ -68,7 +72,7 @@ export default function App() {
               {n.icon}{n.label}
             </NavLink>
           ))}
-          <div className="sidebar-section">System</div>
+          <div className="sidebar-section">{t('nav.system')}</div>
           {nav2.map(n => (
             <NavLink key={n.to} to={n.to} className={({ isActive }) => isActive ? 'active' : ''}>
               {n.icon}{n.label}
@@ -79,12 +83,23 @@ export default function App() {
           <span className={`status-dot ${waStatus.status}`} />
           <span>WhatsApp: {waStatus.status}</span>
         </div>
+        <div style={{ display: 'flex', gap: 6, margin: '0.5rem 1rem 0' }}>
+          {LANGUAGES.map(l => (
+            <button key={l.code} onClick={() => setLang(l.code)} style={{
+              flex: 1, padding: '0.35rem 0.4rem', borderRadius: 7, cursor: 'pointer',
+              font: 'inherit', fontSize: '0.75rem', fontWeight: getLang() === l.code ? 700 : 500,
+              border: '1px solid var(--border, #e2e8f0)',
+              background: getLang() === l.code ? 'var(--primary, #4f46e5)' : 'transparent',
+              color: getLang() === l.code ? '#fff' : 'inherit',
+            }}>{l.label}</button>
+          ))}
+        </div>
         <button className="sidebar-logout" onClick={logout} style={{
           display: 'flex', alignItems: 'center', gap: 8, margin: '0.5rem 1rem 1rem',
           padding: '0.5rem 0.75rem', background: 'none', border: '1px solid var(--border, #e2e8f0)',
           borderRadius: 8, color: 'inherit', cursor: 'pointer', font: 'inherit', fontSize: '0.85rem',
         }}>
-          <FiLogOut /> Sign out
+          <FiLogOut /> {t('nav.signOut')}
         </button>
       </aside>
       <div className="main-content">
@@ -107,6 +122,7 @@ export default function App() {
           <Route path="/activity" element={<ActivityLog />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/registrations" element={<Registrations />} />
+          <Route path="/content" element={<Content />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </div>

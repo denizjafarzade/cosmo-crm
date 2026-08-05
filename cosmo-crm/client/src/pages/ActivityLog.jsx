@@ -1,3 +1,4 @@
+import { formatDateTime, t } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 
@@ -8,7 +9,7 @@ function timeAgo(iso) {
   if (s < 60) return 'just now';
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return new Date(utc).toLocaleDateString();
+  return formatDateTime(iso);
 }
 
 export default function ActivityLog() {
@@ -21,7 +22,7 @@ export default function ActivityLog() {
 
   return (
     <>
-      <div className="page-header"><h1>Activity Log</h1></div>
+      <div className="page-header"><h1>{t('activity.title')}</h1></div>
       <div className="page-body">
         <div className="filters-bar">
           {['', 'reminder', 'homework', 'payment', 'report', 'test'].map(t => (

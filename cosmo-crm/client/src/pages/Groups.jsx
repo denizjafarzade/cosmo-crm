@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlus, FiX, FiUsers, FiChevronRight, FiTrash2 } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 
 const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1, lesson_duration_minutes: 60 };
@@ -31,11 +32,11 @@ export default function Groups() {
   return (
     <>
       <div className="page-header">
-        <h1>Groups</h1>
-        <button className="btn btn-primary" onClick={() => { setForm(EMPTY); setModal(true); }}><FiPlus /> New Group</button>
+        <h1>{t('groups.title')}</h1>
+        <button className="btn btn-primary" onClick={() => { setForm(EMPTY); setModal(true); }}><FiPlus /> {t('groups.new')}</button>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+        <div className="card-grid">
           {groups.map(g => (
             <Link to={`/groups/${g.id}`} key={g.id} className="card" style={{ textDecoration: 'none', color: 'inherit', transition: 'box-shadow 0.15s' }}>
               <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

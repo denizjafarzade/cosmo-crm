@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar, FiRefreshCw, FiUserX } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 import AttendanceCalendar from './AttendanceCalendar';
 
@@ -142,26 +143,26 @@ export default function Students() {
   return (
     <>
       <div className="page-header">
-        <h1>Students</h1>
-        <button className="btn btn-primary" onClick={openAdd}><FiPlus /> Add Student</button>
+        <h1>{t('students.title')}</h1>
+        <button className="btn btn-primary" onClick={openAdd}><FiPlus /> {t('students.add')}</button>
       </div>
       <div className="page-body">
         <div className="filters-bar">
           <select className="form-input" value={filters.level} onChange={e => setFilters(f => ({ ...f, level: e.target.value }))}>
-            <option value="">All Levels</option>
+            <option value="">{t('students.allLevels')}</option>
             {LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}
           </select>
           <select className="form-input" value={filters.group_id} onChange={e => setFilters(f => ({ ...f, group_id: e.target.value }))}>
-            <option value="">All Groups</option>
+            <option value="">{t('students.allGroups')}</option>
             {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           <select className="form-input" value={filters.payment_status} onChange={e => setFilters(f => ({ ...f, payment_status: e.target.value }))}>
-            <option value="">All Payment</option>
+            <option value="">{t('students.allPayment')}</option>
             <option value="paid">Paid</option>
             <option value="due">Due</option>
             <option value="overdue">Overdue</option>
           </select>
-          <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>{students.length} students</span>
+          <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>{students.length} {t('students.count')}</span>
         </div>
 
         <div className="card">
@@ -170,13 +171,13 @@ export default function Students() {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Level</th>
-                  <th>Online Ratings</th>
-                  <th>FIDE</th>
-                  <th>Group</th>
-                  <th>Payment</th>
-                  <th>Lessons</th>
-                  <th>Actions</th>
+                  <th>{t('students.level')}</th>
+                  <th>{t('students.onlineRatings')}</th>
+                  <th>{t('students.fide')}</th>
+                  <th>{t('students.group')}</th>
+                  <th>{t('students.payment')}</th>
+                  <th>{t('students.lessons')}</th>
+                  <th>{t('students.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -368,7 +369,7 @@ export default function Students() {
               ) : (
                 <div className="table-wrap">
                   <table>
-                    <thead><tr><th>Date</th><th>Amount</th><th>Lessons</th><th>Notes</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Amount</th><th>{t('students.lessons')}</th><th>Notes</th></tr></thead>
                     <tbody>
                       {historyStudent.payments.map(p => (
                         <tr key={p.id}>

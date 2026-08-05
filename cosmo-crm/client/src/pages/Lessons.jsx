@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiBookOpen } from 'react-icons/fi';
+import { formatDate, t } from '../i18n';
 import api from '../api';
 
 export default function Lessons() {
@@ -21,7 +22,7 @@ export default function Lessons() {
 
   return (
     <>
-      <div className="page-header"><h1>Lessons</h1></div>
+      <div className="page-header"><h1>{t('lessons.title')}</h1></div>
       <div className="page-body">
         <div className="stats-grid">
           <div className="stat-card"><div className="stat-label">Total Lessons</div><div className="stat-value">{stats.total || 0}</div></div>
@@ -45,7 +46,7 @@ export default function Lessons() {
                   <tr><td colSpan={5}><div className="empty-state"><FiBookOpen /><p>No lessons recorded</p></div></td></tr>
                 ) : lessons.map(l => (
                   <tr key={l.id}>
-                    <td>{new Date(l.occurred_at).toLocaleDateString()}</td>
+                    <td>{formatDate(l.occurred_at)}</td>
                     <td>{l.group_name}</td>
                     <td>{l.student_name}</td>
                     <td>#{l.lesson_number}</td>

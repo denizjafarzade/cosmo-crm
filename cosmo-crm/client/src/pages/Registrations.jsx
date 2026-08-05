@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiUserPlus, FiCheck, FiX, FiTrash2, FiMessageCircle, FiFilter } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 
 const STATUS_LABELS = { new: 'New', contacted: 'Contacted', enrolled: 'Enrolled', rejected: 'Rejected' };
@@ -170,7 +171,7 @@ export default function Registrations() {
 
       <div className="page-header">
         <div>
-          <h1>Registrations</h1>
+          <h1>{t('registrations.title')}</h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginTop: 2 }}>Inquiries from the landing page</p>
         </div>
       </div>

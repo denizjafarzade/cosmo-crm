@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiFileText, FiPlus, FiTrash2, FiUpload, FiLink, FiType, FiImage, FiX, FiFile, FiArrowUp, FiArrowDown, FiMenu } from 'react-icons/fi';
+import { formatDateTime, t } from '../i18n';
 import api from '../api';
 
 const TYPE_ICONS = { file: <FiFile />, image: <FiImage />, text: <FiType />, link: <FiLink /> };
@@ -96,7 +97,7 @@ export default function Homeworks() {
 
   return (
     <>
-      <div className="page-header"><h1>Homework Curriculum</h1></div>
+      <div className="page-header"><h1>{t('homeworks.title')}</h1></div>
       <div className="page-body">
         <div className="card" style={{ marginBottom: '1.5rem', border: '1px solid #DBEAFE' }}>
           <div className="card-body" style={{ background: '#EFF6FF', borderRadius: 'var(--radius)', fontSize: '0.85rem', color: 'var(--slate-600)' }}>
@@ -183,7 +184,7 @@ export default function Homeworks() {
                             </span>
                           </div>
                           {hw.caption && <div style={{ fontSize: '0.75rem', color: 'var(--slate-400)', marginTop: 2 }}>"{hw.caption}"</div>}
-                          {isSent && groupInfo.sent_at && <div style={{ fontSize: '0.7rem', color: 'var(--green)', marginTop: 2 }}>Sent {new Date(groupInfo.sent_at).toLocaleString()}</div>}
+                          {isSent && groupInfo.sent_at && <div style={{ fontSize: '0.7rem', color: 'var(--green)', marginTop: 2 }}>Sent {formatDateTime(groupInfo.sent_at)}</div>}
                         </div>
 
                         {/* Actions */}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiRefreshCw, FiSend, FiWifi, FiWifiOff, FiAlertTriangle, FiCopy, FiCheck } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 
 export default function WhatsAppPage() {
@@ -56,7 +57,7 @@ export default function WhatsAppPage() {
   return (
     <>
       <div className="page-header">
-        <h1>WhatsApp Connection</h1>
+        <h1>{t('whatsapp.title')}</h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-outline" onClick={reconnect} disabled={reconnecting}>
             <FiRefreshCw /> {reconnecting ? 'Working...' : 'Reconnect'}
@@ -102,7 +103,7 @@ export default function WhatsAppPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="two-col">
           {/* Groups */}
           <div className="card">
             <div className="card-header">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiBarChart2 } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 
 export default function Reports() {
@@ -8,7 +9,7 @@ export default function Reports() {
 
   return (
     <>
-      <div className="page-header"><h1>Weekly Reports</h1></div>
+      <div className="page-header"><h1>{t('reports.title')}</h1></div>
       <div className="page-body">
         {reports.length === 0 ? (
           <div className="card"><div className="card-body"><div className="empty-state"><FiBarChart2 /><p>No reports yet. Reports are auto-generated weekly.</p></div></div></div>

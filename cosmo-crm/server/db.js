@@ -327,6 +327,44 @@ if (!columnExists('students', 'overdue_warned_at_lessons')) {
   db.exec('ALTER TABLE students ADD COLUMN overdue_warned_at_lessons INTEGER');
 }
 
+// --- Landing-page content managed from the CRM ---
+// The public site consumes /news-data.js, which is generated from these tables.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS gallery_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_key TEXT UNIQUE,
+    category TEXT NOT NULL DEFAULT 'training',
+    title TEXT NOT NULL DEFAULT '',
+    caption TEXT DEFAULT '',
+    image_path TEXT,
+    alt TEXT DEFAULT '',
+    sort_order INTEGER DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS news_articles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT UNIQUE NOT NULL,
+    category TEXT DEFAULT '',
+    date TEXT,
+    title TEXT NOT NULL DEFAULT '',
+    excerpt TEXT DEFAULT '',
+    image_path TEXT,
+    image_alt TEXT DEFAULT '',
+    body TEXT DEFAULT '',
+    related_gallery_filter TEXT,
+    published INTEGER DEFAULT 1,
+    sort_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_gallery_sort ON gallery_items(sort_order);
+  CREATE INDEX IF NOT EXISTS idx_news_sort ON news_articles(sort_order);
+`);
+
 // Insert default settings if not present
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 const defaults = {

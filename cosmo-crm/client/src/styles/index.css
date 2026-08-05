@@ -595,6 +595,11 @@ input[type=checkbox] { width: auto; accent-color: var(--primary); cursor: pointe
 .progress-fill.amber { background: var(--amber); }
 .progress-fill.red { background: var(--red); }
 
+/* Page layout grids (kept in CSS, not inline, so they can collapse on mobile) */
+.dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; align-items: start; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
 /* ===== MOBILE ===== */
 @media (max-width: 900px) {
   :root { --sidebar-w: 0px; }
@@ -607,10 +612,40 @@ input[type=checkbox] { width: auto; accent-color: var(--primary); cursor: pointe
   .page-body { padding: 0.75rem 1rem 2rem; }
   .form-row { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Multi-column page layouts stack */
+  .dash-grid, .two-col { grid-template-columns: 1fr; gap: 1rem; }
+  .card-grid { grid-template-columns: 1fr; }
+
+  /* Header actions wrap instead of squeezing the title */
+  .page-header { flex-wrap: wrap; gap: 0.5rem; }
+  .page-header h1 { font-size: 1.35rem; }
+
+  /* Wide tables scroll inside their card rather than pushing the page wider.
+     The min-width:0 chain lets these flex/grid children actually shrink. */
+  .main-content, .page-body, .card, .card-body { min-width: 0; max-width: 100%; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 0; max-width: 100%; }
+  .table-wrap table { min-width: 560px; }
+
+  /* Modals become near-full-screen sheets and always scroll */
+  .modal { max-width: none !important; width: calc(100vw - 1.5rem); max-height: 88vh; overflow-y: auto; }
+  .modal-body { padding: 1rem; }
+  .form-actions { flex-wrap: wrap; }
+  .form-actions .btn { flex: 1 1 auto; justify-content: center; }
+
+  /* Filters wrap onto their own lines */
+  .filters-bar { flex-wrap: wrap; gap: 0.5rem; }
+  .filters-bar .form-input { flex: 1 1 45%; min-width: 130px; }
 }
 
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .stat-value { font-size: 1.5rem; }
   .btn { font-size: 0.8rem; padding: 0.45rem 0.85rem; }
+  .page-body { padding: 0.6rem 0.75rem 2rem; }
+  .page-header { padding: 0.85rem 0.75rem 0.4rem; }
+  .card-body { padding: 0.85rem; }
+  /* Touch targets stay comfortable even when icon buttons wrap */
+  .btn-icon { min-width: 34px; min-height: 34px; }
+  .table-wrap table { min-width: 520px; font-size: 0.85rem; }
 }

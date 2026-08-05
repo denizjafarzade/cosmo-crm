@@ -40,6 +40,7 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
 app.use('/api/registrations', require('./routes/registrations'));
+app.use('/api/content', require('./routes/content'));
 
 // Public pages
 const publicDir = path.join(__dirname, '..', 'public');
@@ -47,7 +48,20 @@ app.use('/img', express.static(path.join(publicDir, 'img')));
 app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 app.get('/news', (req, res) => res.sendFile(path.join(publicDir, 'news.html')));
 app.get('/news-article', (req, res) => res.sendFile(path.join(publicDir, 'news-article.html')));
-app.get('/news-data.js', (req, res) => res.sendFile(path.join(publicDir, 'news-data.js')));
+// Serve gallery/news from the CRM once any content has been added there;
+// otherwise fall back to the bundled demo file.
+app.get('/news-data.js', (req, res) => {
+  try {
+    const content = require('./routes/content');
+    if (content.hasManagedContent()) {
+      res.type('application/javascript').set('Cache-Control', 'no-cache');
+      return res.send(content.buildNewsDataJs());
+    }
+  } catch (e) {
+    console.error('[Server] news-data.js generation failed:', e.message);
+  }
+  res.sendFile(path.join(publicDir, 'news-data.js'));
+});
 
 // CRM dashboard at /crm (React SPA — static assets then SPA fallback)
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
@@ -72,6 +86,13 @@ const server = app.listen(PORT, () => {
     Promise.resolve(wa.init()).catch(e => console.error('[Server] WhatsApp init failed:', e.message));
   } catch (e) {
     console.error('[Server] WhatsApp init failed:', e.message);
+  }
+
+  // Make the bundled gallery/news content editable in the CRM on first boot.
+  try {
+    require('./routes/content').importStaticContentOnce();
+  } catch (e) {
+    console.error('[Server] Content import failed:', e.message);
   }
 
   // Start scheduler

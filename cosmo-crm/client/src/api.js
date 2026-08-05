@@ -116,6 +116,17 @@ const api = {
   updateRegistration: (id, data) => request(`/registrations/${id}`, { method: 'PUT', body: data }),
   deleteRegistration: (id) => request(`/registrations/${id}`, { method: 'DELETE' }),
 
+  // Landing-page content (gallery + news)
+  getGallery: () => request('/content/gallery'),
+  createGalleryItem: (data) => request('/content/gallery', { method: 'POST', body: data }),
+  updateGalleryItem: (id, data) => request(`/content/gallery/${id}`, { method: 'PUT', body: data }),
+  deleteGalleryItem: (id) => request(`/content/gallery/${id}`, { method: 'DELETE' }),
+  getNews: () => request('/content/news'),
+  createNews: (data) => request('/content/news', { method: 'POST', body: data }),
+  updateNews: (id, data) => request(`/content/news/${id}`, { method: 'PUT', body: data }),
+  deleteNews: (id) => request(`/content/news/${id}`, { method: 'DELETE' }),
+  uploadContentImage: (formData) => upload('/content/upload', formData),
+
   // Reports
   getWeeklyReports: () => request('/reports/weekly'),
 

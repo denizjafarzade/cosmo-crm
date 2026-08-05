@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiDollarSign } from 'react-icons/fi';
+import { formatDate, t } from '../i18n';
 import api from '../api';
 
 export default function Payments() {
@@ -16,7 +17,7 @@ export default function Payments() {
 
   return (
     <>
-      <div className="page-header"><h1>Payments</h1></div>
+      <div className="page-header"><h1>{t('payments.title')}</h1></div>
       <div className="page-body">
         <div className="stats-grid">
           <div className="stat-card green"><div className="stat-label">Paid</div><div className="stat-value">{summary.paid}</div></div>
@@ -39,7 +40,7 @@ export default function Payments() {
                     <tr><td colSpan={5}><div className="empty-state"><FiDollarSign /><p>No payment history</p></div></td></tr>
                   ) : payments.map(p => (
                     <tr key={p.id}>
-                      <td>{new Date(p.confirmed_at).toLocaleDateString()}</td>
+                      <td>{formatDate(p.confirmed_at)}</td>
                       <td>{p.student_name}</td>
                       <td>{p.lessons_covered}</td>
                       <td>{p.amount || '—'}</td>
@@ -56,7 +57,7 @@ export default function Payments() {
                     <tr><td colSpan={3}><div className="empty-state"><p>No reminders sent</p></div></td></tr>
                   ) : reminders.map(r => (
                     <tr key={r.id}>
-                      <td>{new Date(r.sent_at).toLocaleDateString()}</td>
+                      <td>{formatDate(r.sent_at)}</td>
                       <td>{r.student_name}</td>
                       <td><span className="badge amber">#{r.reminder_number}</span></td>
                     </tr>

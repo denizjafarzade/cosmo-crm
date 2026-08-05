@@ -6,6 +6,7 @@ import {
   FiActivity, FiMessageCircle
 } from 'react-icons/fi';
 import api from '../api';
+import { t } from '../i18n';
 
 function timeAgo(iso) {
   if (!iso) return '';
@@ -96,9 +97,9 @@ function AttendanceModal({ schedule, onClose, onDone }) {
                       {isSuspended && <div style={{ fontSize: '0.72rem', color: 'var(--amber)' }}>Suspended</div>}
                     </div>
                     <div style={{ display: 'flex', gap: 4 }}>
-                      <Btn active={mark === 'present'} color="var(--green)" onClick={() => setMark(s.id, 'present')}>Present</Btn>
-                      <Btn active={mark === 'excused'} color="var(--amber)" onClick={() => setMark(s.id, 'excused')}>Absent · allowed</Btn>
-                      <Btn active={mark === 'unexcused'} color="var(--red)" onClick={() => setMark(s.id, 'unexcused')}>Not allowed</Btn>
+                      <Btn active={mark === 'present'} color="var(--green)" onClick={() => setMark(s.id, 'present')}>{t('dashboard.present')}</Btn>
+                      <Btn active={mark === 'excused'} color="var(--amber)" onClick={() => setMark(s.id, 'excused')}>{t('dashboard.absentAllowed')}</Btn>
+                      <Btn active={mark === 'unexcused'} color="var(--red)" onClick={() => setMark(s.id, 'unexcused')}>{t('dashboard.notAllowed')}</Btn>
                     </div>
                   </div>
                 );
@@ -112,7 +113,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
             <div className="form-actions" style={{ margin: 0 }}>
               <button className="btn btn-outline" onClick={onClose}>Cancel</button>
               <button className="btn btn-primary" onClick={submit} disabled={submitting || students.length === 0}>
-                <FiCheck /> {submitting ? 'Saving...' : 'Save Attendance'}
+                <FiCheck /> {submitting ? '…' : t('dashboard.saveAttendance')}
               </button>
             </div>
           </div>
@@ -191,7 +192,7 @@ export default function Dashboard() {
 
       <div className="page-header">
         <div>
-          <h1>Dashboard</h1>
+          <h1>{t('dashboard.title')}</h1>
           <p>{DAYS[todayDow]}, {now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
         <Link to="/students" className="btn btn-primary"><FiPlus /> Add Student</Link>
@@ -261,14 +262,14 @@ export default function Dashboard() {
         </div>
 
         {/* Two-column layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.25rem', alignItems: 'start' }}>
+        <div className="dash-grid">
 
           {/* Weekly Timetable */}
           <div className="card">
             <div className="card-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <FiClock style={{ color: 'var(--primary)' }} />
-                <h2>Weekly Timetable</h2>
+                <h2>{t('dashboard.timetable')}</h2>
               </div>
               <span className="badge slate">{(data.today_schedule || []).length} total slots</span>
             </div>
@@ -359,7 +360,7 @@ export default function Dashboard() {
               <div className="card-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <FiDollarSign style={{ color: 'var(--green)' }} />
-                  <h2>Payment Status</h2>
+                  <h2>{t('dashboard.paymentStatus')}</h2>
                 </div>
                 <Link to="/payments" className="btn btn-sm btn-outline">View All</Link>
               </div>
@@ -388,7 +389,7 @@ export default function Dashboard() {
                 <div className="card-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <FiTrendingUp style={{ color: 'var(--primary)' }} />
-                    <h2>Top Groups</h2>
+                    <h2>{t('dashboard.topGroups')}</h2>
                   </div>
                 </div>
                 <div style={{ padding: '0.5rem 0' }}>
@@ -428,7 +429,7 @@ export default function Dashboard() {
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <FiMessageCircle style={{ color: 'var(--slate-500)' }} />
-              <h2>Recent Activity</h2>
+              <h2>{t('dashboard.recentActivity')}</h2>
             </div>
             <Link to="/activity" className="btn btn-sm btn-outline">View All</Link>
           </div>

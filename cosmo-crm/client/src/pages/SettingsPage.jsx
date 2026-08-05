@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiSave } from 'react-icons/fi';
+import { t } from '../i18n';
 import api from '../api';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -21,7 +22,7 @@ export default function SettingsPage() {
   return (
     <>
       <div className="page-header">
-        <h1>Settings</h1>
+        <h1>{t('settings.title')}</h1>
         <button className="btn btn-primary" onClick={save}><FiSave /> {saved ? 'Saved!' : 'Save'}</button>
       </div>
       <div className="page-body">

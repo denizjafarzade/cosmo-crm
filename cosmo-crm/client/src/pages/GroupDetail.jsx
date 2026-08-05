@@ -186,7 +186,7 @@ export default function GroupDetail() {
         <button className="btn btn-green" onClick={markDone}><FiCheck /> Lesson Done</button>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="two-col">
           {/* Group Info */}
           <div className="card">
             <div className="card-header"><h2>Group Settings</h2><button className="btn btn-sm btn-outline" onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button></div>
