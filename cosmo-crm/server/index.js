@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 // Never let an async error from the WhatsApp/puppeteer stack crash the whole
 // server (which would 502 the site). Log and keep running.
@@ -80,9 +81,26 @@ app.get('/news-data.js', (req, res) => {
 
 // CRM dashboard at /crm (React SPA — static assets then SPA fallback)
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
-app.use('/crm', express.static(clientDist, { index: false }));
+// Build assets carry a content hash, so they can be cached hard. The SPA shell
+// must NOT be cached: a stale index.html points at asset filenames that no
+// longer exist after a rebuild, which the browser shows as a blank white page.
+app.use('/crm', express.static(clientDist, {
+  index: false,
+  setHeaders: (res, filePath) => {
+    if (/\.(js|css|woff2?|png|jpe?g|svg|gif|webp|avif)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  },
+}));
 app.get(/^\/crm(?:\/.*)?$/, (req, res) => {
-  res.sendFile(path.join(clientDist, 'index.html'));
+  const shell = path.join(clientDist, 'index.html');
+  if (!fs.existsSync(shell)) {
+    return res.status(503).type('html').send(
+      '<h1>CRM not built</h1><p>Run <code>cd client &amp;&amp; npm run build</code> on the server, then restart.</p>'
+    );
+  }
+  res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  res.sendFile(shell);
 });
 
 // Any error thrown in a route lands here as JSON instead of a dead connection.
