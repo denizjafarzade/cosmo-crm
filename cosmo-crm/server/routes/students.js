@@ -68,34 +68,44 @@ r.get('/:id/ratings', (req, res) => {
   res.json(s);
 });
 
+// Only the fields actually present in the body are updated. This matters
+// because COALESCE cannot distinguish "not sent" from "set to null" — which
+// previously made it impossible to clear group_id (i.e. remove a student from a
+// group) or coach_id.
+const NULLABLE_TEXT = ['whatsapp_number', 'parent_whatsapp', 'notes', 'birth_date', 'sector', 'chess_platform', 'chess_username'];
+const PLAIN_TEXT = ['name', 'surname', 'level'];
+const NULLABLE_IDS = ['coach_id', 'group_id'];
+
 r.put('/:id', (req, res) => {
-  const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, active,
-    birth_date, sector, chess_platform, chess_username } = req.body;
+  const body = req.body || {};
+  const has = (k) => Object.prototype.hasOwnProperty.call(body, k);
+  const sets = [];
+  const params = [];
+  const add = (col, val) => { sets.push(`${col} = ?`); params.push(val); };
+
+  for (const k of PLAIN_TEXT) if (has(k) && body[k] != null) add(k, body[k]);
+  for (const k of NULLABLE_TEXT) if (has(k)) add(k, body[k] === '' || body[k] == null ? null : body[k]);
+  // An empty string or null here means "unassign".
+  for (const k of NULLABLE_IDS) if (has(k)) add(k, body[k] === '' || body[k] == null ? null : Number(body[k]));
+  if (has('fide_rating')) add('fide_rating', parseFideRating(body.fide_rating));
+  if (has('active')) add('active', body.active ? 1 : 0);
+
+  if (!sets.length) return res.json({ ok: true, updated: 0 });
+
   const before = db.prepare('SELECT chess_platform, chess_username FROM students WHERE id = ?').get(req.params.id);
-  db.prepare(`UPDATE students SET
-    name = COALESCE(?, name),
-    surname = COALESCE(?, surname),
-    whatsapp_number = COALESCE(?, whatsapp_number),
-    parent_whatsapp = COALESCE(?, parent_whatsapp),
-    level = COALESCE(?, level),
-    fide_rating = ?,
-    coach_id = COALESCE(?, coach_id),
-    group_id = COALESCE(?, group_id),
-    notes = COALESCE(?, notes),
-    active = COALESCE(?, active),
-    birth_date = COALESCE(?, birth_date),
-    sector = COALESCE(?, sector),
-    chess_platform = COALESCE(?, chess_platform),
-    chess_username = COALESCE(?, chess_username),
-    updated_at = datetime('now')
-    WHERE id = ?`).run(name, surname, whatsapp_number, parent_whatsapp, level, parseFideRating(fide_rating), coach_id, group_id, notes, active !== undefined ? (active ? 1 : 0) : null,
-      birth_date || null, sector || null, chess_platform || null, chess_username || null, req.params.id);
+  if (!before) return res.status(404).json({ error: 'Not found' });
+
+  sets.push("updated_at = datetime('now')");
+  params.push(req.params.id);
+  const info = db.prepare(`UPDATE students SET ${sets.join(', ')} WHERE id = ?`).run(...params);
 
   // Re-fetch ratings when the linked account changed.
-  if (chess_username && (chess_username !== before?.chess_username || chess_platform !== before?.chess_platform)) {
-    require('../services/chessRatings').updateRatingsFor('students', req.params.id, chess_platform || before?.chess_platform, chess_username).catch(() => {});
+  const newUser = has('chess_username') ? body.chess_username : before.chess_username;
+  const newPlatform = has('chess_platform') ? body.chess_platform : before.chess_platform;
+  if (newUser && (newUser !== before.chess_username || newPlatform !== before.chess_platform)) {
+    require('../services/chessRatings').updateRatingsFor('students', req.params.id, newPlatform, newUser).catch(() => {});
   }
-  res.json({ ok: true });
+  res.json({ ok: true, updated: info.changes });
 });
 
 r.delete('/:id', (req, res) => {
