@@ -33,7 +33,8 @@ function checkAutoLessons() {
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   const schedules = db.prepare(`
-    SELECT gs.*, g.id as gid, g.name as group_name, g.current_lesson_number, g.auto_increment_lessons
+    SELECT gs.*, g.id as gid, g.name as group_name, g.current_lesson_number, g.auto_increment_lessons,
+           g.lesson_duration_minutes
     FROM group_schedules gs
     JOIN groups g ON gs.group_id = g.id
     WHERE gs.day_of_week = ? AND g.auto_increment_lessons = 1
@@ -41,7 +42,12 @@ function checkAutoLessons() {
 
   for (const sched of schedules) {
     const [h, m] = sched.time.split(':').map(Number);
-    if (currentMinutes !== h * 60 + m) continue;
+    // The lesson is recorded when it FINISHES, not when it starts, so a student's
+    // attendance calendar only fills in once the lesson has actually happened.
+    // Catching up on any already-finished slot also means a restart (or downtime)
+    // no longer silently skips a lesson.
+    const endMinutes = h * 60 + m + (sched.lesson_duration_minutes || 60);
+    if (currentMinutes < endMinutes) continue;
 
     const idempKey = `autolesson-${sched.gid}-${now.toISOString().slice(0, 10)}-${sched.time}`;
     const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
@@ -106,15 +112,14 @@ function scheduleHomeworkAfterLesson(groupId, lessonNumber, lessonTime) {
   const already = db.prepare('SELECT id FROM homework_sends WHERE homework_id = ? AND group_id = ?').get(hw.id, groupId);
   if (already) return;
 
-  // Send after the lesson's duration ends, then at a random human-like time
-  // (not a fixed offset): duration + a random 10–90 min. The send itself is also
-  // gated to daytime hours inside sendHomework().
-  const duration = group.lesson_duration_minutes || 60;
+  // Called once the lesson has already finished, so this is just a human-like
+  // pause before sending — not another full lesson duration. The send itself is
+  // also gated to daytime hours inside sendHomework().
   const randomAfter = 10 + Math.random() * 80;
-  const delayMs = (duration + randomAfter) * 60 * 1000;
+  const delayMs = randomAfter * 60 * 1000;
   const sendAt = new Date(Date.now() + delayMs);
 
-  console.log(`[Scheduler] Homework #${hwNum} for group ${groupId} (${duration}min lesson) scheduled ~${sendAt.toLocaleTimeString()}`);
+  console.log(`[Scheduler] Homework #${hwNum} for group ${groupId} scheduled ~${sendAt.toLocaleTimeString()}`);
 
   setTimeout(() => {
     sendHomework(groupId, hw.id, hwNum).catch(e => console.error('[Scheduler] Homework send error:', e.message));

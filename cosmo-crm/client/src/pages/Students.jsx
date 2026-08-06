@@ -7,17 +7,9 @@ import AttendanceCalendar from './AttendanceCalendar';
 // Level keys stored in the database. 'beginner', 'intermediate', 'advanced' are the
 // original values kept as-is for backward compatibility with existing student records.
 const LEVELS = ['new_to_chess', 'beginner', 'intermediate', 'advanced', 'expert', 'not_sure'];
-const LEVEL_LABELS = {
-  new_to_chess: 'New to Chess',
-  beginner: 'Beginner',
-  intermediate: 'Intermediate',
-  advanced: 'Advanced',
-  expert: 'Expert',
-  not_sure: 'Not Sure',
-};
-const levelLabel = (level) => LEVEL_LABELS[level] || level;
+const levelLabel = (level) => t(`lvl.${level}`) || level;
 const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '', birth_date: '', sector: '', chess_platform: '', chess_username: '' };
-const SECTORS = { az: 'Azerbaijani', ru: 'Russian', en: 'English', tr: 'Turkish' };
+const SECTORS = () => ({ az: t('sec.az'), ru: t('sec.ru'), en: t('sec.en'), tr: t('sec.tr') });
 const PAYMENT_CYCLE = 8;
 
 // How far past the payment cycle a student is, and how severe that is.
@@ -46,6 +38,14 @@ export default function Students() {
   const [reasonText, setReasonText] = useState('');
   const [removeFor, setRemoveFor] = useState(null);
   const [refreshingId, setRefreshingId] = useState(null);
+  const [adjustingId, setAdjustingId] = useState(null);
+
+  const adjustLessons = async (s, delta) => {
+    setAdjustingId(s.id);
+    try { await api.adjustLessons(s.id, delta); load(); }
+    catch (e) { alert(e.message); }
+    setAdjustingId(null);
+  };
 
   const load = useCallback(() => {
     const params = {};
@@ -88,21 +88,21 @@ export default function Students() {
   };
 
   const remove = async (id) => {
-    if (!window.confirm('Deactivate this student?')) return;
+    if (!window.confirm(t('students.deactivateConfirm'))) return;
     await api.deleteStudent(id);
     load();
   };
 
   const paymentBadge = (s) => {
     const sev = paymentSeverity(s);
-    if (sev.level === 'critical') return <span className="badge red">{sev.over} lessons overdue</span>;
+    if (sev.level === 'critical') return <span className="badge red">{sev.over} {t('students.lessonsOverdue')}</span>;
     if (sev.level === 'late') return (
-      <span className="badge amber" title={sev.hasReason ? `Reason: ${s.payment_excuse_reason}` : undefined}>
-        {sev.over} late{sev.hasReason ? ' · reason noted' : ''}
+      <span className="badge amber" title={sev.hasReason ? `${t('ui.reason')}: ${s.payment_excuse_reason}` : undefined}>
+        {sev.over} {t('students.late')}{sev.hasReason ? ` · ${t('students.reasonNoted')}` : ''}
       </span>
     );
     if (s.payment_status === 'paid') return <span className="badge green">{t('ui.paid')}</span>;
-    return <span className="badge amber">Due ({s.lessons_since_payment})</span>;
+    return <span className="badge amber">{t('students.due')} ({s.lessons_since_payment})</span>;
   };
 
   const ratingCell = (s) => {
@@ -223,7 +223,17 @@ export default function Students() {
                         </>
                       )}
                     </td>
-                    <td>{s.lessons_since_payment}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <button className="btn btn-sm btn-outline btn-icon" title={t('students.decLesson')}
+                          disabled={adjustingId === s.id || s.lessons_since_payment <= 0}
+                          onClick={() => adjustLessons(s, -1)}>−</button>
+                        <strong style={{ minWidth: 18, textAlign: 'center' }}>{s.lessons_since_payment}</strong>
+                        <button className="btn btn-sm btn-outline btn-icon" title={t('students.incLesson')}
+                          disabled={adjustingId === s.id}
+                          onClick={() => adjustLessons(s, 1)}>+</button>
+                      </div>
+                    </td>
                     <td>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                         <button className="btn btn-sm btn-outline btn-icon" onClick={() => setCalendarStudent(s)} title="Attendance calendar"><FiCalendar /></button>
@@ -271,7 +281,7 @@ export default function Students() {
                     <label>{t('ui.sector')}</label>
                     <select className="form-input" value={form.sector || ''} onChange={e => setForm(f => ({ ...f, sector: e.target.value }))}>
                       <option value="">—</option>
-                      {Object.entries(SECTORS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      {Object.entries(SECTORS()).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select>
                   </div>
                 </div>

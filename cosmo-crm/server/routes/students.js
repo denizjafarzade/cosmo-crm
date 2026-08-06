@@ -139,6 +139,21 @@ r.post('/:id/excuse', (req, res) => {
   res.json({ ok: true });
 });
 
+// Manually nudge a student's lesson count. Stored as an adjustment on top of
+// the counted lessons so a later recompute keeps it.
+r.post('/:id/adjust-lessons', (req, res) => {
+  const delta = Number(req.body.delta);
+  if (!Number.isFinite(delta) || delta === 0) return res.status(400).json({ error: 'delta must be a non-zero number' });
+  const s = db.prepare('SELECT lessons_since_payment, COALESCE(lessons_adjustment, 0) AS adj FROM students WHERE id = ?').get(req.params.id);
+  if (!s) return res.status(404).json({ error: 'Not found' });
+  // Never let the visible count go below zero.
+  const applied = s.lessons_since_payment + delta < 0 ? -s.lessons_since_payment : delta;
+  db.prepare("UPDATE students SET lessons_adjustment = ?, updated_at = datetime('now') WHERE id = ?")
+    .run(s.adj + applied, req.params.id);
+  const total = db.recomputeLessonsSincePayment(req.params.id);
+  res.json({ ok: true, lessons_since_payment: total });
+});
+
 // Record (or clear) a reason for a late payment. A reason stops the student
 // being escalated to red and suppresses the automatic warning message.
 r.post('/:id/payment-reason', (req, res) => {
@@ -158,7 +173,7 @@ r.post('/:id/pay', (req, res) => {
 
   db.prepare(`INSERT INTO payments (student_id, amount, lessons_covered, confirmed_at, notes) VALUES (?, ?, ?, datetime('now'), ?)`)
     .run(studentId, amount || 0, student.lessons_since_payment, notes || '');
-  db.prepare(`UPDATE students SET lessons_since_payment = 0, payment_status = 'paid', payment_excuse_reason = NULL, overdue_warned_at_lessons = NULL, updated_at = datetime('now') WHERE id = ?`)
+  db.prepare(`UPDATE students SET lessons_since_payment = 0, lessons_adjustment = 0, payment_status = 'paid', payment_excuse_reason = NULL, overdue_warned_at_lessons = NULL, updated_at = datetime('now') WHERE id = ?`)
     .run(studentId);
   // Clear pending reminders
   db.prepare('DELETE FROM payment_reminders WHERE student_id = ?').run(studentId);

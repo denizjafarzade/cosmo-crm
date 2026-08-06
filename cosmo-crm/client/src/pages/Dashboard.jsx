@@ -18,8 +18,8 @@ function timeAgo(iso) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = () => [0,1,2,3,4,5,6].map(i => t(`day.long.${i}`));
+const SHORT_DAYS = () => [0,1,2,3,4,5,6].map(i => t(`day.short.${i}`));
 const todayDow = new Date().getDay();
 
 function AttendanceModal({ schedule, onClose, onDone }) {
@@ -69,12 +69,12 @@ function AttendanceModal({ schedule, onClose, onDone }) {
     <div className="modal-overlay">
       <div className="modal" style={{ maxWidth: 500 }}>
         <div className="modal-header">
-          <h3>Attendance — {schedule.group_name}</h3>
+          <h3>{t('dashboard.attendance')} — {schedule.group_name}</h3>
           <button className="modal-close" onClick={onClose}><FiX /></button>
         </div>
         <div className="modal-body">
           <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginBottom: '1rem' }}>
-            {schedule.time} · Everyone is counted <strong>present</strong> automatically — only mark who was absent, and whether it's allowed.
+            {schedule.time} · {t('dashboard.attendanceHint')}
           </p>
           {students.length === 0 ? (
             <p style={{ color: 'var(--slate-400)', fontSize: '0.9rem' }}>{t('ui.no_students_in_this_group')}</p>
@@ -108,7 +108,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>
-              {students.length - absentCount} present · {absentCount} absent
+              {students.length - absentCount} {t('dashboard.presentCount')} · {absentCount} {t('dashboard.absentCount')}
             </span>
             <div className="form-actions" style={{ margin: 0 }}>
               <button className="btn btn-outline" onClick={onClose}>{t('ui.cancel')}</button>
@@ -248,7 +248,7 @@ export default function Dashboard() {
       <div className="page-header">
         <div>
           <h1>{t('dashboard.title')}</h1>
-          <p>{DAYS[todayDow]}, {now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          <p>{DAYS()[todayDow]}, {formatDate(now)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="btn btn-outline" style={{ color: 'var(--red)' }}
@@ -272,7 +272,7 @@ export default function Dashboard() {
             <FiActivity style={{ color: todayDone === todayTotal ? 'var(--green)' : 'var(--primary)', fontSize: 18, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <strong style={{ color: todayDone === todayTotal ? 'var(--green)' : 'var(--primary)' }}>
-                {todayDone === todayTotal ? 'All done for today!' : `Today: ${todayDone}/${todayTotal} lessons marked`}
+                {todayDone === todayTotal ? t('dash.allDone') : `${t('dash.todayProgress')}: ${todayDone}/${todayTotal} ${t('dash.lessonsMarked')}`}
               </strong>
               <div style={{ marginTop: 4 }}>
                 <div style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 99, height: 5, overflow: 'hidden' }}>
@@ -282,7 +282,7 @@ export default function Dashboard() {
             </div>
             {data.new_registrations > 0 && (
               <Link to="/registrations" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)', textDecoration: 'none', background: 'var(--white)', padding: '0.3rem 0.7rem', borderRadius: 20, border: '1.5px solid var(--primary)' }}>
-                <FiUserPlus /> {data.new_registrations} new inquiry{data.new_registrations > 1 ? 's' : ''}
+                <FiUserPlus /> {data.new_registrations} {data.new_registrations > 1 ? t('dash.newInquiries') : t('dash.newInquiry')}
               </Link>
             )}
           </div>
@@ -293,32 +293,32 @@ export default function Dashboard() {
           <div className="stat-card primary">
             <div className="stat-label"><FiUsers style={{ marginRight: 4 }} />{t('ui.students')}</div>
             <div className="stat-value">{data.total_students}</div>
-            <div className="stat-sub">+{data.new_students_this_week} this week · +{data.new_students_this_month} this month</div>
+            <div className="stat-sub">+{data.new_students_this_week} {t('dash.thisWeek')} · +{data.new_students_this_month} {t('dash.thisMonth')}</div>
           </div>
           <div className="stat-card">
             <div className="stat-label"><FiLayers style={{ marginRight: 4 }} />{t('ui.groups')}</div>
             <div className="stat-value">{data.total_groups}</div>
-            <div className="stat-sub">{daysWithClasses.length} active day{daysWithClasses.length !== 1 ? 's' : ''}</div>
+            <div className="stat-sub">{daysWithClasses.length} {t('dash.activeDays')}</div>
           </div>
           <div className="stat-card blue">
             <div className="stat-label"><FiBookOpen style={{ marginRight: 4 }} />{t('ui.lessons')}</div>
             <div className="stat-value">{data.lessons_this_week}</div>
-            <div className="stat-sub">{data.lessons_this_month} this month · {data.homeworks_sent_this_week} HW sent</div>
+            <div className="stat-sub">{data.lessons_this_month} {t('dash.thisMonth')} · {data.homeworks_sent_this_week} {t('dash.hwSent')}</div>
           </div>
           <div className="stat-card green">
             <div className="stat-label"><FiPercent style={{ marginRight: 4 }} />{t('ui.attendance')}</div>
             <div className="stat-value">{data.attendance_rate}%</div>
-            <div className="stat-sub">Last 30 days</div>
+            <div className="stat-sub">{t('dash.last30')}</div>
           </div>
           <div className="stat-card green">
             <div className="stat-label"><FiDollarSign style={{ marginRight: 4 }} />{t('ui.paid')}</div>
             <div className="stat-value">{data.payment.paid}</div>
-            <div className="stat-sub">{paidPct}% of students</div>
+            <div className="stat-sub">{paidPct}% {t('dash.ofStudents')}</div>
           </div>
           <div className="stat-card amber">
             <div className="stat-label"><FiAlertCircle style={{ marginRight: 4 }} />{t('ui.payment_due')}</div>
             <div className="stat-value">{data.payment.due + data.payment.overdue}</div>
-            <div className="stat-sub">{data.payment.due} due · {data.payment.overdue} overdue</div>
+            <div className="stat-sub">{data.payment.due} {t('dash.due')} · {data.payment.overdue} {t('dash.overdue')}</div>
           </div>
         </div>
 
@@ -332,11 +332,11 @@ export default function Dashboard() {
                 <FiClock style={{ color: 'var(--primary)' }} />
                 <h2>{t('dashboard.timetable')}</h2>
               </div>
-              <span className="badge slate">{(data.today_schedule || []).length} total slots</span>
+              <span className="badge slate">{(data.today_schedule || []).length} {t('dash.totalSlots')}</span>
             </div>
             <div className="card-body">
               <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                {SHORT_DAYS.map((day, dow) => (
+                {SHORT_DAYS().map((day, dow) => (
                   <button key={dow} onClick={() => setSelectedDay(dow)}
                     className={`btn btn-sm ${selectedDay === dow ? 'btn-primary' : 'btn-outline'}`}
                     style={{ position: 'relative', minWidth: 42 }}>
@@ -380,7 +380,7 @@ export default function Dashboard() {
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{s.group_name}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: 1 }}>
-                            {s.student_count} student{s.student_count !== 1 ? 's' : ''} · {t('dashboard.lesson')} #{s.slot_lesson_number ?? (s.current_lesson_number + 1)} · {s.duration || 60}min
+                            {s.student_count} · {t('dashboard.lesson')} #{s.slot_lesson_number ?? (s.current_lesson_number + 1)} · {s.duration || 60}min
                             {s.coach_name && ` · ${s.coach_name}`}
                           </div>
                         </div>
@@ -413,7 +413,7 @@ export default function Dashboard() {
                               onClick={() => setCancelFor({ scope: 'slot', slot: s, reason: '' })}>{t('dashboard.cancel')}</button>
                           </div>
                         ) : (
-                          <span className="badge slate">{DAYS[selectedDay].slice(0, 3)}</span>
+                          <span className="badge slate">{SHORT_DAYS()[selectedDay]}</span>
                         )}
                       </div>
                     );
@@ -422,7 +422,7 @@ export default function Dashboard() {
               ) : (
                 <div className="empty-state" style={{ padding: '2rem' }}>
                   <FiClock />
-                  <p>No classes on {DAYS[selectedDay]}.<br /><Link to="/groups">Set up group schedules →</Link></p>
+                  <p>{t('dashboard.noClasses')} {DAYS()[selectedDay]}.<br /><Link to="/groups">{t('dash.setupSchedules')} →</Link></p>
                 </div>
               )}
             </div>
@@ -490,8 +490,8 @@ export default function Dashboard() {
                   <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <FiUserPlus style={{ color: 'var(--primary)', fontSize: 20 }} />
                     <div>
-                      <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{data.new_registrations} New Inquir{data.new_registrations > 1 ? 'ies' : 'y'}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)' }}>From landing page · Click to review</div>
+                      <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{data.new_registrations} {data.new_registrations > 1 ? t('dash.newInquiries') : t('dash.newInquiry')}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)' }}>{t('dash.fromLanding')}</div>
                     </div>
                   </div>
                 </div>

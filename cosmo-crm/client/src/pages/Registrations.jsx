@@ -3,7 +3,7 @@ import { FiUserPlus, FiCheck, FiX, FiTrash2, FiMessageCircle, FiFilter } from 'r
 import { t } from '../i18n';
 import api from '../api';
 
-const STATUS_LABELS = { new: 'New', contacted: 'Contacted', enrolled: 'Enrolled', rejected: 'Rejected' };
+const STATUS_LABELS = () => ({ new: t('st.new'), contacted: t('st.contacted'), enrolled: t('st.enrolled'), rejected: t('st.rejected') });
 const SECTORS = { az: 'Azerbaijani', ru: 'Russian', en: 'English', tr: 'Turkish' };
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -40,6 +40,30 @@ function ratingsText(r) {
   const part = (label, rating, games) =>
     `${label} ${rating ?? '—'}${games != null ? ` (${games})` : ''}`;
   return `${platform} ${r.chess_username} · ${part('Blitz', r.blitz_rating, r.blitz_games)} · ${part('Rapid', r.rapid_rating, r.rapid_games)}`;
+}
+
+// Applicant's preferred windows, parsed from "<dayIndex>|<HH:MM-HH:MM>".
+function wantedWindows(raw) {
+  if (!raw) return [];
+  let arr = raw;
+  if (typeof raw === 'string') { try { arr = JSON.parse(raw); } catch { return []; } }
+  if (!Array.isArray(arr)) return [];
+  return arr.map(s => {
+    const [d, slot] = String(s).split('|');
+    const [from, to] = String(slot || '').split('-');
+    return { day: Number(d), from, to };
+  }).filter(w => w.from && w.to);
+}
+
+const toMin = (hhmm) => {
+  const [h, m] = String(hhmm).split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+
+// A group slot fits when it starts inside one of the applicant's windows.
+function slotMatches(slot, windows) {
+  const start = toMin(slot.time);
+  return windows.some(w => w.day === slot.day_of_week && start >= toMin(w.from) && start < toMin(w.to));
 }
 
 // Stored as JSON array of "<dayIndex>|<HH:MM-HH:MM>".
@@ -121,8 +145,11 @@ export default function Registrations() {
   // them in a group, so it opens its own dialog.
   const updateStatus = async (id, status) => {
     if (status === 'enrolled') {
+      const reg = selected;
       api.getGroups().then(g => setGroups(Array.isArray(g) ? g : [])).catch(() => setGroups([]));
-      setEnroll({ reg: selected, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, homework_start_from: 1, schedules: [] } });
+      // Close the detail dialog first — two stacked overlays left this one behind.
+      setSelected(null);
+      setEnroll({ reg, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, homework_start_from: 1, schedules: [] } });
       return;
     }
     setSaving(true);
@@ -186,7 +213,7 @@ export default function Registrations() {
         </div>
       )}
 
-      {enroll && (
+      {enroll && (() => { const wanted = wantedWindows(enroll.reg.availability); return (
         <div className="modal-overlay" onClick={() => setEnroll(null)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
             <div className="modal-header">
@@ -208,13 +235,52 @@ export default function Registrations() {
               {enroll.mode === 'existing' ? (
                 <div className="form-group">
                   <label className="form-label">{t('students.group')}</label>
-                  <select className="form-input" value={enroll.group_id}
-                    onChange={e => setEnroll(en => ({ ...en, group_id: e.target.value }))}>
-                    <option value="">{t('reg.pickGroup')}</option>
-                    {groups.map(g => (
-                      <option key={g.id} value={g.id}>{g.name} ({g.student_count} · {t('dashboard.lesson')} #{g.current_lesson_number})</option>
-                    ))}
-                  </select>
+                  {wanted.length > 0 && (
+                    <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)', marginBottom: 8 }}>
+                      {t('reg.prefers')}: {wanted.map((w, i) => (
+                        <span key={i} className="badge slate" style={{ marginRight: 4, fontSize: '0.68rem' }}>
+                          {DAY_NAMES[w.day]} {w.from}–{w.to}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+                    {groups.map(g => {
+                      const slots = g.schedules || [];
+                      const matches = slots.filter(s => slotMatches(s, wanted)).length;
+                      const chosen = String(enroll.group_id) === String(g.id);
+                      return (
+                        <button key={g.id} type="button"
+                          onClick={() => setEnroll(en => ({ ...en, group_id: String(g.id) }))}
+                          style={{
+                            textAlign: 'left', cursor: 'pointer', font: 'inherit',
+                            padding: '0.6rem 0.75rem', borderRadius: 'var(--radius-sm)',
+                            border: `1.5px solid ${chosen ? 'var(--primary)' : matches ? 'var(--green)' : 'var(--slate-200)'}`,
+                            background: chosen ? 'var(--primary-bg)' : matches ? 'var(--green-bg)' : 'var(--white)',
+                          }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                            {g.name}
+                            {matches > 0 && <span className="badge green" style={{ marginLeft: 6, fontSize: '0.65rem' }}>{matches} {t('reg.matching')}</span>}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: 2 }}>
+                            {g.student_count} · {t('dashboard.lesson')} #{g.current_lesson_number}
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 5 }}>
+                            {slots.length === 0
+                              ? <span style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{t('reg.noSchedule')}</span>
+                              : slots.map((s, i) => {
+                                  const fits = slotMatches(s, wanted);
+                                  return (
+                                    <span key={i} className={`badge ${fits ? 'green' : 'slate'}`} style={{ fontSize: '0.68rem' }}>
+                                      {DAY_NAMES[s.day_of_week]} {s.time}
+                                    </span>
+                                  );
+                                })}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : (
                 <>
@@ -267,7 +333,7 @@ export default function Registrations() {
             </div>
           </div>
         </div>
-      )}
+      ); })()}
 
       {selected && (
         <div className="modal-overlay">
@@ -327,7 +393,7 @@ export default function Registrations() {
               <div style={{ marginBottom: '1rem' }}>
                 <div className="form-label" style={{ marginBottom: '0.5rem' }}>{t('ui.update_status')}</div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {Object.entries(STATUS_LABELS).map(([s, label]) => (
+                  {Object.entries(STATUS_LABELS()).map(([s, label]) => (
                     <button
                       key={s}
                       className={`btn btn-sm ${selected.status === s ? 'btn-primary' : 'btn-outline'}`}
@@ -361,7 +427,7 @@ export default function Registrations() {
       <div className="page-header">
         <div>
           <h1>{t('registrations.title')}</h1>
-          <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginTop: 2 }}>Inquiries from the landing page</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginTop: 2 }}>{t('reg.subtitle')}</p>
         </div>
       </div>
 
@@ -410,7 +476,7 @@ export default function Registrations() {
                     <td>{r.level || '—'}</td>
                     <td>{ratingCell(r)}</td>
                     <td>{r.fide_rating || '—'}</td>
-                    <td><span className={`badge ${STATUS_BADGE[r.status] || 'slate'}`}>{STATUS_LABELS[r.status] || r.status}</span></td>
+                    <td><span className={`badge ${STATUS_BADGE[r.status] || 'slate'}`}>{STATUS_LABELS()[r.status] || r.status}</span></td>
                     <td style={{ color: 'var(--slate-500)', fontSize: '0.85rem' }}>{timeAgo(r.created_at)}</td>
                     <td onClick={e => e.stopPropagation()}>
                       <button className="btn btn-sm btn-outline" style={{ color: 'var(--red)' }} onClick={() => setConfirmDelete(r)}>

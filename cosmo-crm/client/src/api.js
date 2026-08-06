@@ -61,6 +61,7 @@ const api = {
   excuseStudent: (id, lessonId) => request(`/students/${id}/excuse`, { method: 'POST', body: { lesson_id: lessonId } }),
   confirmPayment: (id, data) => request(`/students/${id}/pay`, { method: 'POST', body: data }),
   setPaymentReason: (id, reason) => request(`/students/${id}/payment-reason`, { method: 'POST', body: { reason } }),
+  adjustLessons: (id, delta) => request(`/students/${id}/adjust-lessons`, { method: 'POST', body: { delta } }),
   refreshRatings: (id) => request(`/students/${id}/refresh-ratings`, { method: 'POST' }),
   delayPayment: (id, days) => request(`/students/${id}/delay`, { method: 'POST', body: { days } }),
 

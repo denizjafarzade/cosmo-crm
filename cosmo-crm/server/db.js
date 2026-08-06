@@ -328,6 +328,11 @@ if (!columnExists('students', 'payment_excuse_reason')) {
 if (!columnExists('students', 'overdue_warned_at_lessons')) {
   db.exec('ALTER TABLE students ADD COLUMN overdue_warned_at_lessons INTEGER');
 }
+// Manual +/- correction applied on top of the counted lessons. Kept separate so
+// it survives every recompute instead of being overwritten by it.
+if (!columnExists('students', 'lessons_adjustment')) {
+  db.exec('ALTER TABLE students ADD COLUMN lessons_adjustment INTEGER DEFAULT 0');
+}
 
 // --- Cancelled lessons ---
 // A cancellation blocks one timetable slot on one date (or the whole day for a
@@ -434,9 +439,11 @@ function recomputeLessonsSincePayment(studentId) {
     WHERE student_id = ? AND counts_toward_payment = 1
       AND (? IS NULL OR datetime(occurred_at) > datetime(?))
   `).get(studentId, since, since);
+  const adj = db.prepare('SELECT COALESCE(lessons_adjustment, 0) AS a FROM students WHERE id = ?').get(studentId);
+  const total = Math.max(0, row.c + (adj ? adj.a : 0));
   db.prepare("UPDATE students SET lessons_since_payment = ?, updated_at = datetime('now') WHERE id = ?")
-    .run(row.c, studentId);
-  return row.c;
+    .run(total, studentId);
+  return total;
 }
 
 module.exports = db;

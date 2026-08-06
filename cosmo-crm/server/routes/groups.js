@@ -6,6 +6,15 @@ r.get('/', (req, res) => {
   const groups = db.prepare(`SELECT g.*, c.name as coach_name,
     (SELECT COUNT(*) FROM students s WHERE s.group_id = g.id AND s.active = 1) as student_count
     FROM groups g LEFT JOIN coaches c ON g.coach_id = c.id ORDER BY g.name`).all();
+  // Attach each group's weekly slots so the enrolment dialog can match them
+  // against an applicant's preferred times.
+  const slots = db.prepare('SELECT group_id, day_of_week, time FROM group_schedules ORDER BY day_of_week, time').all();
+  const byGroup = new Map();
+  for (const s of slots) {
+    if (!byGroup.has(s.group_id)) byGroup.set(s.group_id, []);
+    byGroup.get(s.group_id).push({ day_of_week: s.day_of_week, time: s.time });
+  }
+  for (const g of groups) g.schedules = byGroup.get(g.id) || [];
   res.json(groups);
 });
 

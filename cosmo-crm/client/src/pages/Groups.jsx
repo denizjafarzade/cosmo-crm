@@ -48,7 +48,7 @@ export default function Groups() {
                   {g.coach_name && <div style={{ fontSize: '0.75rem', color: 'var(--slate-400)', marginTop: 2 }}>{t('ui.coach')}: {g.coach_name}</div>}
                   <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                     {g.auto_increment_lessons ? <span className="badge green">{t('ui.auto')}</span> : <span className="badge slate">{t('ui.manual')}</span>}
-                    <span className="badge blue">HW from #{g.homework_start_from || 1}</span>
+                    <span className="badge blue">{t('grp.hwFrom')}{g.homework_start_from || 1}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -56,7 +56,7 @@ export default function Groups() {
                     className="btn btn-sm btn-icon"
                     style={{ color: 'var(--red)' }}
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDelete({ id: g.id, name: g.name }); }}
-                    title="Delete group"
+                    title={t('ui.delete_group')}
                   ><FiTrash2 /></button>
                   <FiChevronRight style={{ color: 'var(--slate-300)', fontSize: '1.2rem' }} />
                 </div>
@@ -75,7 +75,7 @@ export default function Groups() {
               <button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button>
             </div>
             <div className="modal-body">
-              <p>Are you sure you want to delete <strong>"{confirmDelete.name}"</strong>? Students will be unassigned.</p>
+              <p>{t('grp.deleteConfirm')} <strong>"{confirmDelete.name}"</strong></p>
               <div className="form-actions">
                 <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>{t('ui.cancel')}</button>
                 <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={() => remove(confirmDelete.id)}>{t('ui.delete')}</button>
@@ -105,7 +105,7 @@ export default function Groups() {
                     <input className="form-input" type="number" min="15" step="5" value={form.lesson_duration_minutes} onChange={e => setForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} />
                   </div>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)', display: 'block', marginTop: -6, marginBottom: 8 }}>After the duration ends, homework auto-sends and the lesson locks on the dashboard.</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)', display: 'block', marginTop: -6, marginBottom: 8 }}>{t('grp.durationHint')}</span>
                 <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <input type="checkbox" checked={form.auto_increment_lessons} onChange={e => setForm(f => ({ ...f, auto_increment_lessons: e.target.checked }))} />
                   <label style={{ margin: 0 }}>{t('ui.auto_increment_lessons_on_schedule')}</label>
