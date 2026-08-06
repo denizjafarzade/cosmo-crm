@@ -77,7 +77,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
             {schedule.time} · Everyone is counted <strong>present</strong> automatically — only mark who was absent, and whether it's allowed.
           </p>
           {students.length === 0 ? (
-            <p style={{ color: 'var(--slate-400)', fontSize: '0.9rem' }}>No students in this group.</p>
+            <p style={{ color: 'var(--slate-400)', fontSize: '0.9rem' }}>{t('ui.no_students_in_this_group')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
               {students.map(s => {
@@ -94,7 +94,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
                   }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{s.name} {s.surname}</div>
-                      {isSuspended && <div style={{ fontSize: '0.72rem', color: 'var(--amber)' }}>Suspended</div>}
+                      {isSuspended && <div style={{ fontSize: '0.72rem', color: 'var(--amber)' }}>{t('ui.suspended')}</div>}
                     </div>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <Btn active={mark === 'present'} color="var(--green)" onClick={() => setMark(s.id, 'present')}>{t('dashboard.present')}</Btn>
@@ -111,7 +111,7 @@ function AttendanceModal({ schedule, onClose, onDone }) {
               {students.length - absentCount} present · {absentCount} absent
             </span>
             <div className="form-actions" style={{ margin: 0 }}>
-              <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+              <button className="btn btn-outline" onClick={onClose}>{t('ui.cancel')}</button>
               <button className="btn btn-primary" onClick={submit} disabled={submitting || students.length === 0}>
                 <FiCheck /> {submitting ? '…' : t('dashboard.saveAttendance')}
               </button>
@@ -177,7 +177,7 @@ export default function Dashboard() {
     <div className="page-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200 }}>
       <div style={{ textAlign: 'center', color: 'var(--slate-400)' }}>
         <div style={{ width: 32, height: 32, border: '3px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
-        <p>Loading dashboard...</p>
+        <p>{t('ui.loading_dashboard')}</p>
       </div>
     </div>
   );
@@ -291,32 +291,32 @@ export default function Dashboard() {
         {/* Main stats */}
         <div className="stats-grid">
           <div className="stat-card primary">
-            <div className="stat-label"><FiUsers style={{ marginRight: 4 }} />Students</div>
+            <div className="stat-label"><FiUsers style={{ marginRight: 4 }} />{t('ui.students')}</div>
             <div className="stat-value">{data.total_students}</div>
             <div className="stat-sub">+{data.new_students_this_week} this week · +{data.new_students_this_month} this month</div>
           </div>
           <div className="stat-card">
-            <div className="stat-label"><FiLayers style={{ marginRight: 4 }} />Groups</div>
+            <div className="stat-label"><FiLayers style={{ marginRight: 4 }} />{t('ui.groups')}</div>
             <div className="stat-value">{data.total_groups}</div>
             <div className="stat-sub">{daysWithClasses.length} active day{daysWithClasses.length !== 1 ? 's' : ''}</div>
           </div>
           <div className="stat-card blue">
-            <div className="stat-label"><FiBookOpen style={{ marginRight: 4 }} />Lessons</div>
+            <div className="stat-label"><FiBookOpen style={{ marginRight: 4 }} />{t('ui.lessons')}</div>
             <div className="stat-value">{data.lessons_this_week}</div>
             <div className="stat-sub">{data.lessons_this_month} this month · {data.homeworks_sent_this_week} HW sent</div>
           </div>
           <div className="stat-card green">
-            <div className="stat-label"><FiPercent style={{ marginRight: 4 }} />Attendance</div>
+            <div className="stat-label"><FiPercent style={{ marginRight: 4 }} />{t('ui.attendance')}</div>
             <div className="stat-value">{data.attendance_rate}%</div>
             <div className="stat-sub">Last 30 days</div>
           </div>
           <div className="stat-card green">
-            <div className="stat-label"><FiDollarSign style={{ marginRight: 4 }} />Paid</div>
+            <div className="stat-label"><FiDollarSign style={{ marginRight: 4 }} />{t('ui.paid')}</div>
             <div className="stat-value">{data.payment.paid}</div>
             <div className="stat-sub">{paidPct}% of students</div>
           </div>
           <div className="stat-card amber">
-            <div className="stat-label"><FiAlertCircle style={{ marginRight: 4 }} />Payment Due</div>
+            <div className="stat-label"><FiAlertCircle style={{ marginRight: 4 }} />{t('ui.payment_due')}</div>
             <div className="stat-value">{data.payment.due + data.payment.overdue}</div>
             <div className="stat-sub">{data.payment.due} due · {data.payment.overdue} overdue</div>
           </div>
@@ -438,13 +438,13 @@ export default function Dashboard() {
                   <FiDollarSign style={{ color: 'var(--green)' }} />
                   <h2>{t('dashboard.paymentStatus')}</h2>
                 </div>
-                <Link to="/payments" className="btn btn-sm btn-outline">View All</Link>
+                <Link to="/payments" className="btn btn-sm btn-outline">{t('ui.view_all')}</Link>
               </div>
               <div className="card-body" style={{ paddingTop: '1rem' }}>
                 {[
-                  { label: 'Paid', value: data.payment.paid, color: 'var(--green)', pct: payTotal > 0 ? (data.payment.paid / payTotal) * 100 : 0 },
-                  { label: 'Due', value: data.payment.due, color: 'var(--amber)', pct: payTotal > 0 ? (data.payment.due / payTotal) * 100 : 0 },
-                  { label: 'Overdue', value: data.payment.overdue, color: 'var(--red)', pct: payTotal > 0 ? (data.payment.overdue / payTotal) * 100 : 0 },
+                  { label: t('students.paid'), value: data.payment.paid, color: 'var(--green)', pct: payTotal > 0 ? (data.payment.paid / payTotal) * 100 : 0 },
+                  { label: t('students.due'), value: data.payment.due, color: 'var(--amber)', pct: payTotal > 0 ? (data.payment.due / payTotal) * 100 : 0 },
+                  { label: t('students.overdue'), value: data.payment.overdue, color: 'var(--red)', pct: payTotal > 0 ? (data.payment.overdue / payTotal) * 100 : 0 },
                 ].map(row => (
                   <div key={row.label} style={{ marginBottom: '0.85rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 600, marginBottom: 4 }}>
@@ -476,7 +476,7 @@ export default function Dashboard() {
                         <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{g.name}</div>
                         <div style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{g.student_count} students</div>
                       </div>
-                      <span className="badge slate">Lesson {g.current_lesson_number}</span>
+                      <span className="badge slate">{t('dashboard.lesson')} {g.current_lesson_number}</span>
                     </div>
                   ))}
                 </div>
@@ -507,11 +507,11 @@ export default function Dashboard() {
               <FiMessageCircle style={{ color: 'var(--slate-500)' }} />
               <h2>{t('dashboard.recentActivity')}</h2>
             </div>
-            <Link to="/activity" className="btn btn-sm btn-outline">View All</Link>
+            <Link to="/activity" className="btn btn-sm btn-outline">{t('ui.view_all')}</Link>
           </div>
           <div className="card-body">
             {data.recent_activity.length === 0 ? (
-              <div className="empty-state"><p>No recent activity</p></div>
+              <div className="empty-state"><p>{t('ui.no_recent_activity')}</p></div>
             ) : (
               <ul className="activity-list">
                 {data.recent_activity.map(a => (

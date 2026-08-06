@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiX, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
 import api from '../api';
+import { t } from '../i18n';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -195,18 +196,18 @@ export default function AttendanceCalendar({ student, onClose }) {
 
               <div style={{ display: 'flex', gap: 16, marginTop: 14, fontSize: '0.78rem', color: 'var(--slate-400)' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} /> Attended
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} /> {t('ui.attended')}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #f59e0b', display: 'inline-block' }} /> Excused
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #f59e0b', display: 'inline-block' }} /> {t('ui.excused')}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} /> Unexcused
+                  <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} /> {t('ui.unexcused')}
                 </span>
               </div>
 
               <div className="form-actions" style={{ marginTop: 16 }}>
-                <button className="btn btn-primary" onClick={download}><FiDownload /> Download image</button>
+                <button className="btn btn-primary" onClick={download}><FiDownload /> {t('ui.download_image')}</button>
               </div>
             </>
           )}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaChessKnight } from 'react-icons/fa';
 import api, { setToken } from '../api';
+import { t } from '../i18n';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -33,14 +34,14 @@ export default function Login({ onLogin }) {
           <span>Cosmo CRM</span>
         </div>
         <p style={{ textAlign: 'center', color: 'var(--slate-400)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-          Sign in to continue
+          {t('ui.sign_in_to_continue')}
         </p>
         <div className="form-group">
-          <label>Username</label>
+          <label>{t('ui.username')}</label>
           <input className="form-input" value={username} onChange={e => setUsername(e.target.value)} autoFocus required />
         </div>
         <div className="form-group">
-          <label>Password</label>
+          <label>{t('ui.password')}</label>
           <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         </div>
         {error && <div style={{ color: 'var(--red, #dc2626)', fontSize: '0.85rem', marginBottom: 12 }}>{error}</div>}

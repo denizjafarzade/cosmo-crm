@@ -64,7 +64,7 @@ export default function WhatsAppPage() {
           </button>
           {(wa.status === 'ready' || wa.status === 'qr' || wa.status === 'connecting') && (
             <button className="btn" style={{ background: 'var(--red, #dc2626)', color: '#fff' }} onClick={disconnect} disabled={reconnecting}>
-              <FiWifiOff /> Disconnect
+              <FiWifiOff /> {t('ui.disconnect')}
             </button>
           )}
         </div>
@@ -76,14 +76,14 @@ export default function WhatsAppPage() {
             <div style={{ fontSize: '1.5rem', color: sc.color }}>{sc.icon}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: '1.1rem', color: sc.color }}>{sc.label}</div>
-              {wa.status === 'ready' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>WhatsApp is linked and ready to send messages</div>}
+              {wa.status === 'ready' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>{t('ui.whatsapp_is_linked_and_ready_to_send_m')}</div>}
               {wa.status === 'disconnected' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>Click "Reconnect" to start the WhatsApp client and generate a QR code</div>}
               {wa.status === 'error' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>
                 {wa.error || 'Failed to start WhatsApp client'}
                 <br /><strong>Note:</strong> This requires Chromium/Chrome installed on the server. On Linux: <code>sudo apt install chromium-browser</code>
               </div>}
               {wa.status === 'qr' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>Open WhatsApp on your phone → Settings → Linked Devices → Scan the QR code below</div>}
-              {wa.status === 'connecting' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>Establishing connection, please wait...</div>}
+              {wa.status === 'connecting' && <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)' }}>{t('ui.establishing_connection_please_wait')}</div>}
             </div>
             {wa.groups?.length > 0 && <span className="badge green">{wa.groups.length} groups cached</span>}
           </div>
@@ -93,7 +93,7 @@ export default function WhatsAppPage() {
         {wa.status === 'qr' && wa.qr && (
           <div className="card" style={{ marginBottom: '1.5rem' }}>
             <div style={{ textAlign: 'center', padding: '2.5rem' }}>
-              <h3 style={{ marginBottom: '0.5rem' }}>Scan with WhatsApp</h3>
+              <h3 style={{ marginBottom: '0.5rem' }}>{t('ui.scan_with_whatsapp')}</h3>
               <p style={{ color: 'var(--slate-500)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
                 Open WhatsApp → ⋮ Menu → Linked Devices → Link a Device
               </p>
@@ -107,7 +107,7 @@ export default function WhatsAppPage() {
           {/* Groups */}
           <div className="card">
             <div className="card-header">
-              <h2>WhatsApp Groups</h2>
+              <h2>{t('ui.whatsapp_groups')}</h2>
               <button className="btn btn-sm btn-outline" onClick={refresh} disabled={wa.status !== 'ready' || wa.isRefreshing}>
                 <FiRefreshCw style={{ animation: wa.isRefreshing ? 'spin 1s linear infinite' : 'none' }} /> {wa.isRefreshing ? 'Scanning...' : 'Refresh'}
               </button>
@@ -136,7 +136,7 @@ export default function WhatsAppPage() {
                   <div style={{ maxHeight: 320, overflowY: 'auto', borderRadius: 'var(--radius-sm)', border: '1px solid var(--slate-200)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead style={{ position: 'sticky', top: 0, background: 'var(--white)', zIndex: 1 }}>
-                        <tr><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>Name</th><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>Group ID</th><th style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--slate-200)' }}></th></tr>
+                        <tr><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>{t('ui.name')}</th><th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', borderBottom: '1px solid var(--slate-200)', fontSize: '0.8rem', color: 'var(--slate-500)' }}>{t('ui.group_id')}</th><th style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--slate-200)' }}></th></tr>
                       </thead>
                       <tbody>
                         {wa.groups.filter(g => !groupSearch || g.name.toLowerCase().includes(groupSearch.toLowerCase())).map(g => (
@@ -145,7 +145,7 @@ export default function WhatsAppPage() {
                             <td style={{ padding: '0.5rem 0.75rem' }}><code style={{ fontSize: '0.7rem', color: 'var(--slate-400)', background: 'var(--slate-100)', padding: '2px 6px', borderRadius: 4 }}>{g.id}</code></td>
                             <td style={{ padding: '0.5rem 0.75rem' }}>
                               <button className="btn btn-sm btn-outline" onClick={() => useGroup(g.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                {copiedId === g.id ? <><FiCheck style={{ color: 'var(--green)' }} /> Copied</> : <><FiCopy /> Use</>}
+                                {copiedId === g.id ? <><FiCheck style={{ color: 'var(--green)' }} /> {t('ui.copied')}</> : <><FiCopy /> Use</>}
                               </button>
                             </td>
                           </tr>
@@ -158,9 +158,9 @@ export default function WhatsAppPage() {
                 <div className="empty-state">
                   <FiWifiOff style={{ fontSize: '2rem', marginBottom: 8 }} />
                   {wa.status === 'ready' ? (
-                    <p>Click <strong>Refresh</strong> to load all your WhatsApp groups.</p>
+                    <p>Click <strong>{t('ui.refresh')}</strong> to load all your WhatsApp groups.</p>
                   ) : (
-                    <p>Connect WhatsApp first to see your groups</p>
+                    <p>{t('ui.connect_whatsapp_first_to_see_your_gro')}</p>
                   )}
                   {wa.status === 'ready' && wa.groupError && (
                     <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8 }}>Error: {wa.groupError}</p>
@@ -172,22 +172,22 @@ export default function WhatsAppPage() {
 
           {/* Test send */}
           <div className="card">
-            <div className="card-header"><h2>Send Test Message</h2></div>
+            <div className="card-header"><h2>{t('ui.send_test_message')}</h2></div>
             <div className="card-body">
               {wa.status !== 'ready' ? (
                 <div className="empty-state">
                   <FiSend style={{ fontSize: '2rem', marginBottom: 8 }} />
-                  <p>Connect WhatsApp first to send messages</p>
+                  <p>{t('ui.connect_whatsapp_first_to_send_message')}</p>
                 </div>
               ) : (
                 <form onSubmit={sendTest}>
                   <div className="form-group">
-                    <label>Chat ID</label>
+                    <label>{t('ui.chat_id')}</label>
                     <input className="form-input" value={testChat} onChange={e => setTestChat(e.target.value)} placeholder="120363...@g.us or 994...@c.us" required />
                     <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>Click "Use" on a group to fill this, or paste a number like 994501234567@c.us</span>
                   </div>
                   <div className="form-group">
-                    <label>Message</label>
+                    <label>{t('ui.message')}</label>
                     <textarea className="form-input" value={testMsg} onChange={e => setTestMsg(e.target.value)} placeholder="Hello from Cosmo CRM!" required />
                   </div>
                   <button className="btn btn-primary" disabled={sending} type="submit"><FiSend /> {sending ? 'Sending...' : 'Send'}</button>
@@ -199,7 +199,7 @@ export default function WhatsAppPage() {
 
         {/* Setup instructions */}
         <div className="card" style={{ marginTop: '1.5rem' }}>
-          <div className="card-header"><h2>Setup Guide</h2></div>
+          <div className="card-header"><h2>{t('ui.setup_guide')}</h2></div>
           <div className="card-body" style={{ fontSize: '0.9rem', color: 'var(--slate-600)' }}>
             <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <li><strong>Install Chromium</strong> on your server (required for whatsapp-web.js):<br />

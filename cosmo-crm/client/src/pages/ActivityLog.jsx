@@ -46,7 +46,7 @@ export default function ActivityLog() {
                   <span className="activity-time">{timeAgo(l.created_at)}</span>
                 </li>
               ))}
-              {logs.length === 0 && <div className="empty-state"><p>No activity logged</p></div>}
+              {logs.length === 0 && <div className="empty-state"><p>{t('ui.no_activity_logged')}</p></div>}
             </ul>
           </div>
         </div>

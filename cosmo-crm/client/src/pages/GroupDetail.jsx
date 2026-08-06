@@ -2,17 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiCheck, FiPlus, FiTrash2, FiX, FiChevronRight, FiPause, FiPlay } from 'react-icons/fi';
 import api from '../api';
+import { t } from '../i18n';
 
 function ConfirmModal({ message, onConfirm, onCancel }) {
   return (
     <div className="modal-overlay">
       <div className="modal" style={{ maxWidth: 400 }}>
-        <div className="modal-header"><h3>Confirm</h3><button className="modal-close" onClick={onCancel}><FiX /></button></div>
+        <div className="modal-header"><h3>{t('ui.confirm')}</h3><button className="modal-close" onClick={onCancel}><FiX /></button></div>
         <div className="modal-body">
           <p>{message}</p>
           <div className="form-actions">
-            <button className="btn btn-outline" onClick={onCancel}>Cancel</button>
-            <button className="btn btn-primary" onClick={onConfirm}>Confirm</button>
+            <button className="btn btn-outline" onClick={onCancel}>{t('ui.cancel')}</button>
+            <button className="btn btn-primary" onClick={onConfirm}>{t('ui.confirm')}</button>
           </div>
         </div>
       </div>
@@ -109,7 +110,7 @@ export default function GroupDetail() {
         (s.whatsapp_number && s.whatsapp_number.includes(q));
     });
 
-  if (!group) return <div className="page-body"><p>Loading...</p></div>;
+  if (!group) return <div className="page-body"><p>{t('ui.loading')}</p></div>;
 
   return (
     <>
@@ -127,7 +128,7 @@ export default function GroupDetail() {
                 The student will be automatically skipped (excused) for the next <strong>{suspendLessons}</strong> lesson{suspendLessons !== 1 ? 's' : ''} of this group. Lessons will not count toward their payment cycle. They resume automatically after.
               </p>
               <div className="form-group">
-                <label className="form-label">Number of lessons to suspend</label>
+                <label className="form-label">{t('ui.number_of_lessons_to_suspend')}</label>
                 <input
                   type="number"
                   className="form-control"
@@ -141,7 +142,7 @@ export default function GroupDetail() {
                 </div>
               </div>
               <div className="form-actions">
-                <button className="btn btn-outline" onClick={() => setSuspendModal(null)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setSuspendModal(null)}>{t('ui.cancel')}</button>
                 <button className="btn btn-amber" onClick={doSuspend}><FiPause /> Suspend {suspendLessons} lesson{suspendLessons !== 1 ? 's' : ''}</button>
               </div>
             </div>
@@ -162,14 +163,14 @@ export default function GroupDetail() {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button className="btn btn-amber" onClick={() => recordAbsence({ present: false, excused: true })}>
-                  Allowed absence <span style={{ opacity: 0.8, fontWeight: 400 }}>— excused, does NOT count toward payment</span>
+                  {t('ui.allowed_absence')} <span style={{ opacity: 0.8, fontWeight: 400 }}>— excused, does NOT count toward payment</span>
                 </button>
                 <button className="btn btn-red" onClick={() => recordAbsence({ present: false, excused: false })}>
-                  Not allowed <span style={{ opacity: 0.8, fontWeight: 400 }}>— unexcused, still counts toward payment</span>
+                  {t('ui.not_allowed')} <span style={{ opacity: 0.8, fontWeight: 400 }}>— unexcused, still counts toward payment</span>
                 </button>
                 {absentModal.current_lesson_absent === 1 && (
                   <button className="btn btn-green" onClick={() => recordAbsence({ present: true })}>
-                    <FiCheck /> Mark present (undo absence)
+                    <FiCheck /> {t('ui.mark_present_undo_absence')}
                   </button>
                 )}
               </div>
@@ -183,24 +184,24 @@ export default function GroupDetail() {
           <h1>{group.name}</h1>
           <span className="badge blue">Lesson #{group.current_lesson_number}</span>
         </div>
-        <button className="btn btn-green" onClick={markDone}><FiCheck /> Lesson Done</button>
+        <button className="btn btn-green" onClick={markDone}><FiCheck /> {t('ui.lesson_done')}</button>
       </div>
       <div className="page-body">
         <div className="two-col">
           {/* Group Info */}
           <div className="card">
-            <div className="card-header"><h2>Group Settings</h2><button className="btn btn-sm btn-outline" onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button></div>
+            <div className="card-header"><h2>{t('ui.group_settings')}</h2><button className="btn btn-sm btn-outline" onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit'}</button></div>
             <div className="card-body">
               {editing ? (
                 <form onSubmit={saveGroup}>
-                  <div className="form-group"><label>Name</label><input className="form-input" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} /></div>
-                  <div className="form-group"><label>WA Group ID</label><input className="form-input" value={editForm.whatsapp_group_id} onChange={e => setEditForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} /></div>
-                  <div className="form-group"><label>Lesson duration (min)</label><input className="form-input" type="number" min="15" step="5" value={editForm.lesson_duration_minutes} onChange={e => setEditForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} /></div>
+                  <div className="form-group"><label>{t('ui.name')}</label><input className="form-input" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} /></div>
+                  <div className="form-group"><label>{t('ui.wa_group_id')}</label><input className="form-input" value={editForm.whatsapp_group_id} onChange={e => setEditForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} /></div>
+                  <div className="form-group"><label>{t('ui.lesson_duration_min')}</label><input className="form-input" type="number" min="15" step="5" value={editForm.lesson_duration_minutes} onChange={e => setEditForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} /></div>
                   <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={editForm.auto_increment_lessons} onChange={e => setEditForm(f => ({ ...f, auto_increment_lessons: e.target.checked }))} />
-                    <label style={{ margin: 0 }}>Auto-increment on schedule</label>
+                    <label style={{ margin: 0 }}>{t('ui.auto_increment_on_schedule')}</label>
                   </div>
-                  <div className="form-actions"><button className="btn btn-primary" type="submit">Save</button></div>
+                  <div className="form-actions"><button className="btn btn-primary" type="submit">{t('ui.save')}</button></div>
                 </form>
               ) : (
                 <div style={{ fontSize: '0.9rem' }}>
@@ -216,7 +217,7 @@ export default function GroupDetail() {
 
           {/* Schedule */}
           <div className="card">
-            <div className="card-header"><h2>Weekly Schedule</h2><button className="btn btn-sm btn-primary" onClick={saveSchedules}>Save</button></div>
+            <div className="card-header"><h2>{t('ui.weekly_schedule')}</h2><button className="btn btn-sm btn-primary" onClick={saveSchedules}>{t('ui.save')}</button></div>
             <div className="card-body">
               {schedules.map((s, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -257,7 +258,7 @@ export default function GroupDetail() {
                   maxHeight: 200, overflowY: 'auto',
                 }}>
                   {filteredStudents.length === 0 ? (
-                    <div style={{ padding: '0.6rem 0.75rem', color: 'var(--slate-400)', fontSize: '0.85rem' }}>No students found</div>
+                    <div style={{ padding: '0.6rem 0.75rem', color: 'var(--slate-400)', fontSize: '0.85rem' }}>{t('ui.no_students_found')}</div>
                   ) : filteredStudents.slice(0, 10).map(s => (
                     <div
                       key={s.id}
@@ -279,7 +280,7 @@ export default function GroupDetail() {
             {group.students?.length ? (
               <div className="table-wrap">
                 <table>
-                  <thead><tr><th>Name</th><th>Level</th><th>Payment</th><th>Lessons</th><th>Attendance</th><th>Status</th><th></th></tr></thead>
+                  <thead><tr><th>{t('ui.name')}</th><th>{t('ui.level')}</th><th>Payment</th><th>{t('ui.lessons')}</th><th>{t('ui.attendance')}</th><th>{t('ui.status')}</th><th></th></tr></thead>
                   <tbody>
                     {group.students.map(s => {
                       const isSuspended = s.suspended_until_lesson != null && group.current_lesson_number < s.suspended_until_lesson;
@@ -364,7 +365,7 @@ export default function GroupDetail() {
                       <span className={`badge ${hw.type === 'file' ? 'blue' : hw.type === 'image' ? 'green' : hw.type === 'link' ? 'slate' : 'amber'}`} style={{ fontSize: '0.65rem', marginRight: 6 }}>{hw.type}</span>
                       {hw.type === 'text' ? hw.content?.substring(0, 50) : hw.type === 'link' ? hw.content : (hw.original_name || '').replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')}
                     </span>
-                    {hw.sent_to_group ? <span className="badge green">Sent</span> : hw.is_next ? <span className="badge blue">Next</span> : <span className="badge slate">Queued</span>}
+                    {hw.sent_to_group ? <span className="badge green">{t('ui.sent')}</span> : hw.is_next ? <span className="badge blue">Next</span> : <span className="badge slate">Queued</span>}
                   </li>
                 ))}
               </ul>

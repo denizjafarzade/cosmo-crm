@@ -107,14 +107,14 @@ export default function Homeworks() {
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
           <label className="btn btn-primary" style={{ cursor: 'pointer' }}>
-            <FiUpload /> Upload Files
+            <FiUpload /> {t('ui.upload_files')}
             <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp" multiple onChange={uploadFiles} style={{ display: 'none' }} />
           </label>
           <button className="btn btn-outline" onClick={() => { setForm({ content: '', caption: '' }); setModal('text'); }}>
-            <FiType /> Add Text
+            <FiType /> {t('ui.add_text')}
           </button>
           <button className="btn btn-outline" onClick={() => { setForm({ content: '', caption: '' }); setModal('link'); }}>
-            <FiLink /> Add Link
+            <FiLink /> {t('ui.add_link')}
           </button>
           <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem', alignSelf: 'center', marginLeft: 'auto' }}>{homeworks.length} homeworks</span>
         </div>
@@ -122,11 +122,11 @@ export default function Homeworks() {
         <div style={{ display: 'grid', gridTemplateColumns: previewGroup ? '1fr 320px' : '1fr', gap: '1.5rem' }}>
           <div className="card">
             <div className="card-header">
-              <h2>All Homeworks</h2>
+              <h2>{t('ui.all_homeworks')}</h2>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>Preview:</span>
                 <select className="form-input" style={{ width: 'auto', padding: '0.3rem 0.5rem', fontSize: '0.8rem' }} value={previewGroup || ''} onChange={e => setPreviewGroup(e.target.value || null)}>
-                  <option value="">None</option>
+                  <option value="">{t('ui.none')}</option>
                   {groups.map(g => <option key={g.id} value={g.id}>{g.name} (from #{g.homework_start_from || 1})</option>)}
                 </select>
               </div>
@@ -191,7 +191,7 @@ export default function Homeworks() {
                         <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
                           <button className="btn btn-sm btn-icon btn-outline" onClick={() => move(idx, -1)} disabled={idx === 0} title="Move up"><FiArrowUp /></button>
                           <button className="btn btn-sm btn-icon btn-outline" onClick={() => move(idx, 1)} disabled={idx === homeworks.length - 1} title="Move down"><FiArrowDown /></button>
-                          <button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={() => deleteHw(hw.id)} title="Delete"><FiTrash2 /></button>
+                          <button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={() => deleteHw(hw.id)} title={t('ui.delete')}><FiTrash2 /></button>
                         </div>
                       </div>
                     );
@@ -203,7 +203,7 @@ export default function Homeworks() {
 
           {previewGroup && groupView && (
             <div className="card" style={{ alignSelf: 'start', position: 'sticky', top: '1rem' }}>
-              <div className="card-header"><h2>Group Mapping</h2></div>
+              <div className="card-header"><h2>{t('ui.group_mapping')}</h2></div>
               <div className="card-body" style={{ fontSize: '0.85rem' }}>
                 <p style={{ marginBottom: 6 }}><strong>Starts from:</strong> Homework #{groupView.homework_start_from}</p>
                 <p style={{ marginBottom: 6 }}><strong>Current lesson:</strong> #{groupView.current_lesson}</p>
@@ -230,12 +230,12 @@ export default function Homeworks() {
       {confirmDelete && (
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: 400 }}>
-            <div className="modal-header"><h3>Delete Homework</h3><button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button></div>
+            <div className="modal-header"><h3>{t('ui.delete_homework')}</h3><button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button></div>
             <div className="modal-body">
               <p>Are you sure you want to delete this homework? Numbers will re-adjust.</p>
               <div className="form-actions">
-                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
-                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={confirmDeleteHw}>Delete</button>
+                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>{t('ui.cancel')}</button>
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={confirmDeleteHw}>{t('ui.delete')}</button>
               </div>
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function Homeworks() {
                   <input className="form-input" value={form.caption} onChange={e => setForm(f => ({ ...f, caption: e.target.value }))} placeholder={modal === 'text' ? 'e.g. Practice these positions' : 'e.g. Solve these 10 puzzles'} />
                 </div>
                 <div className="form-actions">
-                  <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>{t('ui.cancel')}</button>
                   <button className="btn btn-primary" type="submit"><FiPlus /> Add as Homework {homeworks.length + 1}</button>
                 </div>
               </form>

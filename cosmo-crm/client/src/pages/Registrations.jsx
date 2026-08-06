@@ -172,14 +172,14 @@ export default function Registrations() {
         <div className="modal-overlay">
           <div className="modal" style={{ maxWidth: 400 }}>
             <div className="modal-header">
-              <h3>Delete Registration</h3>
+              <h3>{t('ui.delete_registration')}</h3>
               <button className="modal-close" onClick={() => setConfirmDelete(null)}><FiX /></button>
             </div>
             <div className="modal-body">
               <p>Delete registration for <strong>{confirmDelete.name}</strong>? This cannot be undone.</p>
               <div className="form-actions">
-                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
-                <button className="btn btn-danger" onClick={() => doDelete(confirmDelete.id)}>Delete</button>
+                <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>{t('ui.cancel')}</button>
+                <button className="btn btn-danger" onClick={() => doDelete(confirmDelete.id)}>{t('ui.delete')}</button>
               </div>
             </div>
           </div>
@@ -278,17 +278,17 @@ export default function Registrations() {
             </div>
             <div className="modal-body">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div><div className="form-label">Phone</div><div style={{ fontWeight: 600 }}>{selected.phone}</div></div>
-                <div><div className="form-label">Level</div><div>{selected.level || '—'}</div></div>
-                <div><div className="form-label">Date of Birth</div><div>{selected.birth_date || '—'}</div></div>
-                <div><div className="form-label">Sector</div><div>{SECTORS[selected.sector] || '—'}</div></div>
-                <div><div className="form-label">Online Ratings</div><div>{ratingsText(selected)}</div></div>
-                <div><div className="form-label">FIDE Rating</div><div>{selected.fide_rating || '—'}</div></div>
-                <div><div className="form-label">Received</div><div>{timeAgo(selected.created_at)}</div></div>
+                <div><div className="form-label">{t('ui.phone')}</div><div style={{ fontWeight: 600 }}>{selected.phone}</div></div>
+                <div><div className="form-label">{t('ui.level')}</div><div>{selected.level || '—'}</div></div>
+                <div><div className="form-label">{t('ui.date_of_birth')}</div><div>{selected.birth_date || '—'}</div></div>
+                <div><div className="form-label">{t('ui.sector')}</div><div>{SECTORS[selected.sector] || '—'}</div></div>
+                <div><div className="form-label">{t('ui.online_ratings')}</div><div>{ratingsText(selected)}</div></div>
+                <div><div className="form-label">{t('ui.fide_rating')}</div><div>{selected.fide_rating || '—'}</div></div>
+                <div><div className="form-label">{t('ui.received')}</div><div>{timeAgo(selected.created_at)}</div></div>
               </div>
               {availabilityList(selected.availability).length > 0 && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <div className="form-label">Available</div>
+                  <div className="form-label">{t('ui.available')}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                     {availabilityList(selected.availability).map((a, i) => (
                       <span key={i} className="badge blue" style={{ fontSize: '0.7rem' }}>{a}</span>
@@ -298,12 +298,12 @@ export default function Registrations() {
               )}
               {selected.message && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <div className="form-label">Message</div>
+                  <div className="form-label">{t('ui.message')}</div>
                   <p style={{ background: 'var(--slate-50)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem' }}>{selected.message}</p>
                 </div>
               )}
               <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label className="form-label">Internal Notes</label>
+                <label className="form-label">{t('ui.internal_notes')}</label>
                 <textarea
                   className="form-control" rows={3} value={notes}
                   onChange={e => { setNotes(e.target.value); setNoteSaved(false); setNoteError(''); }}
@@ -320,12 +320,12 @@ export default function Registrations() {
                   {noteSaved && <span style={{ fontSize: '0.8rem', color: 'var(--green)' }}>✓ Saved</span>}
                   {noteError && <span style={{ fontSize: '0.8rem', color: 'var(--red)' }}>{noteError}</span>}
                   {!noteSaved && !noteError && notes !== (selected.notes || '') && (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--slate-400)' }}>Unsaved changes</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--slate-400)' }}>{t('ui.unsaved_changes')}</span>
                   )}
                 </div>
               </div>
               <div style={{ marginBottom: '1rem' }}>
-                <div className="form-label" style={{ marginBottom: '0.5rem' }}>Update Status</div>
+                <div className="form-label" style={{ marginBottom: '0.5rem' }}>{t('ui.update_status')}</div>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {Object.entries(STATUS_LABELS).map(([s, label]) => (
                     <button
@@ -349,9 +349,9 @@ export default function Registrations() {
                   <FiMessageCircle /> WhatsApp
                 </a>
                 <button className="btn btn-danger" onClick={() => { setSelected(null); setConfirmDelete(selected); }}>
-                  <FiTrash2 /> Delete
+                  <FiTrash2 /> {t('ui.delete')}
                 </button>
-                <button className="btn btn-outline" onClick={() => setSelected(null)}>Close</button>
+                <button className="btn btn-outline" onClick={() => setSelected(null)}>{t('ui.close')}</button>
               </div>
             </div>
           </div>

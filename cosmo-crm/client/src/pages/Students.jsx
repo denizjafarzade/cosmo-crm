@@ -101,7 +101,7 @@ export default function Students() {
         {sev.over} late{sev.hasReason ? ' · reason noted' : ''}
       </span>
     );
-    if (s.payment_status === 'paid') return <span className="badge green">Paid</span>;
+    if (s.payment_status === 'paid') return <span className="badge green">{t('ui.paid')}</span>;
     return <span className="badge amber">Due ({s.lessons_since_payment})</span>;
   };
 
@@ -171,9 +171,9 @@ export default function Students() {
           </select>
           <select className="form-input" value={filters.payment_status} onChange={e => setFilters(f => ({ ...f, payment_status: e.target.value }))}>
             <option value="">{t('students.allPayment')}</option>
-            <option value="paid">Paid</option>
+            <option value="paid">{t('ui.paid')}</option>
             <option value="due">Due</option>
-            <option value="overdue">Overdue</option>
+            <option value="overdue">{t('ui.overdue')}</option>
           </select>
           <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>{students.length} {t('students.count')}</span>
         </div>
@@ -183,7 +183,7 @@ export default function Students() {
             <table>
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>{t('ui.name')}</th>
                   <th>{t('students.level')}</th>
                   <th>{t('students.onlineRatings')}</th>
                   <th>{t('students.fide')}</th>
@@ -233,7 +233,7 @@ export default function Students() {
                         )}
                         <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
                         {sev.level === 'critical' ? (
-                          <button className="btn btn-sm btn-red" onClick={() => setRemoveFor(s)} title="Remove from student list"><FiUserX /> Remove</button>
+                          <button className="btn btn-sm btn-red" onClick={() => setRemoveFor(s)} title="Remove from student list"><FiUserX /> {t('ui.remove')}</button>
                         ) : (
                           <button className="btn btn-sm btn-red btn-icon" onClick={() => remove(s.id)} title="Deactivate"><FiTrash2 /></button>
                         )}
@@ -254,21 +254,21 @@ export default function Students() {
             <div className="modal-body">
               <form onSubmit={save}>
                 <div className="form-row">
-                  <div className="form-group"><label>Name *</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
-                  <div className="form-group"><label>Surname</label><input className="form-input" value={form.surname} onChange={e => setForm(f => ({ ...f, surname: e.target.value }))} /></div>
+                  <div className="form-group"><label>{t('ui.name_required')}</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
+                  <div className="form-group"><label>{t('ui.surname')}</label><input className="form-input" value={form.surname} onChange={e => setForm(f => ({ ...f, surname: e.target.value }))} /></div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>WhatsApp #</label><input className="form-input" value={form.whatsapp_number} onChange={e => setForm(f => ({ ...f, whatsapp_number: e.target.value }))} placeholder="994501234567" /></div>
-                  <div className="form-group"><label>Parent WhatsApp</label><input className="form-input" value={form.parent_whatsapp} onChange={e => setForm(f => ({ ...f, parent_whatsapp: e.target.value }))} placeholder="994501234567" /></div>
+                  <div className="form-group"><label>{t('ui.whatsapp')}</label><input className="form-input" value={form.whatsapp_number} onChange={e => setForm(f => ({ ...f, whatsapp_number: e.target.value }))} placeholder="994501234567" /></div>
+                  <div className="form-group"><label>{t('ui.parent_whatsapp')}</label><input className="form-input" value={form.parent_whatsapp} onChange={e => setForm(f => ({ ...f, parent_whatsapp: e.target.value }))} placeholder="994501234567" /></div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>Level</label><select className="form-input" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>{LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}</select></div>
-                  <div className="form-group"><label>Group</label><select className="form-input" value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: e.target.value }))}><option value="">None</option>{groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+                  <div className="form-group"><label>{t('ui.level')}</label><select className="form-input" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>{LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}</select></div>
+                  <div className="form-group"><label>{t('ui.group')}</label><select className="form-input" value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: e.target.value }))}><option value="">{t('ui.none')}</option>{groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group"><label>Date of Birth</label><input className="form-input" type="date" value={form.birth_date || ''} onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))} /></div>
+                  <div className="form-group"><label>{t('ui.date_of_birth')}</label><input className="form-input" type="date" value={form.birth_date || ''} onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))} /></div>
                   <div className="form-group">
-                    <label>Sector</label>
+                    <label>{t('ui.sector')}</label>
                     <select className="form-input" value={form.sector || ''} onChange={e => setForm(f => ({ ...f, sector: e.target.value }))}>
                       <option value="">—</option>
                       {Object.entries(SECTORS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -277,26 +277,26 @@ export default function Students() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Chess Platform</label>
+                    <label>{t('ui.chess_platform')}</label>
                     <select className="form-input" value={form.chess_platform || ''} onChange={e => setForm(f => ({ ...f, chess_platform: e.target.value }))}>
-                      <option value="">None</option>
+                      <option value="">{t('ui.none')}</option>
                       <option value="lichess">Lichess.org</option>
                       <option value="chesscom">Chess.com</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Username</label>
+                    <label>{t('ui.username')}</label>
                     <input className="form-input" value={form.chess_username || ''} disabled={!form.chess_platform}
                       onChange={e => setForm(f => ({ ...f, chess_username: e.target.value }))} placeholder="blitz & rapid pulled automatically" />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>FIDE Rating</label>
+                  <label>{t('ui.fide_rating')}</label>
                   <input className="form-input" type="number" value={form.fide_rating} onChange={e => setForm(f => ({ ...f, fide_rating: e.target.value }))} placeholder="Empty = no official FIDE rating" />
                 </div>
-                <div className="form-group"><label>Coach</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">None</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                <div className="form-group"><label>Notes</label><textarea className="form-input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>
-                <div className="form-actions"><button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-primary" type="submit">{editId ? 'Update' : 'Add'}</button></div>
+                <div className="form-group"><label>{t('ui.coach')}</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">{t('ui.none')}</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                <div className="form-group"><label>{t('ui.notes')}</label><textarea className="form-input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>
+                <div className="form-actions"><button type="button" className="btn btn-outline" onClick={() => setModal(null)}>{t('ui.cancel')}</button><button className="btn btn-primary" type="submit">{editId ? 'Update' : 'Add'}</button></div>
               </form>
             </div>
           </div>
@@ -316,16 +316,16 @@ export default function Students() {
                 and the automatic “lessons will be stopped” warning is not sent.
               </p>
               <div className="form-group">
-                <label>Reason</label>
+                <label>{t('ui.reason')}</label>
                 <textarea className="form-input" value={reasonText} onChange={e => setReasonText(e.target.value)}
                   placeholder="e.g. agreed to pay after the exam period" />
               </div>
               <div className="form-actions">
-                <button className="btn btn-outline" onClick={() => setReasonFor(null)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setReasonFor(null)}>{t('ui.cancel')}</button>
                 {reasonFor.payment_excuse_reason && (
                   <button className="btn btn-outline" style={{ color: 'var(--red)' }} onClick={() => { setReasonText(''); api.setPaymentReason(reasonFor.id, '').then(() => { setReasonFor(null); load(); }); }}>Clear</button>
                 )}
-                <button className="btn btn-primary" onClick={saveReason}>Save</button>
+                <button className="btn btn-primary" onClick={saveReason}>{t('ui.save')}</button>
               </div>
             </div>
           </div>
@@ -348,9 +348,9 @@ export default function Students() {
                 Removing takes them off the student list (their records are kept). You can add a reason instead if the delay is agreed.
               </p>
               <div className="form-actions">
-                <button className="btn btn-outline" onClick={() => setRemoveFor(null)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setRemoveFor(null)}>{t('ui.cancel')}</button>
                 <button className="btn btn-outline" onClick={() => { const s = removeFor; setRemoveFor(null); openReason(s); }}>Add reason instead</button>
-                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={doRemove}>Remove</button>
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={doRemove}>{t('ui.remove')}</button>
               </div>
             </div>
           </div>
@@ -382,7 +382,7 @@ export default function Students() {
               ) : (
                 <div className="table-wrap">
                   <table>
-                    <thead><tr><th>Date</th><th>Amount</th><th>{t('students.lessons')}</th><th>Notes</th></tr></thead>
+                    <thead><tr><th>{t('ui.date')}</th><th>{t('ui.amount')}</th><th>{t('students.lessons')}</th><th>{t('ui.notes')}</th></tr></thead>
                     <tbody>
                       {historyStudent.payments.map(p => (
                         <tr key={p.id}>
@@ -407,9 +407,9 @@ export default function Students() {
             <div className="modal-header"><h3>Confirm Payment</h3><button className="modal-close" onClick={() => setModal(null)}><FiX /></button></div>
             <div className="modal-body">
               <form onSubmit={confirmPay}>
-                <div className="form-group"><label>Amount (optional)</label><input className="form-input" type="number" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} /></div>
-                <div className="form-group"><label>Notes</label><textarea className="form-input" value={payForm.notes} onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))} /></div>
-                <div className="form-actions"><button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button><button className="btn btn-green" type="submit">Confirm Paid</button></div>
+                <div className="form-group"><label>{t('ui.amount_optional')}</label><input className="form-input" type="number" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} /></div>
+                <div className="form-group"><label>{t('ui.notes')}</label><textarea className="form-input" value={payForm.notes} onChange={e => setPayForm(f => ({ ...f, notes: e.target.value }))} /></div>
+                <div className="form-actions"><button type="button" className="btn btn-outline" onClick={() => setModal(null)}>{t('ui.cancel')}</button><button className="btn btn-green" type="submit">Confirm Paid</button></div>
               </form>
             </div>
           </div>
