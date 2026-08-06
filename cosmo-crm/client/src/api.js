@@ -115,6 +115,7 @@ const api = {
   getRegistrations: (status) => request(`/registrations${status ? `?status=${status}` : ''}`),
   updateRegistration: (id, data) => request(`/registrations/${id}`, { method: 'PUT', body: data }),
   deleteRegistration: (id) => request(`/registrations/${id}`, { method: 'DELETE' }),
+  enrollRegistration: (id, data) => request(`/registrations/${id}/enroll`, { method: 'POST', body: data }),
 
   // Landing-page content (gallery + news)
   getGallery: () => request('/content/gallery'),

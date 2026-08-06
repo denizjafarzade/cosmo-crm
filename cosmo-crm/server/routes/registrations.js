@@ -91,6 +91,65 @@ r.put('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+// Turn an inquiry into a student: either into an existing group, or into a new
+// group created here with its weekly schedule. Everything already collected on
+// the form (birth date, preferred language, level, chess account and ratings)
+// is carried over so nothing has to be retyped.
+r.post('/:id/enroll', (req, res) => {
+  const reg = db.prepare('SELECT * FROM registrations WHERE id = ?').get(req.params.id);
+  if (!reg) return res.status(404).json({ error: 'Inquiry not found' });
+
+  const { group_id, new_group } = req.body || {};
+  if (!group_id && !new_group) return res.status(400).json({ error: 'Choose a group or provide a new one' });
+
+  // Map the public form's level wording onto the students table's values.
+  const LEVELS = {
+    'new to chess': 'new_to_chess', 'beginner': 'beginner', 'intermediate': 'intermediate',
+    'advanced': 'advanced', 'expert': 'expert', 'not sure': 'not_sure',
+  };
+  const level = LEVELS[String(reg.level || '').toLowerCase()] || 'beginner';
+  const [name, ...rest] = String(reg.name || '').trim().split(/\s+/);
+  const surname = rest.join(' ');
+
+  let groupId = group_id ? Number(group_id) : null;
+  let createdGroup = null;
+  let studentId;
+
+  const run = db.transaction(() => {
+    if (!groupId) {
+      const g = new_group;
+      if (!g.name) throw new Error('New group needs a name');
+      const info = db.prepare(`INSERT INTO groups (name, coach_id, auto_increment_lessons, homework_start_from, lesson_duration_minutes)
+        VALUES (?, ?, 1, ?, ?)`).run(g.name, g.coach_id || null, parseInt(g.homework_start_from) || 1, parseInt(g.lesson_duration_minutes) || 60);
+      groupId = info.lastInsertRowid;
+      const stmt = db.prepare('INSERT INTO group_schedules (group_id, day_of_week, time) VALUES (?, ?, ?)');
+      for (const s of (g.schedules || [])) {
+        if (s && s.time != null && s.day_of_week != null) stmt.run(groupId, Number(s.day_of_week), String(s.time));
+      }
+      createdGroup = { id: groupId, name: g.name };
+    }
+
+    const ins = db.prepare(`INSERT INTO students
+      (name, surname, whatsapp_number, level, fide_rating, group_id, birth_date, sector,
+       chess_platform, chess_username, blitz_rating, rapid_rating, blitz_games, rapid_games, ratings_updated_at, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(name || reg.name, surname, reg.phone || null, level, reg.fide_rating ?? null, groupId,
+        reg.birth_date || null, reg.sector || null, reg.chess_platform || null, reg.chess_username || null,
+        reg.blitz_rating ?? null, reg.rapid_rating ?? null, reg.blitz_games ?? null, reg.rapid_games ?? null,
+        reg.ratings_updated_at || null, reg.notes || '');
+    studentId = ins.lastInsertRowid;
+
+    db.prepare("UPDATE registrations SET status = 'enrolled', updated_at = datetime('now') WHERE id = ?").run(req.params.id);
+  });
+
+  try {
+    run();
+  } catch (e) {
+    return res.status(400).json({ error: e.message });
+  }
+  res.json({ ok: true, student_id: studentId, group_id: groupId, created_group: createdGroup });
+});
+
 r.delete('/:id', (req, res) => {
   db.prepare('DELETE FROM registrations WHERE id = ?').run(req.params.id);
   res.json({ ok: true });

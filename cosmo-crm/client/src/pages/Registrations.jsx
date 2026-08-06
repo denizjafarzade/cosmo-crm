@@ -7,6 +7,33 @@ const STATUS_LABELS = { new: 'New', contacted: 'Contacted', enrolled: 'Enrolled'
 const SECTORS = { az: 'Azerbaijani', ru: 'Russian', en: 'English', tr: 'Turkish' };
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+// Compact per-mode rating pills for the grid: platform + username on top,
+// then Blitz / Rapid with their rating and games played.
+function ratingCell(r) {
+  if (!r.chess_username) return <span style={{ color: 'var(--slate-300)' }}>—</span>;
+  const pill = (label, rating, games) => (
+    <div style={{
+      background: 'var(--slate-50)', border: '1px solid var(--slate-200)',
+      borderRadius: 7, padding: '2px 7px', textAlign: 'center', minWidth: 54,
+    }}>
+      <div style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase', color: 'var(--slate-400)' }}>{label}</div>
+      <div style={{ fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.2, color: rating != null ? 'var(--primary)' : 'var(--slate-300)' }}>{rating ?? '—'}</div>
+      <div style={{ fontSize: '0.58rem', color: 'var(--slate-400)' }}>{games != null ? `${games} ${t('students.games')}` : '—'}</div>
+    </div>
+  );
+  return (
+    <div>
+      <div style={{ fontSize: '0.68rem', color: 'var(--slate-400)', marginBottom: 3 }}>
+        {r.chess_platform === 'lichess' ? 'Lichess' : 'Chess.com'} · {r.chess_username}
+      </div>
+      <div style={{ display: 'flex', gap: 4 }}>
+        {pill(t('students.blitz'), r.blitz_rating, r.blitz_games)}
+        {pill(t('students.rapid'), r.rapid_rating, r.rapid_games)}
+      </div>
+    </div>
+  );
+}
+
 function ratingsText(r) {
   if (!r.chess_username) return '—';
   const platform = r.chess_platform === 'lichess' ? 'Lichess' : 'Chess.com';
@@ -49,6 +76,36 @@ export default function Registrations() {
   const [saving, setSaving] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
   const [noteError, setNoteError] = useState('');
+  const [groups, setGroups] = useState([]);
+  const [enroll, setEnroll] = useState(null); // { reg, mode, group_id, newGroup }
+  const [enrollError, setEnrollError] = useState('');
+  const [newSlot, setNewSlot] = useState({ day_of_week: 1, time: '16:00' });
+
+  const doEnroll = async () => {
+    setSaving(true);
+    setEnrollError('');
+    try {
+      const payload = enroll.mode === 'existing'
+        ? { group_id: enroll.group_id }
+        : { new_group: enroll.newGroup };
+      if (enroll.mode === 'existing' && !enroll.group_id) throw new Error(t('reg.pickGroup'));
+      if (enroll.mode === 'new' && !enroll.newGroup.name.trim()) throw new Error(t('reg.groupNameRequired'));
+      await api.enrollRegistration(enroll.reg.id, payload);
+      setEnroll(null);
+      setSelected(null);
+      load();
+    } catch (e) {
+      setEnrollError(e.message || 'Failed');
+    }
+    setSaving(false);
+  };
+
+  const addSlot = () => setEnroll(en => ({
+    ...en, newGroup: { ...en.newGroup, schedules: [...en.newGroup.schedules, { ...newSlot }] },
+  }));
+  const removeSlot = (i) => setEnroll(en => ({
+    ...en, newGroup: { ...en.newGroup, schedules: en.newGroup.schedules.filter((_, j) => j !== i) },
+  }));
 
   const load = () => {
     api.getRegistrations(filter || undefined)
@@ -60,7 +117,14 @@ export default function Registrations() {
 
   const openDetail = (r) => { setSelected(r); setNotes(r.notes || ''); setNoteSaved(false); setNoteError(''); };
 
+  // Enrolling is not just a status change — it creates the student and places
+  // them in a group, so it opens its own dialog.
   const updateStatus = async (id, status) => {
+    if (status === 'enrolled') {
+      api.getGroups().then(g => setGroups(Array.isArray(g) ? g : [])).catch(() => setGroups([]));
+      setEnroll({ reg: selected, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, homework_start_from: 1, schedules: [] } });
+      return;
+    }
     setSaving(true);
     try {
       await api.updateRegistration(id, { status, notes });
@@ -116,6 +180,89 @@ export default function Registrations() {
               <div className="form-actions">
                 <button className="btn btn-outline" onClick={() => setConfirmDelete(null)}>Cancel</button>
                 <button className="btn btn-danger" onClick={() => doDelete(confirmDelete.id)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {enroll && (
+        <div className="modal-overlay" onClick={() => setEnroll(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
+            <div className="modal-header">
+              <h3>{t('reg.enrollTitle')} — {enroll.reg.name}</h3>
+              <button className="modal-close" onClick={() => setEnroll(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginBottom: '1rem' }}>
+                {t('reg.enrollHint')}
+              </p>
+
+              <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
+                <button className={`btn btn-sm ${enroll.mode === 'existing' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setEnroll(en => ({ ...en, mode: 'existing' }))}>{t('reg.existingGroup')}</button>
+                <button className={`btn btn-sm ${enroll.mode === 'new' ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setEnroll(en => ({ ...en, mode: 'new' }))}>{t('reg.newGroup')}</button>
+              </div>
+
+              {enroll.mode === 'existing' ? (
+                <div className="form-group">
+                  <label className="form-label">{t('students.group')}</label>
+                  <select className="form-input" value={enroll.group_id}
+                    onChange={e => setEnroll(en => ({ ...en, group_id: e.target.value }))}>
+                    <option value="">{t('reg.pickGroup')}</option>
+                    {groups.map(g => (
+                      <option key={g.id} value={g.id}>{g.name} ({g.student_count} · {t('dashboard.lesson')} #{g.current_lesson_number})</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">{t('reg.groupName')} *</label>
+                      <input className="form-input" value={enroll.newGroup.name}
+                        onChange={e => setEnroll(en => ({ ...en, newGroup: { ...en.newGroup, name: e.target.value } }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">{t('reg.duration')}</label>
+                      <input className="form-input" type="number" min="15" step="5" value={enroll.newGroup.lesson_duration_minutes}
+                        onChange={e => setEnroll(en => ({ ...en, newGroup: { ...en.newGroup, lesson_duration_minutes: parseInt(e.target.value) || 60 } }))} />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">{t('reg.schedule')}</label>
+                    {enroll.newGroup.schedules.length === 0 && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--slate-400)', marginBottom: 6 }}>{t('reg.noSlots')}</div>
+                    )}
+                    {enroll.newGroup.schedules.map((s, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <span className="badge blue">{DAY_NAMES[s.day_of_week]}</span>
+                        <span>{s.time}</span>
+                        <button className="btn btn-sm btn-icon" style={{ marginLeft: 'auto', color: 'var(--red)' }}
+                          onClick={() => removeSlot(i)}><FiTrash2 /></button>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                      <select className="form-input" style={{ width: 'auto' }} value={newSlot.day_of_week}
+                        onChange={e => setNewSlot(s => ({ ...s, day_of_week: parseInt(e.target.value) }))}>
+                        {DAY_NAMES.map((d, i) => <option key={i} value={i}>{d}</option>)}
+                      </select>
+                      <input className="form-input" type="time" style={{ width: 'auto' }} value={newSlot.time}
+                        onChange={e => setNewSlot(s => ({ ...s, time: e.target.value }))} />
+                      <button className="btn btn-sm btn-outline" onClick={addSlot}>{t('reg.addSlot')}</button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {enrollError && <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: 8 }}>{enrollError}</div>}
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setEnroll(null)}>{t('common.cancel')}</button>
+                <button className="btn btn-primary" onClick={doEnroll} disabled={saving}>
+                  {saving ? '…' : t('reg.enrollAction')}
+                </button>
               </div>
             </div>
           </div>
@@ -245,12 +392,13 @@ export default function Registrations() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Level</th>
-                  <th>FIDE</th>
-                  <th>Status</th>
-                  <th>Received</th>
+                  <th>{t('students.name')}</th>
+                  <th>{t('reg.phone')}</th>
+                  <th>{t('students.level')}</th>
+                  <th>{t('students.onlineRatings')}</th>
+                  <th>{t('students.fide')}</th>
+                  <th>{t('content.status')}</th>
+                  <th>{t('reg.received')}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -260,6 +408,7 @@ export default function Registrations() {
                     <td style={{ fontWeight: 600 }}>{r.name}</td>
                     <td>{r.phone}</td>
                     <td>{r.level || '—'}</td>
+                    <td>{ratingCell(r)}</td>
                     <td>{r.fide_rating || '—'}</td>
                     <td><span className={`badge ${STATUS_BADGE[r.status] || 'slate'}`}>{STATUS_LABELS[r.status] || r.status}</span></td>
                     <td style={{ color: 'var(--slate-500)', fontSize: '0.85rem' }}>{timeAgo(r.created_at)}</td>
