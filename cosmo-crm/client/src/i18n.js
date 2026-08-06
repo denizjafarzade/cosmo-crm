@@ -105,6 +105,7 @@ const EN = {
   'students.amount': 'Amount',
 
   'dashboard.title': 'Dashboard',
+  'dashboard.lesson': 'Lesson',
   'dashboard.timetable': 'Weekly Timetable',
   'dashboard.paymentStatus': 'Payment Status',
   'dashboard.topGroups': 'Top Groups',
@@ -232,6 +233,7 @@ const RU = {
   'students.amount': 'Сумма',
 
   'dashboard.title': 'Панель',
+  'dashboard.lesson': 'Урок',
   'dashboard.timetable': 'Недельное расписание',
   'dashboard.paymentStatus': 'Статус оплат',
   'dashboard.topGroups': 'Лучшие группы',

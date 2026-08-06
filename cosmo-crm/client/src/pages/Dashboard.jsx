@@ -317,7 +317,7 @@ export default function Dashboard() {
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{s.group_name}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', marginTop: 1 }}>
-                            {s.student_count} student{s.student_count !== 1 ? 's' : ''} · Lesson #{s.current_lesson_number + 1} · {s.duration || 60}min
+                            {s.student_count} student{s.student_count !== 1 ? 's' : ''} · {t('dashboard.lesson')} #{s.slot_lesson_number ?? (s.current_lesson_number + 1)} · {s.duration || 60}min
                             {s.coach_name && ` · ${s.coach_name}`}
                           </div>
                         </div>

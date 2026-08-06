@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cosmo Chess Academy — Professional Chess Training</title>
+  <!-- Tab icon: the brand's gold knight badge, inlined so it needs no extra request -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9a84c'/%3E%3Cpath fill='%23fff' d='M11.5 25h10v-1.8c0-3.9-1.9-5.3-3.8-7.3l1.3-1.6c.9-2.4-.3-4.3-2.3-5.3l.8-2.7-3.2 1.5c-2.5.1-4.9 2-5.8 4.8-.5 1.6-.1 3 1 3.4.8.3 1.4 0 1.9-.6.4-.4.8-.6 1.1-.4.4.3.3.8-.1 1.2-1.5 1.9-2.9 3.3-2.9 5.8V25z'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9a84c'/%3E%3Cpath fill='%23fff' d='M11.5 25h10v-1.8c0-3.9-1.9-5.3-3.8-7.3l1.3-1.6c.9-2.4-.3-4.3-2.3-5.3l.8-2.7-3.2 1.5c-2.5.1-4.9 2-5.8 4.8-.5 1.6-.1 3 1 3.4.8.3 1.4 0 1.9-.6.4-.4.8-.6 1.1-.4.4.3.3.8-.1 1.2-1.5 1.9-2.9 3.3-2.9 5.8V25z'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -616,6 +619,13 @@
       .contact-form { padding: 1.25rem !important; }
       .contact-form .form-group { margin-bottom: 0.8rem; }
     }
+    /* Phones get a shorter page: the gallery, the feature grid and the
+       how-it-works walkthrough are desktop-only storytelling. */
+    @media (max-width: 768px) {
+      #gallery, #features, #how { display: none !important; }
+      .nav-links a[href="#gallery"], .nav-links a[href="#features"], .nav-links a[href="#how"] { display: none; }
+    }
+
     @media (max-width: 420px) {
       .section { padding: 2rem 0.9rem !important; }
       .section-header h2 { font-size: 1.4rem; }
@@ -641,8 +651,8 @@
     }
     .avail-grid { width: 100%; border-collapse: separate; border-spacing: 4px; table-layout: fixed; }
     .avail-grid th {
-      font-size: 0.64rem; font-weight: 600; color: var(--text-muted);
-      text-align: center; padding: 0 0 2px; white-space: nowrap;
+      font-size: 0.6rem; font-weight: 600; color: var(--text-muted);
+      text-align: center; padding: 0 0 2px; white-space: nowrap; letter-spacing: -0.2px;
     }
     .avail-grid td:first-child, .avail-grid th:first-child {
       font-size: 0.72rem; font-weight: 600; color: var(--text);
@@ -1298,7 +1308,7 @@
   <!-- Left: text content -->
   <div class="hero-content">
     <div class="hero-badge">♟ Cosmo Chess Academy</div>
-    <h1 data-i18n="hero.title">Master the Art of <em>Chess</em></h1>
+    <h1 data-i18n="hero.title">Every Chess Journey <em>Starts Here</em></h1>
     <p data-i18n="hero.subtitle">Personalized chess coaching for children, teenagers, and adults — from complete beginners to tournament players. Develop strategic thinking, confidence, and competitive skills with expert coaching.</p>
     <div class="hero-btns">
       <a href="#contact" class="btn-hero primary">&#9823; <span data-i18n="common.startLearning">Start Learning</span></a>
@@ -2084,9 +2094,9 @@
           <div class="form-row">
             <div class="form-group"><label data-i18n="contact.birthDate">Date of Birth *</label><input type="date" name="birthDate" required /></div>
             <div class="form-group">
-              <label data-i18n="contact.sector">Sector *</label>
+              <label data-i18n="contact.sector">What language do you prefer? *</label>
               <select name="sector" required>
-                <option value="" disabled selected data-i18n="contact.sectorPlaceholder">Select sector</option>
+                <option value="" disabled selected data-i18n="contact.sectorPlaceholder">Select a language</option>
                 <option value="az" data-i18n="sector.az">Azerbaijani</option>
                 <option value="ru" data-i18n="sector.ru">Russian</option>
                 <option value="en" data-i18n="sector.en">English</option>
@@ -2312,7 +2322,7 @@
       'nav.contact': 'Contact',
       'common.startLearning': 'Start Learning',
 
-      'hero.title': 'Master the Art of <em>Chess</em>',
+      'hero.title': 'Every Chess Journey <em>Starts Here</em>',
       'hero.subtitle': 'Personalized chess coaching for children, teenagers, and adults — from complete beginners to tournament players. Develop strategic thinking, confidence, and competitive skills with expert coaching.',
       'hero.ctaSecondary': 'Meet Your Coach',
       'nav.pricing': 'Pricing',
@@ -2514,8 +2524,8 @@
       'contact.noFideRating': "I don't have an official FIDE rating",
       'contact.fideToggle': 'I have an official FIDE rating',
       'contact.birthDate': 'Date of Birth *',
-      'contact.sector': 'Sector *',
-      'contact.sectorPlaceholder': 'Select sector',
+      'contact.sector': 'What language do you prefer? *',
+      'contact.sectorPlaceholder': 'Select a language',
       'contact.onlineAccount': 'Online Chess Account (optional)',
       'contact.onlineAccountHint': "Choose one platform — we'll read your blitz & rapid ratings automatically.",
       'contact.games': 'games',
@@ -2541,7 +2551,7 @@
       'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Message',
       'contact.messagePlaceholder': 'Any questions or requests...',
-      'contact.submit': 'Send & Contact via WhatsApp',
+      'contact.submit': "Send & Let's contact with you",
       'contact.thankYouTitle': 'Thank you!',
       'contact.thankYouText': 'We will contact you shortly via WhatsApp.',
 
@@ -2580,7 +2590,7 @@
       'nav.contact': 'Əlaqə',
       'common.startLearning': 'Dərslərə başlayın',
 
-      'hero.title': 'Şahmat Sənətinə <em>Yiyələnin</em>',
+      'hero.title': 'Şahmatda uğura aparan <em>hər yol burada başlayır</em>',
       'hero.subtitle': 'Uşaqlar, yeniyetmələr və böyüklər üçün fərdi şahmat dərsləri — şahmata yeni başlayanlardan turnir oyunçularına qədər. Peşəkar hazırlıq ilə strateji düşüncənizi, özünəinamınızı və yarış bacarıqlarınızı inkişaf etdirin.',
       'hero.ctaSecondary': 'Məşqçinizlə Tanış Olun',
       'nav.pricing': 'Qiymətlər',
@@ -2782,8 +2792,8 @@
       'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
       'contact.fideToggle': 'Rəsmi FIDE reytinqim var',
       'contact.birthDate': 'Təvəllüd *',
-      'contact.sector': 'Sektor *',
-      'contact.sectorPlaceholder': 'Sektoru seçin',
+      'contact.sector': 'Hansı dili üstün tutursunuz? *',
+      'contact.sectorPlaceholder': 'Dili seçin',
       'contact.onlineAccount': 'Onlayn şahmat hesabı (istəyə bağlı)',
       'contact.onlineAccountHint': 'Bir platforma seçin — blits və rapid reytinqlərinizi avtomatik oxuyacağıq.',
       'contact.games': 'oyun',
@@ -2809,7 +2819,7 @@
       'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Mesaj',
       'contact.messagePlaceholder': 'Suallarınızı və ya istəklərinizi qeyd edin...',
-      'contact.submit': 'Göndərin və WhatsApp vasitəsilə əlaqə saxlayın',
+      'contact.submit': 'Göndərin — sizinlə əlaqə saxlayaq',
       'contact.thankYouTitle': 'Təşəkkür edirik!',
       'contact.thankYouText': 'Tezliklə WhatsApp vasitəsilə sizinlə əlaqə saxlayacağıq.',
 
@@ -2848,7 +2858,7 @@
       'nav.contact': 'Контакты',
       'common.startLearning': 'Начать обучение',
 
-      'hero.title': 'Освойте Искусство <em>Шахмат</em>',
+      'hero.title': 'Каждый путь к успеху в шахматах <em>начинается здесь</em>',
       'hero.subtitle': 'Индивидуальные занятия шахматами для детей, подростков и взрослых — от начинающих до турнирных игроков. Развивайте стратегическое мышление, уверенность и соревновательные навыки под руководством опытного тренера.',
       'hero.ctaSecondary': 'Познакомьтесь с тренером',
       'nav.pricing': 'Цены',
@@ -3050,8 +3060,8 @@
       'contact.noFideRating': 'У меня нет официального рейтинга FIDE',
       'contact.fideToggle': 'У меня есть официальный рейтинг FIDE',
       'contact.birthDate': 'Дата рождения *',
-      'contact.sector': 'Сектор *',
-      'contact.sectorPlaceholder': 'Выберите сектор',
+      'contact.sector': 'Какой язык вы предпочитаете? *',
+      'contact.sectorPlaceholder': 'Выберите язык',
       'contact.onlineAccount': 'Онлайн-аккаунт (необязательно)',
       'contact.onlineAccountHint': 'Выберите одну платформу — мы автоматически считаем ваш блиц и рапид рейтинг.',
       'contact.games': 'партий',
@@ -3077,7 +3087,7 @@
       'slot.morning': '09–12', 'slot.midday': '12–15', 'slot.afternoon': '15–18', 'slot.evening': '18–21',
       'contact.message': 'Сообщение',
       'contact.messagePlaceholder': 'Напишите ваши вопросы или пожелания...',
-      'contact.submit': 'Отправить и связаться через WhatsApp',
+      'contact.submit': 'Отправить — мы свяжемся с вами',
       'contact.thankYouTitle': 'Спасибо!',
       'contact.thankYouText': 'Мы свяжемся с вами в ближайшее время через WhatsApp.',
 
@@ -4400,7 +4410,8 @@
       htr.appendChild(document.createElement('th'));
       slots.forEach(function(slot){
         var th = document.createElement('th');
-        th.textContent = slot.replace(/:00/g, '').replace('-', '–');
+        // Full clock times, e.g. "12:00 – 15:00"
+        th.textContent = slot.replace('-', ' – ');
         htr.appendChild(th);
       });
       thead.appendChild(htr);

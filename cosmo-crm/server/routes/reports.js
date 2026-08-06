@@ -43,6 +43,9 @@ r.get('/dashboard', (req, res) => {
            g.current_lesson_number, g.auto_increment_lessons, g.lesson_duration_minutes as duration,
            (SELECT COUNT(*) FROM students s WHERE s.group_id = g.id AND s.active = 1) as student_count,
            (SELECT COUNT(*) FROM lessons l WHERE l.group_id = g.id AND date(l.occurred_at) = date('now') AND l.slot_time = gs.time) > 0 as marked_today,
+           -- The lesson number actually recorded for THIS slot today. Without it
+           -- every slot of a group would display the same "next" number.
+           (SELECT MAX(l.lesson_number) FROM lessons l WHERE l.group_id = g.id AND date(l.occurred_at) = date('now') AND l.slot_time = gs.time) as slot_lesson_number,
            c.name as coach_name
     FROM group_schedules gs
     JOIN groups g ON gs.group_id = g.id
