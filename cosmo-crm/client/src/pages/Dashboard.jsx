@@ -6,7 +6,7 @@ import {
   FiActivity, FiMessageCircle
 } from 'react-icons/fi';
 import api from '../api';
-import { t } from '../i18n';
+import { t, formatDate } from '../i18n';
 
 function timeAgo(iso) {
   if (!iso) return '';
