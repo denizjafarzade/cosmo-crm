@@ -415,6 +415,28 @@ const insertDefaults = db.transaction(() => {
 });
 insertDefaults();
 
+// --- Academy coach ---
+// Make sure the academy's own coach exists with the real contact number,
+// without disturbing a number that has been edited in the CRM.
+const HEAD_COACH = { name: 'Abdulla Shabanov', whatsapp: '994703900007' };
+const PLACEHOLDER_NUMBERS = ['', '994501234567', '994XXXXXXXXX'];
+{
+  const existing = db.prepare('SELECT id, whatsapp_number FROM coaches WHERE name = ?').get(HEAD_COACH.name);
+  if (!existing) {
+    db.prepare('INSERT INTO coaches (name, whatsapp_number) VALUES (?, ?)').run(HEAD_COACH.name, HEAD_COACH.whatsapp);
+    console.log(`[DB] Added coach ${HEAD_COACH.name}`);
+  } else if (PLACEHOLDER_NUMBERS.includes(existing.whatsapp_number || '')) {
+    db.prepare("UPDATE coaches SET whatsapp_number = ?, updated_at = datetime('now') WHERE id = ?")
+      .run(HEAD_COACH.whatsapp, existing.id);
+    console.log(`[DB] Set ${HEAD_COACH.name}'s WhatsApp number`);
+  }
+  // The weekly report goes to this number unless one has been configured.
+  const teacher = db.prepare("SELECT value FROM settings WHERE key = 'teacher_whatsapp'").get();
+  if (!teacher || !teacher.value) {
+    db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('teacher_whatsapp', ?)").run(HEAD_COACH.whatsapp);
+  }
+}
+
 function getSetting(key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
   return row ? row.value : null;
