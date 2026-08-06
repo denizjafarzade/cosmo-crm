@@ -128,6 +128,7 @@ export default function Dashboard() {
   const [attendanceFor, setAttendanceFor] = useState(null);
   const [selectedDay, setSelectedDay] = useState(todayDow);
   const [now, setNow] = useState(new Date());
+  const [cancelFor, setCancelFor] = useState(null); // { scope:'slot'|'day', slot, reason }
 
   const load = () => api.dashboard().then(setData);
   useEffect(() => { load(); }, []);
@@ -142,6 +143,25 @@ export default function Dashboard() {
     load();
   };
 
+  const todayIso = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const doCancel = async () => {
+    const { scope, slot, reason } = cancelFor;
+    if (scope === 'day') await api.cancelDay({ date: todayIso(), reason });
+    else await api.cancelLesson(slot.group_id, { slot_time: slot.time, date: todayIso(), reason });
+    setCancelFor(null);
+    load();
+  };
+
+  const restore = async (s) => {
+    await api.restoreLesson(s.group_id, { slot_time: s.time, date: todayIso() });
+    load();
+  };
+
+  const isToday0 = (dow) => dow === todayDow;
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isTimePassed = (time) => {
     const [h, m] = time.split(':').map(Number);
@@ -190,12 +210,53 @@ export default function Dashboard() {
         />
       )}
 
+      {cancelFor && (
+        <div className="modal-overlay" onClick={() => setCancelFor(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h3>{cancelFor.scope === 'day' ? t('dashboard.cancelDayTitle') : t('dashboard.cancelLessonTitle')}</h3>
+              <button className="modal-close" onClick={() => setCancelFor(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1rem' }}>
+                {cancelFor.scope === 'day'
+                  ? t('dashboard.cancelDayHint')
+                  : `${cancelFor.slot.group_name} · ${cancelFor.slot.time} — ${t('dashboard.cancelLessonHint')}`}
+              </p>
+              <div className="form-group">
+                <label className="form-label">{t('dashboard.cancelReason')}</label>
+                <input className="form-input" value={cancelFor.reason}
+                  onChange={e => setCancelFor(c => ({ ...c, reason: e.target.value }))}
+                  placeholder={t('dashboard.cancelReasonHint')} />
+              </div>
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setCancelFor(null)}>{t('common.cancel')}</button>
+                {cancelFor.scope === 'slot' && (
+                  <button className="btn btn-outline" onClick={() => setCancelFor(c => ({ ...c, scope: 'day' }))}>
+                    {t('dashboard.cancelAllToday')}
+                  </button>
+                )}
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={doCancel}>
+                  {cancelFor.scope === 'day' ? t('dashboard.cancelAllToday') : t('dashboard.cancelConfirm')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1>{t('dashboard.title')}</h1>
           <p>{DAYS[todayDow]}, {now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
-        <Link to="/students" className="btn btn-primary"><FiPlus /> Add Student</Link>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" style={{ color: 'var(--red)' }}
+            onClick={() => setCancelFor({ scope: 'day', slot: null, reason: '' })}>
+            {t('dashboard.cancelAllToday')}
+          </button>
+          <Link to="/students" className="btn btn-primary"><FiPlus /> {t('students.add')}</Link>
+        </div>
       </div>
 
       <div className="page-body">
@@ -291,27 +352,29 @@ export default function Dashboard() {
               {selectedSchedule.length ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {selectedSchedule.map((s, i) => {
+                    const cancelled = isToday0(selectedDay) && !!s.cancelled_today;
                     const done = isMarked(s);
                     const isToday = selectedDay === todayDow;
                     const started = isTimePassed(s.time);
-                    const finished = isToday && isDurationOver(s);
+                    const finished = isToday && isDurationOver(s) && !cancelled;
                     // Once the duration is over the slot is locked (disabled green)
                     // so it can't be clicked by mistake. During the lesson it's
                     // active and attendance can be taken/edited.
                     const locked = finished;
-                    const active = isToday && started && !finished;
-                    const green = done || finished;
+                    const active = isToday && started && !finished && !cancelled;
+                    const green = (done || finished) && !cancelled;
                     return (
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: '0.85rem',
                         padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)',
-                        border: `1.5px solid ${green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-200)'}`,
-                        background: green ? 'var(--green-bg)' : active ? 'var(--primary-bg)' : 'var(--white)',
-                        opacity: locked ? 0.7 : 1,
+                        border: `1.5px solid ${cancelled ? 'var(--red)' : green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-200)'}`,
+                        background: cancelled ? 'var(--red-bg)' : green ? 'var(--green-bg)' : active ? 'var(--primary-bg)' : 'var(--white)',
+                        opacity: locked || cancelled ? 0.75 : 1,
                       }}>
                         <div style={{
                           minWidth: 52, fontWeight: 800, fontSize: '0.9rem',
-                          color: green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-400)',
+                          textDecoration: cancelled ? 'line-through' : 'none',
+                          color: cancelled ? 'var(--red)' : green ? 'var(--green)' : active ? 'var(--primary)' : 'var(--slate-400)',
                           fontVariantNumeric: 'tabular-nums',
                         }}>{s.time}</div>
                         <div style={{ flex: 1 }}>
@@ -321,21 +384,34 @@ export default function Dashboard() {
                             {s.coach_name && ` · ${s.coach_name}`}
                           </div>
                         </div>
-                        {locked ? (
-                          <span className="badge green" style={{ opacity: 0.85 }}><FiCheck /> Done</span>
+                        {cancelled ? (
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span className="badge red" title={s.cancel_reason || ''}>{t('dashboard.cancelled')}</span>
+                            <button className="btn btn-sm btn-outline" onClick={() => restore(s)}>{t('dashboard.restore')}</button>
+                          </div>
+                        ) : locked ? (
+                          <span className="badge green" style={{ opacity: 0.85 }}><FiCheck /> {t('dashboard.done')}</span>
                         ) : active ? (
                           done ? (
-                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                              <span className="badge green"><FiCheck /> Marked</span>
-                              <button className="btn btn-sm btn-outline" onClick={() => setAttendanceFor(s)}>Edit</button>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <span className="badge green"><FiCheck /> {t('dashboard.marked')}</span>
+                              <button className="btn btn-sm btn-outline" onClick={() => setAttendanceFor(s)}>{t('common.edit')}</button>
                             </div>
                           ) : (
-                            <button className="btn btn-sm btn-primary" onClick={() => setAttendanceFor(s)}>
-                              <FiCheck /> Attendance
-                            </button>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <button className="btn btn-sm btn-primary" onClick={() => setAttendanceFor(s)}>
+                                <FiCheck /> {t('dashboard.attendance')}
+                              </button>
+                              <button className="btn btn-sm btn-outline" style={{ color: 'var(--red)' }}
+                                onClick={() => setCancelFor({ scope: 'slot', slot: s, reason: '' })}>{t('dashboard.cancel')}</button>
+                            </div>
                           )
                         ) : isToday ? (
-                          <span className="badge slate"><FiClock /> {s.time}</span>
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span className="badge slate"><FiClock /> {s.time}</span>
+                            <button className="btn btn-sm btn-outline" style={{ color: 'var(--red)' }}
+                              onClick={() => setCancelFor({ scope: 'slot', slot: s, reason: '' })}>{t('dashboard.cancel')}</button>
+                          </div>
                         ) : (
                           <span className="badge slate">{DAYS[selectedDay].slice(0, 3)}</span>
                         )}

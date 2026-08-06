@@ -46,6 +46,8 @@ r.get('/dashboard', (req, res) => {
            -- The lesson number actually recorded for THIS slot today. Without it
            -- every slot of a group would display the same "next" number.
            (SELECT MAX(l.lesson_number) FROM lessons l WHERE l.group_id = g.id AND date(l.occurred_at) = date('now') AND l.slot_time = gs.time) as slot_lesson_number,
+           (SELECT COUNT(*) FROM lesson_cancellations c WHERE c.group_id = g.id AND c.date = date('now') AND (c.slot_time IS NULL OR c.slot_time = gs.time)) > 0 as cancelled_today,
+           (SELECT c.reason FROM lesson_cancellations c WHERE c.group_id = g.id AND c.date = date('now') AND (c.slot_time IS NULL OR c.slot_time = gs.time) LIMIT 1) as cancel_reason,
            c.name as coach_name
     FROM group_schedules gs
     JOIN groups g ON gs.group_id = g.id

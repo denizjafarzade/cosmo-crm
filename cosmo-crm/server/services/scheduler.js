@@ -50,6 +50,17 @@ function checkAutoLessons() {
     // One lesson per SLOT per day: only skip if this exact slot (same start time)
     // already has a lesson today. Different slots of the same group are separate
     // lessons.
+    // A cancelled slot (or a cancelled day) must not create a lesson.
+    const cancelled = db.prepare(
+      "SELECT 1 FROM lesson_cancellations WHERE group_id = ? AND date = date('now') AND (slot_time IS NULL OR slot_time = ?) LIMIT 1"
+    ).get(sched.gid, sched.time);
+    if (cancelled) {
+      db.prepare(`INSERT OR IGNORE INTO scheduled_sends (type, group_id, message, scheduled_at, sent, idempotency_key)
+        VALUES ('auto-lesson', ?, 'Skipped — lesson cancelled', datetime('now'), 1, ?)`).run(sched.gid, idempKey);
+      console.log(`[Scheduler] ${sched.group_name} ${sched.time} skipped — cancelled`);
+      continue;
+    }
+
     const slotDone = db.prepare(
       "SELECT 1 FROM lessons WHERE group_id = ? AND date(occurred_at) = date('now') AND slot_time = ? LIMIT 1"
     ).get(sched.gid, sched.time);

@@ -329,6 +329,22 @@ if (!columnExists('students', 'overdue_warned_at_lessons')) {
   db.exec('ALTER TABLE students ADD COLUMN overdue_warned_at_lessons INTEGER');
 }
 
+// --- Cancelled lessons ---
+// A cancellation blocks one timetable slot on one date (or the whole day for a
+// group when slot_time is NULL). Auto-increment skips cancelled slots and the
+// dashboard shows them as cancelled instead of pending.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS lesson_cancellations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    slot_time TEXT,
+    date TEXT NOT NULL,
+    reason TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_cancel_lookup ON lesson_cancellations(group_id, date, slot_time);
+`);
+
 // --- Landing-page content managed from the CRM ---
 // The public site consumes /news-data.js, which is generated from these tables.
 db.exec(`

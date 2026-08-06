@@ -253,6 +253,52 @@ r.post('/:id/record-absence', (req, res) => {
   res.json({ ok: true, lesson_number: ln, absent: nowAbsent === 1, excused: nowExcused === 1 });
 });
 
+// ─── Lesson cancellations ───────────────────────────────────────
+// Body: { slot_time, date, reason }. Omitting slot_time cancels every slot of
+// this group on that date.
+r.post('/:id/cancel-lesson', (req, res) => {
+  const groupId = Number(req.params.id);
+  const date = req.body.date || new Date().toISOString().slice(0, 10);
+  const slotTime = req.body.slot_time || null;
+  const reason = (req.body.reason || '').trim();
+  if (!db.prepare('SELECT 1 FROM groups WHERE id = ?').get(groupId)) return res.status(404).json({ error: 'Group not found' });
+
+  const exists = slotTime
+    ? db.prepare('SELECT id FROM lesson_cancellations WHERE group_id = ? AND date = ? AND slot_time = ?').get(groupId, date, slotTime)
+    : db.prepare('SELECT id FROM lesson_cancellations WHERE group_id = ? AND date = ? AND slot_time IS NULL').get(groupId, date);
+  if (!exists) {
+    db.prepare('INSERT INTO lesson_cancellations (group_id, slot_time, date, reason) VALUES (?, ?, ?, ?)')
+      .run(groupId, slotTime, date, reason);
+  }
+  res.json({ ok: true, group_id: groupId, date, slot_time: slotTime });
+});
+
+// Cancel every group's lessons for a date — "I'm ill today".
+r.post('/cancel-day', (req, res) => {
+  const date = req.body.date || new Date().toISOString().slice(0, 10);
+  const reason = (req.body.reason || '').trim();
+  const groups = db.prepare('SELECT id FROM groups').all();
+  const ins = db.prepare('INSERT INTO lesson_cancellations (group_id, slot_time, date, reason) VALUES (?, NULL, ?, ?)');
+  const check = db.prepare('SELECT id FROM lesson_cancellations WHERE group_id = ? AND date = ? AND slot_time IS NULL');
+  db.transaction(() => {
+    for (const g of groups) if (!check.get(g.id, date)) ins.run(g.id, date, reason);
+  })();
+  res.json({ ok: true, date, groups: groups.length });
+});
+
+// Undo a cancellation.
+r.post('/:id/restore-lesson', (req, res) => {
+  const groupId = Number(req.params.id);
+  const date = req.body.date || new Date().toISOString().slice(0, 10);
+  const slotTime = req.body.slot_time || null;
+  // Clear the slot-specific row and any whole-day cancellation covering it.
+  if (slotTime) {
+    db.prepare('DELETE FROM lesson_cancellations WHERE group_id = ? AND date = ? AND slot_time = ?').run(groupId, date, slotTime);
+  }
+  db.prepare('DELETE FROM lesson_cancellations WHERE group_id = ? AND date = ? AND slot_time IS NULL').run(groupId, date);
+  res.json({ ok: true });
+});
+
 // Suspend a student for N lessons
 r.post('/:id/suspend-student', (req, res) => {
   const groupId = req.params.id;
