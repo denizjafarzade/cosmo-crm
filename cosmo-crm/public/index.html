@@ -1236,6 +1236,10 @@
       .lang-dropdown { z-index: 101; position: relative; }
       /* Content layout */
       .about-grid, .contact-grid { grid-template-columns: 1fr; }
+      /* On a phone the form is what people came for — put it above the
+         phone/email/hours block instead of below it. */
+      .contact-grid .contact-form { order: 1; }
+      .contact-grid .contact-info { order: 2; }
       .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
       .hero-stats { gap: 1.5rem; }
       .contact-form .form-row { grid-template-columns: 1fr; }
@@ -2792,7 +2796,7 @@
       'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
       'contact.fideToggle': 'Rəsmi FIDE reytinqim var',
       'contact.birthDate': 'Təvəllüd *',
-      'contact.sector': 'Hansı dili üstün tutursunuz? *',
+      'contact.sector': 'Sizin üçün uyğun olan dili seçin *',
       'contact.sectorPlaceholder': 'Dili seçin',
       'contact.onlineAccount': 'Onlayn şahmat hesabı (istəyə bağlı)',
       'contact.onlineAccountHint': 'Bir platforma seçin — blits və rapid reytinqlərinizi avtomatik oxuyacağıq.',
