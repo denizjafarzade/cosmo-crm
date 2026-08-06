@@ -1185,7 +1185,7 @@
     .nav-dropdown-menu a:hover,
     .nav-dropdown-menu a.active { background: var(--icon-bg); color: var(--primary); }
     /* Scroll offset for sticky header */
-    section[id], #testimonials, #gallery { scroll-margin-top: 80px; }
+    section[id], #testimonials, #gallery, #contact-form { scroll-margin-top: 80px; }
 
     /* ===== MOBILE ===== */
     .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text); line-height: 1; }
@@ -1298,7 +1298,7 @@
         <li role="none"><button class="lang-option" type="button" role="menuitem" data-lang="ru">Русский<span class="lang-option-check">✓</span></button></li>
       </ul>
     </div>
-    <a href="#contact" class="nav-cta" data-i18n="common.startLearning">Start Learning</a>
+    <a href="#contact-form" class="nav-cta" data-i18n="common.startLearning">Start Learning</a>
   </div>
   <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
 </nav>
@@ -1311,7 +1311,7 @@
     <h1 data-i18n="hero.title">Every Chess Journey <em>Starts Here</em></h1>
     <p data-i18n="hero.subtitle">Personalized chess coaching for children, teenagers, and adults — from complete beginners to tournament players. Develop strategic thinking, confidence, and competitive skills with expert coaching.</p>
     <div class="hero-btns">
-      <a href="#contact" class="btn-hero primary">&#9823; <span data-i18n="common.startLearning">Start Learning</span></a>
+      <a href="#contact-form" class="btn-hero primary">&#9823; <span data-i18n="common.startLearning">Start Learning</span></a>
       <a href="#about" class="btn-hero outline" data-i18n="hero.ctaSecondary">Meet Your Coach</a>
     </div>
     <div class="hero-stats">
@@ -2085,7 +2085,7 @@
           </a>
         </div>
       </div>
-      <div class="contact-form">
+      <div class="contact-form" id="contact-form">
         <form id="contactForm" onsubmit="window.submitContactForm(event);return false;">
           <div class="form-row">
             <div class="form-group"><label data-i18n="contact.name">Name *</label><input name="name" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Your name" /></div>
