@@ -218,7 +218,7 @@ export default function Students() {
                         <>
                           <br />
                           <button className="btn btn-sm btn-outline" style={{ marginTop: 4, fontSize: '0.7rem' }} onClick={() => openReason(s)}>
-                            {sev.hasReason ? 'Edit reason' : 'Add reason'}
+                            {sev.hasReason ? t('students.editReason') : t('students.addReason')}
                           </button>
                         </>
                       )}
@@ -359,7 +359,7 @@ export default function Students() {
               </p>
               <div className="form-actions">
                 <button className="btn btn-outline" onClick={() => setRemoveFor(null)}>{t('ui.cancel')}</button>
-                <button className="btn btn-outline" onClick={() => { const s = removeFor; setRemoveFor(null); openReason(s); }}>Add reason instead</button>
+                <button className="btn btn-outline" onClick={() => { const s = removeFor; setRemoveFor(null); openReason(s); }}>{t('students.addReasonInstead')}</button>
                 <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={doRemove}>{t('ui.remove')}</button>
               </div>
             </div>

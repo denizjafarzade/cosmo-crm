@@ -49,14 +49,14 @@ r.get('/chess-rating', async (req, res) => {
 });
 
 r.post('/', (req, res) => {
-  const { name, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username, ratings } = req.body;
+  const { name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username, ratings } = req.body;
   if (!name || !phone) return res.status(400).json({ error: 'Name and phone are required' });
   // availability arrives as an array of "<dayIndex>|<HH:MM-HH:MM>" slots.
   const availabilityJson = Array.isArray(availability) ? JSON.stringify(availability) : (availability || null);
   const result = db.prepare(`
-    INSERT INTO registrations (name, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(name, phone, level || '', fide_rating || null, message || '',
+    INSERT INTO registrations (name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(name, surname || '', phone, level || '', fide_rating || null, message || '',
     birth_date || null, sector || null, availabilityJson, chess_platform || null, chess_username || null);
 
   // The form already previewed the ratings, so store those immediately; only
@@ -108,8 +108,11 @@ r.post('/:id/enroll', (req, res) => {
     'advanced': 'advanced', 'expert': 'expert', 'not sure': 'not_sure',
   };
   const level = LEVELS[String(reg.level || '').toLowerCase()] || 'beginner';
-  const [name, ...rest] = String(reg.name || '').trim().split(/\s+/);
-  const surname = rest.join(' ');
+  // Surname is its own field on the form now; fall back to splitting the name
+  // for inquiries captured before that change.
+  const parts = String(reg.name || '').trim().split(/\s+/);
+  const name = parts[0] || reg.name;
+  const surname = (reg.surname && reg.surname.trim()) || parts.slice(1).join(' ');
 
   let groupId = group_id ? Number(group_id) : null;
   let createdGroup = null;

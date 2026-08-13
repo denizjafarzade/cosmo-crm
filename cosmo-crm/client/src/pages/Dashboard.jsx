@@ -449,7 +449,7 @@ export default function Dashboard() {
                   <div key={row.label} style={{ marginBottom: '0.85rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 600, marginBottom: 4 }}>
                       <span style={{ color: 'var(--slate-600)' }}>{row.label}</span>
-                      <span style={{ color: row.color }}>{row.value} students</span>
+                      <span style={{ color: row.color }}>{row.value} {t('students.count')}</span>
                     </div>
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: `${row.pct}%`, background: row.color }} />
@@ -474,7 +474,7 @@ export default function Dashboard() {
                       <div style={{ width: 24, height: 24, borderRadius: '50%', background: i === 0 ? 'var(--primary)' : 'var(--slate-200)', color: i === 0 ? '#fff' : 'var(--slate-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700 }}>{i + 1}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{g.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{g.student_count} students</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{g.student_count} {t('students.count')}</div>
                       </div>
                       <span className="badge slate">{t('dashboard.lesson')} {g.current_lesson_number}</span>
                     </div>

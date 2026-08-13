@@ -294,6 +294,9 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now'))
   )
 `);
+if (!columnExists('registrations', 'surname')) {
+  db.exec("ALTER TABLE registrations ADD COLUMN surname TEXT DEFAULT ''");
+}
 if (!columnExists('registrations', 'status')) {
   db.exec("ALTER TABLE registrations ADD COLUMN status TEXT DEFAULT 'new'");
 }

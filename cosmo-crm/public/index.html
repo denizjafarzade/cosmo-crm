@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cosmo Chess Academy — Professional Chess Training</title>
   <!-- Tab icon: the brand's gold knight badge, inlined so it needs no extra request -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9a84c'/%3E%3Cpath fill='%23fff' d='M11.5 25h10v-1.8c0-3.9-1.9-5.3-3.8-7.3l1.3-1.6c.9-2.4-.3-4.3-2.3-5.3l.8-2.7-3.2 1.5c-2.5.1-4.9 2-5.8 4.8-.5 1.6-.1 3 1 3.4.8.3 1.4 0 1.9-.6.4-.4.8-.6 1.1-.4.4.3.3.8-.1 1.2-1.5 1.9-2.9 3.3-2.9 5.8V25z'/%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9a84c'/%3E%3Cpath fill='%23fff' d='M11.5 25h10v-1.8c0-3.9-1.9-5.3-3.8-7.3l1.3-1.6c.9-2.4-.3-4.3-2.3-5.3l.8-2.7-3.2 1.5c-2.5.1-4.9 2-5.8 4.8-.5 1.6-.1 3 1 3.4.8.3 1.4 0 1.9-.6.4-.4.8-.6 1.1-.4.4.3.3.8-.1 1.2-1.5 1.9-2.9 3.3-2.9 5.8V25z'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23c9a84c'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round'%3E%3Cpath d='M59.5 24.9 A27 27 0 1 0 61.4 67.7'/%3E%3Ccircle cx='55' cy='47' r='25'/%3E%3Cpath d='M44 88 H70'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23c9a84c'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round'%3E%3Cpath d='M59.5 24.9 A27 27 0 1 0 61.4 67.7'/%3E%3Ccircle cx='55' cy='47' r='25'/%3E%3Cpath d='M44 88 H70'/%3E%3C/g%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -87,7 +87,7 @@
       transition: transform .3s cubic-bezier(.34,1.56,.64,1);
     }
     .nav-brand:hover .brand-mark { transform: rotate(-6deg) scale(1.06); }
-    .nav-brand .brand-mark svg { width: 19px; height: 19px; fill: #fff; }
+    .nav-brand .brand-mark svg { width: 20px; height: 20px; color: #fff; }
     .nav-brand span { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.35rem; letter-spacing: .3px; }
     .nav-brand span em { color: var(--accent); font-style: normal; }
     .nav-links { display: flex; gap: 2rem; list-style: none; justify-self: center; }
@@ -646,8 +646,8 @@
     /* Phones get a shorter page: the gallery, the feature grid and the
        how-it-works walkthrough are desktop-only storytelling. */
     @media (max-width: 768px) {
-      #gallery, #features, #how { display: none !important; }
-      .nav-links a[href="#gallery"], .nav-links a[href="#features"], .nav-links a[href="#how"] { display: none; }
+      #gallery, #features, #how, #levels { display: none !important; }
+      .nav-links a[href="#gallery"], .nav-links a[href="#features"], .nav-links a[href="#how"], .nav-links a[href="#levels"] { display: none; }
     }
 
     @media (max-width: 420px) {
@@ -1290,7 +1290,7 @@
 <!-- NAV -->
 <nav class="nav">
   <a href="#" class="nav-brand">
-    <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 20h8v-1.4c0-3.1-1.5-4.2-3-5.8l1-1.3c.7-1.9-.2-3.4-1.8-4.2l.6-2.1-2.5 1.2c-2 .1-3.9 1.6-4.6 3.8-.4 1.3-.1 2.4.8 2.7.6.2 1.1 0 1.5-.5.3-.3.6-.5.9-.3.3.2.2.6-.1.9-1.2 1.5-2.3 2.6-2.3 4.6V20z"/></svg></span>
+    <span class="brand-mark"><svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"><path d="M59.5 24.9 A27 27 0 1 0 61.4 67.7"/><circle cx="55" cy="47" r="25"/><path d="M44 88 H70"/></svg></span>
     <span>Cosmo <em>Chess</em></span>
   </a>
   <ul class="nav-links" id="navLinks">
@@ -2020,6 +2020,114 @@
   Add teachers to TEACHERS, then reference them by id in PRICING_DATA.
   Prices are in AZN integers. The popular flag marks the Most Popular badge.
 -->
+<!-- CONTACT -->
+<div id="contact">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag" data-i18n="contact.tag">Get Started</span>
+      <h2 data-i18n="contact.title">Contact Us</h2>
+      <hr class="divider" />
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3 data-i18n="contact.subtitle">Ready to Begin Your Chess Journey?</h3>
+        <p data-i18n="contact.desc">Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.</p>
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div class="contact-text"><strong data-i18n="contact.whatsappLabel">WhatsApp</strong><span>+994 70 390 00 07</span></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div class="contact-text"><strong data-i18n="contact.emailLabel">Email</strong><span>shabanovchess@gmail.com</span></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div class="contact-text"><strong data-i18n="contact.locationLabel">Location</strong><span data-i18n="contact.locationValue">Baku, Azerbaijan</span></div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">🕐</div>
+          <div class="contact-text"><strong data-i18n="contact.hoursLabel">Hours</strong><span data-i18n="contact.hoursValue">Mon–Sat, 10:00 – 20:00</span></div>
+        </div>
+        <div class="contact-socials">
+          <a href="https://instagram.com/cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.12 1.38C1.36 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.12.66.66 1.33 1.08 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.72 2.12-1.38.66-.66 1.08-1.33 1.38-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.72-1.46-1.38-2.12C21.32 1.36 20.65.94 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/><path d="M12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8z"/><circle cx="18.41" cy="5.59" r="1.44"/></svg>
+          </a>
+          <a href="https://youtube.com/@cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.08 0 12 0 12s0 3.92.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="contact-form" id="contact-form">
+        <form id="contactForm" onsubmit="window.submitContactForm(event);return false;">
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="contact.name">Name *</label><input name="name" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Your name" /></div>
+            <div class="form-group"><label data-i18n="contact.surname">Surname *</label><input name="surname" required data-i18n-placeholder="contact.surnamePlaceholder" placeholder="Your surname" /></div>
+          </div>
+          <div class="form-group"><label data-i18n="contact.phone">Phone *</label><input name="phone" required data-i18n-placeholder="contact.phonePlaceholder" placeholder="+994 XX XXX XX XX" /></div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="contact.birthDate">Date of Birth *</label><input type="date" name="birthDate" required /></div>
+            <div class="form-group">
+              <label data-i18n="contact.sector">What language do you prefer? *</label>
+              <select name="sector" required>
+                <option value="" disabled selected data-i18n="contact.sectorPlaceholder">Select a language</option>
+                <option value="az" data-i18n="sector.az">Azerbaijani</option>
+                <option value="ru" data-i18n="sector.ru">Russian</option>
+                <option value="en" data-i18n="sector.en">English</option>
+                <option value="tr" data-i18n="sector.tr">Turkish</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label data-i18n="contact.level">Chess Level *</label>
+            <select name="level" required>
+              <option value="" disabled selected data-i18n="contact.levelPlaceholder">Select your chess level</option>
+              <option value="New to Chess" data-i18n="chessLevel.newToChess">Starting chess from zero</option>
+              <option value="Beginner" data-i18n="chessLevel.beginner">Beginner</option>
+              <option value="Intermediate" data-i18n="chessLevel.intermediate">Intermediate</option>
+              <option value="Advanced" data-i18n="chessLevel.advanced">Advanced</option>
+              <option value="Expert" data-i18n="chessLevel.expert">Expert</option>
+              <option value="Not Sure" data-i18n="chessLevel.notSure">Not Sure</option>
+            </select>
+          </div>
+
+          <!-- Online chess account: ratings are pulled automatically -->
+          <div class="form-group">
+            <label data-i18n="contact.onlineAccount">Online Chess Account (optional)</label>
+            <div class="acct-row">
+              <select name="chessPlatform" id="chessPlatform">
+                <option value="" data-i18n="contact.platformNone">No account</option>
+                <option value="lichess">Lichess.org</option>
+                <option value="chesscom">Chess.com</option>
+              </select>
+              <input name="chessUsername" id="chessUsername" data-i18n-placeholder="contact.usernamePlaceholder" placeholder="username" disabled />
+            </div>
+            <span class="field-hint" data-i18n="contact.onlineAccountHint">Choose one platform — we'll read your blitz &amp; rapid ratings automatically.</span>
+            <div class="rating-preview" id="ratingPreview" aria-live="polite"></div>
+          </div>
+
+          <!-- Availability: days x 3-hour blocks -->
+          <div class="form-group">
+            <label data-i18n="contact.availability">When are you available? *</label>
+            <div class="avail-wrap" id="availGrid"></div>
+            <span class="field-hint" data-i18n="contact.availabilityHint">Tap the time blocks that work for you.</span>
+          </div>
+
+          <div class="form-group"><label data-i18n="contact.message">Message</label><textarea name="message" data-i18n-placeholder="contact.messagePlaceholder" placeholder="Any questions or requests..."></textarea></div>
+
+          <!-- FIDE rating is a niche detail, kept collapsed so it doesn't dominate -->
+          <details class="fide-details">
+            <summary data-i18n="contact.fideToggle">I have an official FIDE rating</summary>
+            <div class="form-group" style="margin-top:0.65rem;">
+              <input type="number" name="fideRating" id="fideRating" data-i18n-placeholder="contact.fideRatingPlaceholder" placeholder="e.g. 1650" min="0" max="3000" />
+            </div>
+          </details>
+          <button type="submit" data-i18n="contact.submit">Send & Contact via WhatsApp</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FAQ -->
 <div id="faq">
   <div class="section">
@@ -2071,113 +2179,6 @@
           <span class="faq-chevron" aria-hidden="true">▼</span>
         </button>
         <div class="faq-a"><div class="faq-a-inner" data-i18n="faq.a6">Every new student receives a free assessment. Based on skill — not age — we place you in Beginner, Intermediate, Advanced, or Competitive.</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CONTACT -->
-<div id="contact">
-  <div class="section">
-    <div class="section-header">
-      <span class="section-tag" data-i18n="contact.tag">Get Started</span>
-      <h2 data-i18n="contact.title">Contact Us</h2>
-      <hr class="divider" />
-    </div>
-    <div class="contact-grid">
-      <div class="contact-info">
-        <h3 data-i18n="contact.subtitle">Ready to Begin Your Chess Journey?</h3>
-        <p data-i18n="contact.desc">Fill out the form or reach out directly. We'll get back to you within 24 hours to schedule a trial lesson.</p>
-        <div class="contact-item">
-          <div class="contact-icon">📱</div>
-          <div class="contact-text"><strong data-i18n="contact.whatsappLabel">WhatsApp</strong><span>+994 70 390 00 07</span></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">✉️</div>
-          <div class="contact-text"><strong data-i18n="contact.emailLabel">Email</strong><span>shabanovchess@gmail.com</span></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📍</div>
-          <div class="contact-text"><strong data-i18n="contact.locationLabel">Location</strong><span data-i18n="contact.locationValue">Baku, Azerbaijan</span></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">🕐</div>
-          <div class="contact-text"><strong data-i18n="contact.hoursLabel">Hours</strong><span data-i18n="contact.hoursValue">Mon–Sat, 10:00 – 20:00</span></div>
-        </div>
-        <div class="contact-socials">
-          <a href="https://instagram.com/cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.12 1.38C1.36 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.12.66.66 1.33 1.08 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.3 1.46-.72 2.12-1.38.66-.66 1.08-1.33 1.38-2.12.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.3-.79-.72-1.46-1.38-2.12C21.32 1.36 20.65.94 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0z"/><path d="M12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8z"/><circle cx="18.41" cy="5.59" r="1.44"/></svg>
-          </a>
-          <a href="https://youtube.com/@cosmochessacademy" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.08 0 12 0 12s0 3.92.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
-          </a>
-        </div>
-      </div>
-      <div class="contact-form" id="contact-form">
-        <form id="contactForm" onsubmit="window.submitContactForm(event);return false;">
-          <div class="form-row">
-            <div class="form-group"><label data-i18n="contact.name">Name *</label><input name="name" required data-i18n-placeholder="contact.namePlaceholder" placeholder="Your name" /></div>
-            <div class="form-group"><label data-i18n="contact.phone">Phone *</label><input name="phone" required data-i18n-placeholder="contact.phonePlaceholder" placeholder="+994 XX XXX XX XX" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label data-i18n="contact.birthDate">Date of Birth *</label><input type="date" name="birthDate" required /></div>
-            <div class="form-group">
-              <label data-i18n="contact.sector">What language do you prefer? *</label>
-              <select name="sector" required>
-                <option value="" disabled selected data-i18n="contact.sectorPlaceholder">Select a language</option>
-                <option value="az" data-i18n="sector.az">Azerbaijani</option>
-                <option value="ru" data-i18n="sector.ru">Russian</option>
-                <option value="en" data-i18n="sector.en">English</option>
-                <option value="tr" data-i18n="sector.tr">Turkish</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label data-i18n="contact.level">Chess Level *</label>
-            <select name="level" required>
-              <option value="" disabled selected data-i18n="contact.levelPlaceholder">Select your chess level</option>
-              <option value="New to Chess" data-i18n="chessLevel.newToChess">Starting chess from zero</option>
-              <option value="Beginner" data-i18n="chessLevel.beginner">Beginner</option>
-              <option value="Intermediate" data-i18n="chessLevel.intermediate">Intermediate</option>
-              <option value="Advanced" data-i18n="chessLevel.advanced">Advanced</option>
-              <option value="Expert" data-i18n="chessLevel.expert">Expert</option>
-              <option value="Not Sure" data-i18n="chessLevel.notSure">Not Sure</option>
-            </select>
-          </div>
-
-          <!-- Online chess account: ratings are pulled automatically -->
-          <div class="form-group">
-            <label data-i18n="contact.onlineAccount">Online Chess Account (optional)</label>
-            <div class="acct-row">
-              <select name="chessPlatform" id="chessPlatform">
-                <option value="" data-i18n="contact.platformNone">No account</option>
-                <option value="lichess">Lichess.org</option>
-                <option value="chesscom">Chess.com</option>
-              </select>
-              <input name="chessUsername" id="chessUsername" data-i18n-placeholder="contact.usernamePlaceholder" placeholder="username" disabled />
-            </div>
-            <span class="field-hint" data-i18n="contact.onlineAccountHint">Choose one platform — we'll read your blitz &amp; rapid ratings automatically.</span>
-            <div class="rating-preview" id="ratingPreview" aria-live="polite"></div>
-          </div>
-
-          <!-- Availability: days x 3-hour blocks -->
-          <div class="form-group">
-            <label data-i18n="contact.availability">When are you available? *</label>
-            <div class="avail-wrap" id="availGrid"></div>
-            <span class="field-hint" data-i18n="contact.availabilityHint">Tap the time blocks that work for you.</span>
-          </div>
-
-          <div class="form-group"><label data-i18n="contact.message">Message</label><textarea name="message" data-i18n-placeholder="contact.messagePlaceholder" placeholder="Any questions or requests..."></textarea></div>
-
-          <!-- FIDE rating is a niche detail, kept collapsed so it doesn't dominate -->
-          <details class="fide-details">
-            <summary data-i18n="contact.fideToggle">I have an official FIDE rating</summary>
-            <div class="form-group" style="margin-top:0.65rem;">
-              <input type="number" name="fideRating" id="fideRating" data-i18n-placeholder="contact.fideRatingPlaceholder" placeholder="e.g. 1650" min="0" max="3000" />
-            </div>
-          </details>
-          <button type="submit" data-i18n="contact.submit">Send & Contact via WhatsApp</button>
-        </form>
       </div>
     </div>
   </div>
@@ -2436,6 +2437,8 @@
       'pricing.perMonth': '/ month',
       'pricing.lessonsMonth': 'lessons / month',
       'pricing.lessonsWeek': 'lessons / week',
+      'pricing.teacherLabel': 'TEACHER',
+      'pricing.tournamentNote': 'Free online tournament every Sunday included',
       'pricing.popular': 'Most Popular',
       'pricing.apply': 'Apply',
       'pricing.contactForPrice': 'Contact us for pricing',
@@ -2541,18 +2544,20 @@
       'contact.locationValue': 'Baku, Azerbaijan',
       'contact.hoursLabel': 'Hours',
       'contact.hoursValue': 'Mon–Sat, 10:00 – 20:00',
-      'contact.name': 'Name *',
+      'contact.name': 'Name *',
       'contact.namePlaceholder': 'Your name',
-      'contact.phone': 'Phone *',
+      'contact.surname': 'Surname *',
+      'contact.surnamePlaceholder': 'Your surname',
+      'contact.phone': 'Phone *',
       'contact.phonePlaceholder': '+994 XX XXX XX XX',
-      'contact.level': 'Chess Level *',
+      'contact.level': 'Chess Level *',
       'contact.levelPlaceholder': 'Select your chess level',
       'contact.fideRating': 'FIDE Rating (Optional)',
       'contact.fideRatingPlaceholder': 'e.g. 1650',
       'contact.noFideRating': "I don't have an official FIDE rating",
       'contact.fideToggle': 'I have an official FIDE rating',
-      'contact.birthDate': 'Date of Birth *',
-      'contact.sector': 'What language do you prefer? *',
+      'contact.birthDate': 'Date of Birth *',
+      'contact.sector': 'What language do you prefer? *',
       'contact.sectorPlaceholder': 'Select a language',
       'contact.onlineAccount': 'Online Chess Account (optional)',
       'contact.onlineAccountHint': "Choose one platform — we'll read your blitz & rapid ratings automatically.",
@@ -2565,7 +2570,7 @@
       'contact.ratingUnavailable': "Couldn't check right now — you can still submit.",
       'contact.platformNone': 'No account',
       'contact.usernamePlaceholder': 'username',
-      'contact.availability': 'When are you available? *',
+      'contact.availability': 'When are you available? *',
       'contact.availabilityHint': 'Tap the time blocks that work for you.',
       'avail.weekdays': 'Weekdays',
       'avail.weekend': 'Weekend',
@@ -2704,6 +2709,8 @@
       'pricing.perMonth': '/ ay',
       'pricing.lessonsMonth': 'dərs / ay',
       'pricing.lessonsWeek': 'dəfə / həftə',
+      'pricing.teacherLabel': 'MÜƏLLİM',
+      'pricing.tournamentNote': 'Hər bazar günü ödənişsiz onlayn turnir daxildir',
       'pricing.popular': 'Ən çox seçilən',
       'pricing.apply': 'Müraciət et',
       'pricing.contactForPrice': 'Qiymət üçün müraciət edin',
@@ -2809,18 +2816,20 @@
       'contact.locationValue': 'Bakı, Azərbaycan',
       'contact.hoursLabel': 'İş saatları',
       'contact.hoursValue': 'Bazar ertəsi–Şənbə, 10:00–20:00',
-      'contact.name': 'Ad *',
+      'contact.name': 'Ad *',
       'contact.namePlaceholder': 'Adınız',
-      'contact.phone': 'Telefon *',
+      'contact.surname': 'Soyad *',
+      'contact.surnamePlaceholder': 'Soyadınız',
+      'contact.phone': 'Telefon *',
       'contact.phonePlaceholder': '+994 XX XXX XX XX',
-      'contact.level': 'Şahmat Səviyyəsi *',
+      'contact.level': 'Şahmat Səviyyəsi *',
       'contact.levelPlaceholder': 'Şahmat səviyyənizi seçin',
       'contact.fideRating': 'FIDE Reytinqi (İstəyə bağlı)',
       'contact.fideRatingPlaceholder': 'məsələn, 1650',
       'contact.noFideRating': 'Rəsmi FIDE reytinqim yoxdur',
       'contact.fideToggle': 'Rəsmi FIDE reytinqim var',
-      'contact.birthDate': 'Təvəllüd *',
-      'contact.sector': 'Sizin üçün uyğun olan dili seçin *',
+      'contact.birthDate': 'Təvəllüd *',
+      'contact.sector': 'Sizin üçün uyğun olan dili seçin *',
       'contact.sectorPlaceholder': 'Dili seçin',
       'contact.onlineAccount': 'Onlayn şahmat hesabı (istəyə bağlı)',
       'contact.onlineAccountHint': 'Bir platforma seçin — blits və rapid reytinqlərinizi avtomatik oxuyacağıq.',
@@ -2833,7 +2842,7 @@
       'contact.ratingUnavailable': 'Hazırda yoxlamaq alınmadı — formu yenə göndərə bilərsiniz.',
       'contact.platformNone': 'Hesabım yoxdur',
       'contact.usernamePlaceholder': 'istifadəçi adı',
-      'contact.availability': 'Hansı vaxtlar sizə uyğundur? *',
+      'contact.availability': 'Hansı vaxtlar sizə uyğundur? *',
       'contact.availabilityHint': 'Sizə uyğun olan vaxt aralıqlarına toxunun.',
       'avail.weekdays': 'Həftə içi',
       'avail.weekend': 'Həftə sonu',
@@ -2972,6 +2981,8 @@
       'pricing.perMonth': '/ месяц',
       'pricing.lessonsMonth': 'занятий / месяц',
       'pricing.lessonsWeek': 'раза / неделю',
+      'pricing.teacherLabel': 'ПРЕПОДАВАТЕЛЬ',
+      'pricing.tournamentNote': 'Бесплатный онлайн-турнир каждое воскресенье включён',
       'pricing.popular': 'Самый популярный',
       'pricing.apply': 'Оставить заявку',
       'pricing.contactForPrice': 'Уточните стоимость',
@@ -3077,18 +3088,20 @@
       'contact.locationValue': 'Баку, Азербайджан',
       'contact.hoursLabel': 'Часы работы',
       'contact.hoursValue': 'Пн–Сб, 10:00 – 20:00',
-      'contact.name': 'Имя *',
+      'contact.name': 'Имя *',
       'contact.namePlaceholder': 'Ваше имя',
-      'contact.phone': 'Телефон *',
+      'contact.surname': 'Фамилия *',
+      'contact.surnamePlaceholder': 'Ваша фамилия',
+      'contact.phone': 'Телефон *',
       'contact.phonePlaceholder': '+994 XX XXX XX XX',
-      'contact.level': 'Уровень шахмат *',
+      'contact.level': 'Уровень шахмат *',
       'contact.levelPlaceholder': 'Выберите ваш уровень',
       'contact.fideRating': 'Рейтинг FIDE (необязательно)',
       'contact.fideRatingPlaceholder': 'например, 1650',
       'contact.noFideRating': 'У меня нет официального рейтинга FIDE',
       'contact.fideToggle': 'У меня есть официальный рейтинг FIDE',
-      'contact.birthDate': 'Дата рождения *',
-      'contact.sector': 'Какой язык вы предпочитаете? *',
+      'contact.birthDate': 'Дата рождения *',
+      'contact.sector': 'Какой язык вы предпочитаете? *',
       'contact.sectorPlaceholder': 'Выберите язык',
       'contact.onlineAccount': 'Онлайн-аккаунт (необязательно)',
       'contact.onlineAccountHint': 'Выберите одну платформу — мы автоматически считаем ваш блиц и рапид рейтинг.',
@@ -3101,7 +3114,7 @@
       'contact.ratingUnavailable': 'Сейчас не удалось проверить — вы всё равно можете отправить форму.',
       'contact.platformNone': 'Нет аккаунта',
       'contact.usernamePlaceholder': 'имя пользователя',
-      'contact.availability': 'Когда вам удобно? *',
+      'contact.availability': 'Когда вам удобно? *',
       'contact.availabilityHint': 'Отметьте подходящие интервалы времени.',
       'avail.weekdays': 'Будни',
       'avail.weekend': 'Выходные',
@@ -4580,6 +4593,7 @@
       }
       var payload = {
         name: d.name,
+        surname: d.surname || '',
         phone: d.phone,
         level: d.level || '',
         birth_date: d.birthDate || null,
