@@ -3,6 +3,21 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
+// libsignal (bundled inside Baileys) writes decryption noise straight to the
+// console: "Bad MAC" session errors and full SessionEntry dumps containing key
+// buffers. Baileys handles them internally — they only bloat server.log and
+// bury the lines that matter. Drop exactly those, nothing else.
+{
+  const NOISE = /^(Closing session:|Session error:|Removing old closed session:|SessionEntry |Failed to decrypt)/;
+  for (const level of ['log', 'warn', 'error']) {
+    const original = console[level].bind(console);
+    console[level] = (...args) => {
+      if (typeof args[0] === 'string' && NOISE.test(args[0])) return;
+      original(...args);
+    };
+  }
+}
+
 // Never let an async error from the WhatsApp/puppeteer stack crash the whole
 // server (which would 502 the site). Log and keep running.
 process.on('unhandledRejection', (reason) => {
