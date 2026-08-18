@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cosmo Chess Academy — Professional Chess Training</title>
   <!-- Tab icon: the brand's gold knight badge, inlined so it needs no extra request -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23c9a84c'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round'%3E%3Cpath d='M59.5 24.9 A27 27 0 1 0 61.4 67.7'/%3E%3Ccircle cx='55' cy='47' r='25'/%3E%3Cpath d='M44 88 H70'/%3E%3C/g%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23c9a84c'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='6.5' stroke-linecap='round'%3E%3Cpath d='M59.5 24.9 A27 27 0 1 0 61.4 67.7'/%3E%3Ccircle cx='55' cy='47' r='25'/%3E%3Cpath d='M44 88 H70'/%3E%3C/g%3E%3C/svg%3E" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -79,15 +79,23 @@
       text-decoration: none; color: var(--text);
       justify-self: start;
     }
+    /* The supplied logo is a single-colour shape on a transparent background.
+       Using its alpha as a mask lets it take the active theme's accent colour,
+       so it stays legible on light and dark navbars alike. */
     .nav-brand .brand-mark {
-      width: 30px; height: 30px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #000));
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 30%, transparent);
-      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      width: 34px; height: 34px; display: block; flex-shrink: 0;
+      background-color: var(--accent);
+      -webkit-mask: url('/img/logo-mask.png') center / contain no-repeat;
+      mask: url('/img/logo-mask.png') center / contain no-repeat;
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    }
+    /* Browsers without mask support fall back to the gold PNG itself. */
+    @supports not ((-webkit-mask-image: url('x')) or (mask-image: url('x'))) {
+      .nav-brand .brand-mark {
+        background: url('/img/logo.png') center / contain no-repeat;
+      }
     }
     .nav-brand:hover .brand-mark { transform: rotate(-6deg) scale(1.06); }
-    .nav-brand .brand-mark svg { width: 20px; height: 20px; color: #fff; }
     .nav-brand span { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.35rem; letter-spacing: .3px; }
     .nav-brand span em { color: var(--accent); font-style: normal; }
     .nav-links { display: flex; gap: 2rem; list-style: none; justify-self: center; }
@@ -1294,7 +1302,7 @@
 <!-- NAV -->
 <nav class="nav">
   <a href="#" class="nav-brand">
-    <span class="brand-mark"><svg viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"><path d="M59.5 24.9 A27 27 0 1 0 61.4 67.7"/><circle cx="55" cy="47" r="25"/><path d="M44 88 H70"/></svg></span>
+    <span class="brand-mark" role="img" aria-label="Cosmo Chess Academy"></span>
     <span>Cosmo <em>Chess</em></span>
   </a>
   <ul class="nav-links" id="navLinks">
