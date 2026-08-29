@@ -255,6 +255,35 @@ if (!columnExists('groups', 'homework_start_from')) {
 if (!columnExists('groups', 'homework_enabled')) {
   db.exec('ALTER TABLE groups ADD COLUMN homework_enabled INTEGER DEFAULT 1');
 }
+
+// --- Homework queues: one shared global list (with a per-group "start from"
+// offset) replaced by an independent, self-numbered queue per group, built
+// on the group's own page. ---
+if (!columnExists('homeworks', 'group_id')) {
+  db.exec('ALTER TABLE homeworks ADD COLUMN group_id INTEGER REFERENCES groups(id) ON DELETE CASCADE');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_homeworks_group ON homeworks(group_id, homework_number)');
+
+  // One-time migration: give every group its own copy of the slice of the
+  // old shared list it used to read from (starting at its homework_start_from
+  // offset), renumbered from 1 — so nothing a group already had queued up
+  // changes, it just now belongs to that group alone instead of a list every
+  // group drew from. Existing rows (all group_id IS NULL pre-migration) are
+  // removed afterward so the same material isn't listed twice.
+  const groups = db.prepare('SELECT id, homework_start_from FROM groups').all();
+  const insertCopy = db.prepare(`INSERT INTO homeworks
+    (group_id, homework_number, type, content, caption, filename, original_name, file_path)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+  db.transaction(() => {
+    for (const g of groups) {
+      const start = g.homework_start_from || 1;
+      const rows = db.prepare('SELECT * FROM homeworks WHERE group_id IS NULL AND homework_number >= ? ORDER BY homework_number').all(start);
+      rows.forEach((hw, i) => {
+        insertCopy.run(g.id, i + 1, hw.type, hw.content, hw.caption, hw.filename, hw.original_name, hw.file_path);
+      });
+    }
+    db.prepare('DELETE FROM homeworks WHERE group_id IS NULL').run();
+  })();
+}
 if (!columnExists('students', 'payment_delay_until')) {
   db.exec('ALTER TABLE students ADD COLUMN payment_delay_until TEXT');
 }
@@ -321,6 +350,21 @@ for (const [col, type] of Object.entries(REG_COLUMNS)) {
   if (!columnExists('students', col)) db.exec(`ALTER TABLE students ADD COLUMN ${col} ${type}`);
 }
 
+// What the visitor picked on the landing page's format/teacher selector, and
+// the monthly price it quoted them at that moment (AZN). Inquiry-only —
+// intentionally not mirrored onto `students`, since actual enrollment
+// (group/teacher/price) is decided in the CRM at enroll time, not copied
+// blindly from what a prospect self-selected on the form.
+const REG_ONLY_COLUMNS = {
+  preferred_format: 'TEXT',
+  preferred_teacher: 'TEXT',
+  preferred_lessons_per_week: 'INTEGER',
+  quoted_price: 'INTEGER',
+};
+for (const [col, type] of Object.entries(REG_ONLY_COLUMNS)) {
+  if (!columnExists('registrations', col)) db.exec(`ALTER TABLE registrations ADD COLUMN ${col} ${type}`);
+}
+
 // A recorded reason (agreed delay, illness, ...) suppresses overdue escalation
 // and the automatic "lessons will be stopped" warning.
 if (!columnExists('students', 'payment_excuse_reason')) {
@@ -335,6 +379,12 @@ if (!columnExists('students', 'overdue_warned_at_lessons')) {
 // it survives every recompute instead of being overwritten by it.
 if (!columnExists('students', 'lessons_adjustment')) {
   db.exec('ALTER TABLE students ADD COLUMN lessons_adjustment INTEGER DEFAULT 0');
+}
+// What this student pays per cycle — set once when they're added, shown in
+// the list, and reused to pre-fill the "Confirm Payment" amount so staff
+// don't have to remember or retype it every time.
+if (!columnExists('students', 'monthly_fee')) {
+  db.exec('ALTER TABLE students ADD COLUMN monthly_fee REAL');
 }
 
 // --- Cancelled lessons ---
@@ -390,6 +440,16 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_gallery_sort ON gallery_items(sort_order);
   CREATE INDEX IF NOT EXISTS idx_news_sort ON news_articles(sort_order);
 `);
+
+// Optional Azerbaijani/Russian variants of the landing page's title/excerpt/
+// category — title/category/excerpt themselves stay plain English text (what
+// the Content page's fields have always shown and saved), so the CRM's news
+// list and edit form keep working exactly as before. When a variant is
+// blank, the public site just falls back to the English text.
+const NEWS_LANG_COLUMNS = ['title_az', 'title_ru', 'excerpt_az', 'excerpt_ru', 'category_az', 'category_ru'];
+for (const col of NEWS_LANG_COLUMNS) {
+  if (!columnExists('news_articles', col)) db.exec(`ALTER TABLE news_articles ADD COLUMN ${col} TEXT`);
+}
 
 // Insert default settings if not present
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');

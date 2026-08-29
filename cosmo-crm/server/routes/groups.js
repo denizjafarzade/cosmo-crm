@@ -30,32 +30,32 @@ r.get('/:id', (req, res) => {
     WHERE s.group_id = ? AND s.active = 1 ORDER BY s.name
   `).all(group.current_lesson_number, req.params.id);
   group.schedules = db.prepare('SELECT * FROM group_schedules WHERE group_id = ? ORDER BY day_of_week, time').all(req.params.id);
-  // Get homeworks mapped for this group
-  const allHw = db.prepare('SELECT * FROM homeworks ORDER BY homework_number').all();
+  // This group's own homework queue (each group has its own, numbered from 1).
+  const ownHw = db.prepare('SELECT * FROM homeworks WHERE group_id = ? ORDER BY homework_number').all(req.params.id);
   const sends = db.prepare('SELECT homework_id, sent_at FROM homework_sends WHERE group_id = ?').all(req.params.id);
   const sentMap = {};
   for (const s of sends) sentMap[s.homework_id] = s.sent_at;
-  const nextHwNum = group.homework_start_from + group.current_lesson_number;
-  group.homeworks = allHw.map(hw => ({
+  const nextHwNum = group.current_lesson_number + 1;
+  group.homeworks = ownHw.map(hw => ({
     ...hw,
     sent_to_group: !!sentMap[hw.id],
     sent_at: sentMap[hw.id] || null,
     is_next: hw.homework_number === nextHwNum,
-    group_lesson: hw.homework_number >= group.homework_start_from ? hw.homework_number - group.homework_start_from + 1 : null,
-  })).filter(hw => hw.group_lesson !== null);
+    group_lesson: hw.homework_number,
+  }));
   res.json(group);
 });
 
 r.post('/', (req, res) => {
-  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from, lesson_duration_minutes } = req.body;
+  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, lesson_duration_minutes } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO groups (name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, homework_start_from, lesson_duration_minutes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, whatsapp_group_id || '', whatsapp_group_name || '', coach_id || null, auto_increment_lessons ? 1 : 0, reminder_minutes_before || 60, reminder_target || 'group', homework_start_from || 1, parseInt(lesson_duration_minutes) || 60);
+  const result = db.prepare(`INSERT INTO groups (name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, lesson_duration_minutes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(name, whatsapp_group_id || '', whatsapp_group_name || '', coach_id || null, auto_increment_lessons ? 1 : 0, reminder_minutes_before || 60, reminder_target || 'group', parseInt(lesson_duration_minutes) || 60);
   res.status(201).json({ id: result.lastInsertRowid });
 });
 
 r.put('/:id', (req, res) => {
-  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, current_lesson_number, homework_start_from, homework_enabled, lesson_duration_minutes } = req.body;
+  const { name, whatsapp_group_id, whatsapp_group_name, coach_id, auto_increment_lessons, reminder_minutes_before, reminder_target, current_lesson_number, homework_enabled, lesson_duration_minutes } = req.body;
   db.prepare(`UPDATE groups SET
     name = COALESCE(?, name),
     whatsapp_group_id = COALESCE(?, whatsapp_group_id),
@@ -65,13 +65,12 @@ r.put('/:id', (req, res) => {
     reminder_minutes_before = COALESCE(?, reminder_minutes_before),
     reminder_target = COALESCE(?, reminder_target),
     current_lesson_number = COALESCE(?, current_lesson_number),
-    homework_start_from = COALESCE(?, homework_start_from),
     homework_enabled = COALESCE(?, homework_enabled),
     lesson_duration_minutes = COALESCE(?, lesson_duration_minutes),
     updated_at = datetime('now')
     WHERE id = ?`).run(name, whatsapp_group_id, whatsapp_group_name, coach_id,
       auto_increment_lessons !== undefined ? (auto_increment_lessons ? 1 : 0) : null,
-      reminder_minutes_before, reminder_target, current_lesson_number, homework_start_from,
+      reminder_minutes_before, reminder_target, current_lesson_number,
       homework_enabled !== undefined ? (homework_enabled ? 1 : 0) : null,
       lesson_duration_minutes !== undefined ? (parseInt(lesson_duration_minutes) || 60) : null,
       req.params.id);

@@ -31,7 +31,11 @@
       "Bash(awk '{print $5}')",
       "Bash(taskkill //F //PID 3176)",
       "Bash(ls \"/c/Program Files/Google/Chrome/Application/chrome.exe\" 2>/dev/null && echo \"FOUND\" || echo \"NOT FOUND\")",
-      "Bash(taskkill //F //PID 5060)"
+      "Bash(taskkill //F //PID 5060)",
+      "Bash(git show *)",
+      "PowerShell(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\Deniz Jafarzade\\\\Desktop\\\\Chess Project\\\\cosmo-crm\\\\public\\\\img\")",
+      "Read(//c/Users/Deniz Jafarzade/Desktop/bloo-platform/**)",
+      "Bash(docker compose *)"
     ]
   }
 }

@@ -320,6 +320,16 @@ export default function Dashboard() {
             <div className="stat-value">{data.payment.due + data.payment.overdue}</div>
             <div className="stat-sub">{data.payment.due} {t('dash.due')} · {data.payment.overdue} {t('dash.overdue')}</div>
           </div>
+          <div className="stat-card primary">
+            <div className="stat-label"><FiDollarSign style={{ marginRight: 4 }} />{t('dash.revenueThisMonth')}</div>
+            <div className="stat-value">{data.revenue_this_month} AZN</div>
+            <div className="stat-sub">
+              {data.payments_this_month} {t('dash.paymentsCount')}
+              {data.revenue_last_month > 0 && (
+                <> · {data.revenue_this_month >= data.revenue_last_month ? '▲' : '▼'} {Math.abs(Math.round(((data.revenue_this_month - data.revenue_last_month) / data.revenue_last_month) * 100))}% {t('dash.vsLastMonth')}</>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Two-column layout */}

@@ -106,8 +106,10 @@ function checkAutoLessons() {
 function scheduleHomeworkAfterLesson(groupId, lessonNumber, lessonTime) {
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group || !group.homework_enabled) return;
-  const hwNum = (group.homework_start_from || 1) + lessonNumber - 1;
-  const hw = db.prepare('SELECT * FROM homeworks WHERE homework_number = ?').get(hwNum);
+  // Each group now has its own queue, numbered from 1, so lesson N maps
+  // straight to that group's homework #N — no shared list or offset.
+  const hwNum = lessonNumber;
+  const hw = db.prepare('SELECT * FROM homeworks WHERE group_id = ? AND homework_number = ?').get(groupId, hwNum);
   if (!hw) return;
   const already = db.prepare('SELECT id FROM homework_sends WHERE homework_id = ? AND group_id = ?').get(hw.id, groupId);
   if (already) return;
@@ -173,9 +175,9 @@ async function sendHomework(groupId, hwId, homeworkNumber) {
 function sendHomeworkForLesson(groupId, lessonNumber) {
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group || !group.homework_enabled) return;
-  // Map group lesson to global homework number
-  const hwNum = (group.homework_start_from || 1) + lessonNumber - 1;
-  const hw = db.prepare('SELECT * FROM homeworks WHERE homework_number = ?').get(hwNum);
+  // Lesson N maps straight to this group's own homework #N.
+  const hwNum = lessonNumber;
+  const hw = db.prepare('SELECT * FROM homeworks WHERE group_id = ? AND homework_number = ?').get(groupId, hwNum);
   if (!hw) return;
   // Check if already sent to this group
   const already = db.prepare('SELECT id FROM homework_sends WHERE homework_id = ? AND group_id = ?').get(hw.id, groupId);

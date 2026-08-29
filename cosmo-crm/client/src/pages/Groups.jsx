@@ -4,7 +4,7 @@ import { FiPlus, FiX, FiUsers, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { t } from '../i18n';
 import api from '../api';
 
-const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', homework_start_from: 1, lesson_duration_minutes: 60 };
+const EMPTY = { name: '', whatsapp_group_id: '', whatsapp_group_name: '', coach_id: '', auto_increment_lessons: true, reminder_minutes_before: 60, reminder_target: 'group', lesson_duration_minutes: 60 };
 
 export default function Groups() {
   const [groups, setGroups] = useState([]);
@@ -48,7 +48,6 @@ export default function Groups() {
                   {g.coach_name && <div style={{ fontSize: '0.75rem', color: 'var(--slate-400)', marginTop: 2 }}>{t('ui.coach')}: {g.coach_name}</div>}
                   <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                     {g.auto_increment_lessons ? <span className="badge green">{t('ui.auto')}</span> : <span className="badge slate">{t('ui.manual')}</span>}
-                    <span className="badge blue">{t('grp.hwFrom')}{g.homework_start_from || 1}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -95,15 +94,9 @@ export default function Groups() {
                 <div className="form-group"><label>{t('ui.name_required')}</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
                 <div className="form-group"><label>{t('ui.wa_group_id')}</label><input className="form-input" value={form.whatsapp_group_id} onChange={e => setForm(f => ({ ...f, whatsapp_group_id: e.target.value }))} placeholder="...@g.us" /></div>
                 <div className="form-group"><label>{t('ui.coach')}</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">{t('ui.none')}</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>{t('ui.start_from_homework')}</label>
-                    <input className="form-input" type="number" min="1" value={form.homework_start_from} onChange={e => setForm(f => ({ ...f, homework_start_from: parseInt(e.target.value) || 1 }))} />
-                  </div>
-                  <div className="form-group">
-                    <label>{t('ui.lesson_duration_min')}</label>
-                    <input className="form-input" type="number" min="15" step="5" value={form.lesson_duration_minutes} onChange={e => setForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} />
-                  </div>
+                <div className="form-group">
+                  <label>{t('ui.lesson_duration_min')}</label>
+                  <input className="form-input" type="number" min="15" step="5" value={form.lesson_duration_minutes} onChange={e => setForm(f => ({ ...f, lesson_duration_minutes: parseInt(e.target.value) || 60 }))} />
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--slate-400)', display: 'block', marginTop: -6, marginBottom: 8 }}>{t('grp.durationHint')}</span>
                 <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

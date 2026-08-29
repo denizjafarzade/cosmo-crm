@@ -49,15 +49,18 @@ r.get('/chess-rating', async (req, res) => {
 });
 
 r.post('/', (req, res) => {
-  const { name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username, ratings } = req.body;
+  const { name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username, ratings,
+    preferred_format, preferred_teacher, preferred_lessons_per_week, quoted_price } = req.body;
   if (!name || !phone) return res.status(400).json({ error: 'Name and phone are required' });
   // availability arrives as an array of "<dayIndex>|<HH:MM-HH:MM>" slots.
   const availabilityJson = Array.isArray(availability) ? JSON.stringify(availability) : (availability || null);
   const result = db.prepare(`
-    INSERT INTO registrations (name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO registrations (name, surname, phone, level, fide_rating, message, birth_date, sector, availability, chess_platform, chess_username,
+      preferred_format, preferred_teacher, preferred_lessons_per_week, quoted_price)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(name, surname || '', phone, level || '', fide_rating || null, message || '',
-    birth_date || null, sector || null, availabilityJson, chess_platform || null, chess_username || null);
+    birth_date || null, sector || null, availabilityJson, chess_platform || null, chess_username || null,
+    preferred_format || null, preferred_teacher || null, preferred_lessons_per_week || null, quoted_price || null);
 
   // The form already previewed the ratings, so store those immediately; only
   // fall back to a fresh lookup if it didn't have them.
@@ -122,8 +125,8 @@ r.post('/:id/enroll', (req, res) => {
     if (!groupId) {
       const g = new_group;
       if (!g.name) throw new Error('New group needs a name');
-      const info = db.prepare(`INSERT INTO groups (name, coach_id, auto_increment_lessons, homework_start_from, lesson_duration_minutes)
-        VALUES (?, ?, 1, ?, ?)`).run(g.name, g.coach_id || null, parseInt(g.homework_start_from) || 1, parseInt(g.lesson_duration_minutes) || 60);
+      const info = db.prepare(`INSERT INTO groups (name, coach_id, auto_increment_lessons, lesson_duration_minutes)
+        VALUES (?, ?, 1, ?)`).run(g.name, g.coach_id || null, parseInt(g.lesson_duration_minutes) || 60);
       groupId = info.lastInsertRowid;
       const stmt = db.prepare('INSERT INTO group_schedules (group_id, day_of_week, time) VALUES (?, ?, ?)');
       for (const s of (g.schedules || [])) {

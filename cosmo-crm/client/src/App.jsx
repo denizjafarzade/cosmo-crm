@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiLayers, FiBookOpen, FiFileText, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus, FiLogOut, FiImage } from 'react-icons/fi';
+import { FiHome, FiUsers, FiLayers, FiBookOpen, FiDollarSign, FiSettings, FiActivity, FiMessageCircle, FiMenu, FiX, FiBarChart2, FiUserPlus, FiLogOut, FiImage } from 'react-icons/fi';
 import { FaChessKnight } from 'react-icons/fa';
 import api, { getToken, setToken } from './api';
 import { t, useLang, setLang, getLang, LANGUAGES } from './i18n';
@@ -11,7 +11,6 @@ import Students from './pages/Students';
 import Groups from './pages/Groups';
 import GroupDetail from './pages/GroupDetail';
 import Lessons from './pages/Lessons';
-import Homeworks from './pages/Homeworks';
 import Payments from './pages/Payments';
 import WhatsAppPage from './pages/WhatsAppPage';
 import SettingsPage from './pages/SettingsPage';
@@ -45,7 +44,6 @@ export default function App() {
     { to: '/students', icon: <FiUsers />, label: t('nav.students') },
     { to: '/groups', icon: <FiLayers />, label: t('nav.groups') },
     { to: '/lessons', icon: <FiBookOpen />, label: t('nav.lessons') },
-    { to: '/homeworks', icon: <FiFileText />, label: t('nav.homeworks') },
     { to: '/payments', icon: <FiDollarSign />, label: t('nav.payments') },
     { to: '/registrations', icon: <FiUserPlus />, label: t('nav.registrations') },
     { to: '/content', icon: <FiImage />, label: t('nav.content') },
@@ -116,7 +114,6 @@ export default function App() {
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:id" element={<GroupDetail />} />
           <Route path="/lessons" element={<Lessons />} />
-          <Route path="/homeworks" element={<Homeworks />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/whatsapp" element={<WhatsAppPage />} />
           <Route path="/activity" element={<ActivityLog />} />

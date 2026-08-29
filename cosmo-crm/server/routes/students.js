@@ -40,11 +40,11 @@ function parseFideRating(value) {
 
 r.post('/', (req, res) => {
   const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes,
-    birth_date, sector, chess_platform, chess_username } = req.body;
+    birth_date, sector, chess_platform, chess_username, monthly_fee } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
-  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, birth_date, sector, chess_platform, chess_username)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '',
-    birth_date || null, sector || null, chess_platform || null, chess_username || null);
+  const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, birth_date, sector, chess_platform, chess_username, monthly_fee)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '',
+    birth_date || null, sector || null, chess_platform || null, chess_username || null, monthly_fee === '' || monthly_fee == null ? null : Number(monthly_fee));
   if (chess_platform && chess_username) {
     require('../services/chessRatings').updateRatingsFor('students', result.lastInsertRowid, chess_platform, chess_username).catch(() => {});
   }
@@ -88,6 +88,7 @@ r.put('/:id', (req, res) => {
   // An empty string or null here means "unassign".
   for (const k of NULLABLE_IDS) if (has(k)) add(k, body[k] === '' || body[k] == null ? null : Number(body[k]));
   if (has('fide_rating')) add('fide_rating', parseFideRating(body.fide_rating));
+  if (has('monthly_fee')) add('monthly_fee', body.monthly_fee === '' || body.monthly_fee == null ? null : Number(body.monthly_fee));
   if (has('active')) add('active', body.active ? 1 : 0);
 
   if (!sets.length) return res.json({ ok: true, updated: 0 });

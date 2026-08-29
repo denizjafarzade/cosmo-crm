@@ -143,37 +143,69 @@
   <nav class="page-nav">
     <span class="brand">Cosmo Chess</span>
     <span class="sep">›</span>
-    <a href="index.html">Home</a>
+    <a href="index.html" id="txtHome">Home</a>
     <span class="sep">›</span>
-    <a href="news.html">News</a>
+    <a href="news.html" id="txtNews">News</a>
     <span class="sep">›</span>
     <span id="navTitle">Article</span>
   </nav>
 
   <div id="articleRoot"></div>
 
-  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html">Back to Home</a></footer>
+  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html" id="txtBackHome">Back to Home</a></footer>
 
   <script src="/news-data.js"></script>
   <script>
+    // Standalone page (no language switcher of its own) — just render in
+    // whatever language was last picked on the homepage.
+    var lang = 'en';
+    try { lang = localStorage.getItem('cosmo-lang') || 'en'; } catch (e) {}
+    document.documentElement.lang = lang;
+
+    var UI = {
+      en: { home: 'Home', news: 'News', notFoundTitle: 'Article not found',
+        notFoundDesc: 'This article may have been moved or removed.', backToNews: 'Back to News',
+        relatedPhotos: 'Related Photos', viewAll: 'View all', photos: 'photos', all: 'All',
+        moreFromAcademy: 'More from the Academy', backHome: 'Back to Home' },
+      az: { home: 'Ana səhifə', news: 'Xəbərlər', notFoundTitle: 'Məqalə tapılmadı',
+        notFoundDesc: 'Bu məqalə silinmiş və ya köçürülmüş ola bilər.', backToNews: 'Xəbərlərə qayıt',
+        relatedPhotos: 'Əlaqədar Fotolar', viewAll: 'Bütün', photos: 'şəkillərinə bax', all: 'bütün',
+        moreFromAcademy: 'Akademiyadan Daha Çox', backHome: 'Ana səhifəyə qayıt' },
+      ru: { home: 'Главная', news: 'Новости', notFoundTitle: 'Статья не найдена',
+        notFoundDesc: 'Возможно, эта статья была перемещена или удалена.', backToNews: 'Назад к новостям',
+        relatedPhotos: 'Похожие фото', viewAll: 'Смотреть все', photos: 'фото', all: 'все',
+        moreFromAcademy: 'Ещё из академии', backHome: 'Вернуться на главную' }
+    };
+    var t = UI[lang] || UI.en;
+    document.getElementById('txtHome').textContent = t.home;
+    document.getElementById('txtNews').textContent = t.news;
+    document.getElementById('txtBackHome').textContent = t.backHome;
+
+    function pickLang(field) {
+      if (field && typeof field === 'object') return field[lang] || field.en || Object.values(field)[0] || '';
+      return field || '';
+    }
+    var DATE_LOCALE = { en: 'en-GB', az: 'az-Latn', ru: 'ru-RU' };
+
     var root = document.getElementById('articleRoot');
     var slug = new URLSearchParams(window.location.search).get('slug');
     var article = NEWS.find(function(n){ return n.slug === slug; });
 
     if (!article) {
-      root.innerHTML = '<div class="not-found"><h2>Article not found</h2>'
-        + '<p>This article may have been moved or removed.</p>'
-        + '<a href="news.html" class="btn-back">&#8592; Back to News</a></div>';
+      root.innerHTML = '<div class="not-found"><h2>' + t.notFoundTitle + '</h2>'
+        + '<p>' + t.notFoundDesc + '</p>'
+        + '<a href="news.html" class="btn-back">&#8592; ' + t.backToNews + '</a></div>';
     } else {
-      document.title = article.title + ' — Cosmo Chess Academy';
-      document.getElementById('navTitle').textContent = article.title;
+      var title = pickLang(article.title);
+      document.title = title + ' — Cosmo Chess Academy';
+      document.getElementById('navTitle').textContent = title;
 
       var d = new Date(article.date);
-      var dateStr = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+      var dateStr = d.toLocaleDateString(DATE_LOCALE[lang] || 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
       // Cover image
       var coverImg = article.image
-        ? '<img src="' + article.image + '" alt="' + (article.imageAlt || article.title) + '" />'
+        ? '<img src="' + article.image + '" alt="' + (article.imageAlt || title) + '" />'
         : '';
 
       // Related gallery photos
@@ -188,16 +220,16 @@
             : 'index.html#gallery';
           var photoCat = article.relatedGalleryFilter
             ? article.relatedGalleryFilter.charAt(0).toUpperCase() + article.relatedGalleryFilter.slice(1)
-            : 'All';
+            : t.all;
           var photoItems = photos.map(function(p){
             return '<div class="article-photo-item">'
-              + (p.image ? '<img src="' + p.image + '" alt="' + (p.alt || p.title) + '" loading="lazy" />' : '')
+              + (p.image ? '<img src="' + p.image + '" alt="' + (p.alt || pickLang(p.title)) + '" loading="lazy" />' : '')
               + '</div>';
           }).join('');
           photosHtml = '<div class="article-photos-section">'
             + '<div class="article-photos-header">'
-            + '<h3>Related Photos</h3>'
-            + '<a href="' + galleryLink + '">View all ' + photoCat + ' photos &#8594;</a>'
+            + '<h3>' + t.relatedPhotos + '</h3>'
+            + '<a href="' + galleryLink + '">' + t.viewAll + ' ' + photoCat + ' ' + t.photos + ' &#8594;</a>'
             + '</div>'
             + '<div class="article-photos-grid">' + photoItems + '</div>'
             + '</div>';
@@ -206,32 +238,33 @@
 
       root.innerHTML =
         '<div class="article-hero">'
-        + '<span class="article-cat">' + article.category + '</span>'
-        + '<h1>' + article.title + '</h1>'
+        + '<span class="article-cat">' + pickLang(article.category) + '</span>'
+        + '<h1>' + title + '</h1>'
         + '<div class="article-date">' + dateStr + '</div>'
         + '</div>'
         + '<div class="article-img-wrap"><div class="article-img">' + coverImg + '</div></div>'
         + '<div class="article-body">' + (article.body || '') + '</div>'
         + photosHtml
-        + '<div class="article-back"><a href="news.html" class="btn-back">&#8592; Back to News</a></div>';
+        + '<div class="article-back"><a href="news.html" class="btn-back">&#8592; ' + t.backToNews + '</a></div>';
 
       // Related articles
       var related = NEWS.filter(function(n){ return n.slug !== slug; }).slice(0, 3);
       if (related.length) {
         var relCards = related.map(function(n){
+          var rTitle = pickLang(n.title);
           var rImg = n.image
-            ? '<img src="' + n.image + '" alt="' + (n.imageAlt || n.title) + '" loading="lazy" />'
+            ? '<img src="' + n.image + '" alt="' + (n.imageAlt || rTitle) + '" loading="lazy" />'
             : '';
           return '<a class="related-card" href="news-article.html?slug=' + n.slug + '">'
             + '<div class="related-card-img">' + rImg + '</div>'
             + '<div class="related-card-body">'
-            + '<div class="related-card-cat">' + n.category + '</div>'
-            + '<h3>' + n.title + '</h3>'
+            + '<div class="related-card-cat">' + pickLang(n.category) + '</div>'
+            + '<h3>' + rTitle + '</h3>'
             + '</div></a>';
         }).join('');
         root.innerHTML +=
           '<div class="related"><div class="related-inner">'
-          + '<h2>More from the Academy</h2>'
+          + '<h2>' + t.moreFromAcademy + '</h2>'
           + '<div class="related-grid">' + relCards + '</div>'
           + '</div></div>';
       }

@@ -149,7 +149,7 @@ export default function Registrations() {
       api.getGroups().then(g => setGroups(Array.isArray(g) ? g : [])).catch(() => setGroups([]));
       // Close the detail dialog first — two stacked overlays left this one behind.
       setSelected(null);
-      setEnroll({ reg, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, homework_start_from: 1, schedules: [] } });
+      setEnroll({ reg, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, schedules: [] } });
       return;
     }
     setSaving(true);
@@ -351,6 +351,14 @@ export default function Registrations() {
                 <div><div className="form-label">{t('ui.online_ratings')}</div><div>{ratingsText(selected)}</div></div>
                 <div><div className="form-label">{t('ui.fide_rating')}</div><div>{selected.fide_rating || '—'}</div></div>
                 <div><div className="form-label">{t('ui.received')}</div><div>{timeAgo(selected.created_at)}</div></div>
+                {(selected.preferred_format || selected.preferred_teacher || selected.quoted_price) && (
+                  <>
+                    <div><div className="form-label">{t('ui.preferred_format')}</div><div>{selected.preferred_format === 'group' ? t('ui.group') : selected.preferred_format === 'individual' ? t('ui.individual') : '—'}</div></div>
+                    <div><div className="form-label">{t('ui.preferred_teacher')}</div><div>{selected.preferred_teacher === 'cosmo' ? 'CosmoChess' : selected.preferred_teacher === 'abdulla' ? 'Abdulla Shabanov' : '—'}</div></div>
+                    <div><div className="form-label">{t('ui.preferred_lessons_per_week')}</div><div>{selected.preferred_lessons_per_week || '—'}</div></div>
+                    <div><div className="form-label">{t('ui.quoted_price')}</div><div style={{ fontWeight: 600 }}>{selected.quoted_price ? `${selected.quoted_price} AZN` : '—'}</div></div>
+                  </>
+                )}
               </div>
               {availabilityList(selected.availability).length > 0 && (
                 <div style={{ marginBottom: '1rem' }}>

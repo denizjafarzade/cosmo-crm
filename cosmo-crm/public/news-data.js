@@ -1,13 +1,26 @@
 ﻿// Demo content for client preview — replace with real academy content before launch.
 // Edit all articles and gallery items in this single file.
+//
+// category/title/excerpt are { en, az, ru } so the card and listing pages can
+// show the right language (see pickLang() in index.html / news.html /
+// news-article.html). `body` (the full article) stays English-only for this
+// demo copy — translate it here once real articles replace these.
 
 var NEWS = [
   {
     slug: 'young-players-shine-rapid-tournament',
-    category: 'Tournament',
+    category: { en: 'Tournament', az: 'Turnir', ru: 'Турнир' },
     date: '2026-06-21',
-    title: 'Young Players Shine at the Weekend Rapid Tournament',
-    excerpt: 'Our students demonstrated strong focus, confidence, and sportsmanship during a competitive weekend event with players from across the city.',
+    title: {
+      en: 'Young Players Shine at the Weekend Rapid Tournament',
+      az: 'Gənc Oyunçular Həftəsonu Sürətli Turnirdə Parladı',
+      ru: 'Юные игроки блеснули на воскресном турнире по рапиду'
+    },
+    excerpt: {
+      en: 'Our students demonstrated strong focus, confidence, and sportsmanship during a competitive weekend event with players from across the city.',
+      az: 'Şagirdlərimiz şəhərin müxtəlif yerlərindən gələn oyunçularla keçirilən rəqabətli həftəsonu tədbirində güclü diqqət, özünəinam və idman əxlaqı nümayiş etdirdilər.',
+      ru: 'Наши ученики продемонстрировали высокую концентрацию, уверенность и спортивный дух на конкурентном турнире выходного дня с участниками со всего города.'
+    },
     image: 'img/ph-tournament.svg',
     imageAlt: 'Students competing at the Weekend Rapid Tournament',
     relatedGalleryFilter: 'tournaments',
@@ -20,10 +33,18 @@ var NEWS = [
   },
   {
     slug: 'season-of-strong-progress',
-    category: 'Achievement',
+    category: { en: 'Achievement', az: 'Nailiyyət', ru: 'Достижение' },
     date: '2026-05-30',
-    title: 'A Season of Strong Progress and New Milestones',
-    excerpt: 'Several students reached important personal milestones after months of structured training — from first tournament entries to significant rating improvements.',
+    title: {
+      en: 'A Season of Strong Progress and New Milestones',
+      az: 'Güclü İnkişaf və Yeni Nailiyyətlər Mövsümü',
+      ru: 'Сезон уверенного прогресса и новых достижений'
+    },
+    excerpt: {
+      en: 'Several students reached important personal milestones after months of structured training — from first tournament entries to significant rating improvements.',
+      az: 'Bir neçə şagird aylarla davam edən sistemli məşqlərdən sonra mühüm şəxsi nailiyyətlərə çatdı — ilk turnir iştirakından tutmuş reytinqdə ciddi irəliləyişlərə qədər.',
+      ru: 'Несколько учеников достигли важных личных результатов после месяцев системных тренировок — от первого участия в турнире до значительного роста рейтинга.'
+    },
     image: 'img/ph-awards.svg',
     imageAlt: 'Student receiving recognition for chess progress',
     relatedGalleryFilter: 'awards',
@@ -36,10 +57,18 @@ var NEWS = [
   },
   {
     slug: 'highlights-online-chess-event',
-    category: 'Academy Event',
+    category: { en: 'Academy Event', az: 'Akademiya Tədbiri', ru: 'Мероприятие академии' },
     date: '2026-05-10',
-    title: 'Highlights from Our Latest Online Chess Event',
-    excerpt: 'Students from different age groups came together for an engaging online tournament and shared learning session that showcased both skill and sportsmanship.',
+    title: {
+      en: 'Highlights from Our Latest Online Chess Event',
+      az: 'Son Onlayn Şahmat Tədbirimizdən Seçmələr',
+      ru: 'Лучшие моменты нашего последнего онлайн-турнира'
+    },
+    excerpt: {
+      en: 'Students from different age groups came together for an engaging online tournament and shared learning session that showcased both skill and sportsmanship.',
+      az: 'Müxtəlif yaş qruplarından şagirdlər maraqlı bir onlayn turnir və birgə tədris sessiyasında bir araya gəldi, bu da həm bacarıqlarını, həm də idman əxlaqını nümayiş etdirdi.',
+      ru: 'Ученики разных возрастных групп собрались вместе для увлекательного онлайн-турнира и совместного учебного занятия, показав как мастерство, так и спортивный дух.'
+    },
     image: 'img/ph-training.svg',
     imageAlt: 'Students participating in an online chess event',
     relatedGalleryFilter: 'training',
@@ -52,10 +81,18 @@ var NEWS = [
   },
   {
     slug: 'personalised-coaching-approach',
-    category: 'Training',
+    category: { en: 'Training', az: 'Təlim', ru: 'Обучение' },
     date: '2026-04-18',
-    title: 'How Personalised Coaching Plans Change the Game',
-    excerpt: 'Every student at the academy trains with a tailored plan built around their current level, goals, and learning style — here is what that looks like in practice.',
+    title: {
+      en: 'How Personalised Coaching Plans Change the Game',
+      az: 'Fərdi Təlim Planları Oyunu Necə Dəyişir',
+      ru: 'Как персонализированные тренерские планы меняют игру'
+    },
+    excerpt: {
+      en: 'Every student at the academy trains with a tailored plan built around their current level, goals, and learning style — here is what that looks like in practice.',
+      az: 'Akademiyadakı hər bir şagird öz səviyyəsinə, məqsədlərinə və öyrənmə tərzinə uyğun hazırlanmış fərdi planla məşq edir — bu, praktikada necə görünür.',
+      ru: 'Каждый ученик академии тренируется по индивидуальному плану, составленному с учётом его текущего уровня, целей и стиля обучения — вот как это выглядит на практике.'
+    },
     image: 'img/ph-training.svg',
     imageAlt: 'Coach working one-on-one with a student at a chess board',
     relatedGalleryFilter: 'training',
@@ -68,10 +105,18 @@ var NEWS = [
   },
   {
     slug: 'end-of-season-awards',
-    category: 'Achievement',
+    category: { en: 'Achievement', az: 'Nailiyyət', ru: 'Достижение' },
     date: '2026-03-22',
-    title: 'Student Recognition Ceremony — End-of-Season Awards',
-    excerpt: 'The academy held its end-of-season recognition evening, celebrating the dedication and growth of students who made exceptional strides over the past months.',
+    title: {
+      en: 'Student Recognition Ceremony — End-of-Season Awards',
+      az: 'Şagird Təltif Mərasimi — Mövsüm Sonu Mükafatları',
+      ru: 'Церемония признания учеников — награды по итогам сезона'
+    },
+    excerpt: {
+      en: 'The academy held its end-of-season recognition evening, celebrating the dedication and growth of students who made exceptional strides over the past months.',
+      az: 'Akademiya mövsüm sonu təltif gecəsini keçirdi və son aylarda böyük irəliləyiş əldə edən şagirdlərin əzmini və inkişafını qeyd etdi.',
+      ru: 'Академия провела вечер признания по итогам сезона, отметив усердие и рост учеников, добившихся значительных успехов за последние месяцы.'
+    },
     image: 'img/ph-awards.svg',
     imageAlt: 'End-of-season student recognition ceremony at the academy',
     relatedGalleryFilter: 'awards',
@@ -84,10 +129,18 @@ var NEWS = [
   },
   {
     slug: 'summer-chess-camp-2026',
-    category: 'Academy Event',
+    category: { en: 'Academy Event', az: 'Akademiya Tədbiri', ru: 'Мероприятие академии' },
     date: '2026-02-28',
-    title: 'Summer Chess Camp 2026 — Registration Open',
-    excerpt: 'Our intensive five-day summer programme returns this July, offering structured training, friendly competition, and group activities for players aged 7 to 16.',
+    title: {
+      en: 'Summer Chess Camp 2026 — Registration Open',
+      az: '2026 Yay Şahmat Düşərgəsi — Qeydiyyat Açıqdır',
+      ru: 'Летний шахматный лагерь 2026 — регистрация открыта'
+    },
+    excerpt: {
+      en: 'Our intensive five-day summer programme returns this July, offering structured training, friendly competition, and group activities for players aged 7 to 16.',
+      az: 'Beş günlük intensiv yay proqramımız bu iyulda geri qayıdır və 7-16 yaş arası oyunçular üçün sistemli məşq, dostluq yarışları və qrup fəaliyyətləri təklif edir.',
+      ru: 'Наша интенсивная пятидневная летняя программа возвращается в июле, предлагая структурированные тренировки, дружеские соревнования и групповые активности для игроков 7-16 лет.'
+    },
     image: 'img/ph-camps.svg',
     imageAlt: 'Group of students at a chess camp activity',
     relatedGalleryFilter: 'camps',

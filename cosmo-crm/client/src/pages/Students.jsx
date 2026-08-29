@@ -8,7 +8,7 @@ import AttendanceCalendar from './AttendanceCalendar';
 // original values kept as-is for backward compatibility with existing student records.
 const LEVELS = ['new_to_chess', 'beginner', 'intermediate', 'advanced', 'expert', 'not_sure'];
 const levelLabel = (level) => t(`lvl.${level}`) || level;
-const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '', birth_date: '', sector: '', chess_platform: '', chess_username: '' };
+const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '', birth_date: '', sector: '', chess_platform: '', chess_username: '', monthly_fee: '' };
 const SECTORS = () => ({ az: t('sec.az'), ru: t('sec.ru'), en: t('sec.en'), tr: t('sec.tr') });
 const PAYMENT_CYCLE = 8;
 
@@ -58,8 +58,10 @@ export default function Students() {
   useEffect(() => { load(); api.getGroups().then(setGroups); api.getCoaches().then(setCoaches); }, [load]);
 
   const openAdd = () => { setForm(EMPTY); setEditId(null); setModal('add'); };
-  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '', birth_date: s.birth_date || '', sector: s.sector || '', chess_platform: s.chess_platform || '', chess_username: s.chess_username || '' }); setEditId(s.id); setModal('edit'); };
-  const openPay = (s) => { setEditId(s.id); setPayForm({ amount: '', notes: '' }); setModal('pay'); };
+  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '', birth_date: s.birth_date || '', sector: s.sector || '', chess_platform: s.chess_platform || '', chess_username: s.chess_username || '', monthly_fee: s.monthly_fee ?? '' }); setEditId(s.id); setModal('edit'); };
+  // Pre-fill with what this student is on record to pay, so staff don't have
+  // to remember or retype it every cycle — still editable if it's different this time.
+  const openPay = (s) => { setEditId(s.id); setPayForm({ amount: s.monthly_fee ?? '', notes: '' }); setModal('pay'); };
   const openHistory = async (s) => {
     setHistoryStudent({ student: s, payments: null });
     const payments = await api.getPayments({ student_id: s.id });
@@ -73,6 +75,7 @@ export default function Students() {
       coach_id: form.coach_id || null,
       group_id: form.group_id || null,
       fide_rating: form.fide_rating === '' ? null : Number(form.fide_rating),
+      monthly_fee: form.monthly_fee === '' ? null : Number(form.monthly_fee),
     };
     if (editId) await api.updateStudent(editId, data);
     else await api.createStudent(data);
@@ -153,6 +156,24 @@ export default function Students() {
     setRefreshingId(null);
   };
 
+  // Group by group_id so the list reads as one section per class instead of
+  // one flat table — plus a "queue" section for students not yet placed
+  // anywhere, which is exactly the list that needs attention first.
+  const groupBuckets = [];
+  const byGroupId = new Map();
+  for (const g of groups) {
+    const bucket = { id: g.id, name: g.name, students: [] };
+    byGroupId.set(g.id, bucket);
+    groupBuckets.push(bucket);
+  }
+  const queueBucket = { id: 'queue', name: t('students.queue'), students: [] };
+  for (const s of students) {
+    const bucket = s.group_id != null ? byGroupId.get(s.group_id) : null;
+    (bucket || queueBucket).students.push(s);
+  }
+  const sections = [queueBucket, ...groupBuckets].filter(b => b.students.length > 0);
+  let seq = 0; // running row number across every section, reset fresh each render
+
   return (
     <>
       <div className="page-header">
@@ -175,7 +196,10 @@ export default function Students() {
             <option value="due">Due</option>
             <option value="overdue">{t('ui.overdue')}</option>
           </select>
-          <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>{students.length} {t('students.count')}</span>
+          <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>
+            {students.length} {t('students.count')} · {groupBuckets.filter(b => b.students.length > 0).length} {t('students.groupsCount')}
+            {queueBucket.students.length > 0 && <> · <strong style={{ color: 'var(--amber)' }}>{queueBucket.students.length} {t('students.queue')}</strong></>}
+          </span>
         </div>
 
         <div className="card">
@@ -183,75 +207,87 @@ export default function Students() {
             <table>
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>{t('ui.name')}</th>
                   <th>{t('students.level')}</th>
                   <th>{t('students.onlineRatings')}</th>
                   <th>{t('students.fide')}</th>
-                  <th>{t('students.group')}</th>
+                  <th>{t('students.fee')}</th>
                   <th>{t('students.payment')}</th>
                   <th>{t('students.lessons')}</th>
                   <th>{t('students.actions')}</th>
                 </tr>
               </thead>
-              <tbody>
-                {students.map(s => {
-                  const sev = paymentSeverity(s);
-                  return (
-                  <tr key={s.id} style={
-                    sev.level === 'critical' ? { background: 'var(--red-bg)' }
-                    : sev.level === 'late' ? { background: 'var(--amber-bg)' }
-                    : undefined
-                  }>
-                    <td>
-                      <button type="button" className="link-btn" onClick={() => openHistory(s)} title="View payment records" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', font: 'inherit', color: 'var(--primary, #4f46e5)' }}>
-                        <strong>{s.name} {s.surname}</strong>
-                      </button>
-                      <br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span>
-                    </td>
-                    <td><span className="badge blue">{levelLabel(s.level)}</span></td>
-                    <td>{ratingCell(s)}</td>
-                    <td>{s.fide_rating != null ? s.fide_rating : '—'}</td>
-                    <td>{s.group_name || '—'}</td>
-                    <td>
-                      {paymentBadge(s)}
-                      {sev.level !== 'ok' && (
-                        <>
-                          <br />
-                          <button className="btn btn-sm btn-outline" style={{ marginTop: 4, fontSize: '0.7rem' }} onClick={() => openReason(s)}>
-                            {sev.hasReason ? t('students.editReason') : t('students.addReason')}
-                          </button>
-                        </>
-                      )}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <button className="btn btn-sm btn-outline btn-icon" title={t('students.decLesson')}
-                          disabled={adjustingId === s.id || s.lessons_since_payment <= 0}
-                          onClick={() => adjustLessons(s, -1)}>−</button>
-                        <strong style={{ minWidth: 18, textAlign: 'center' }}>{s.lessons_since_payment}</strong>
-                        <button className="btn btn-sm btn-outline btn-icon" title={t('students.incLesson')}
-                          disabled={adjustingId === s.id}
-                          onClick={() => adjustLessons(s, 1)}>+</button>
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        <button className="btn btn-sm btn-outline btn-icon" onClick={() => setCalendarStudent(s)} title="Attendance calendar"><FiCalendar /></button>
-                        <button className="btn btn-sm btn-outline btn-icon" onClick={() => openEdit(s)} title="Edit"><FiEdit2 /></button>
-                        {s.chess_username && (
-                          <button className="btn btn-sm btn-outline btn-icon" disabled={refreshingId === s.id} onClick={() => doRefreshRatings(s)} title="Refresh online ratings"><FiRefreshCw /></button>
-                        )}
-                        <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
-                        {sev.level === 'critical' ? (
-                          <button className="btn btn-sm btn-red" onClick={() => setRemoveFor(s)} title="Remove from student list"><FiUserX /> {t('ui.remove')}</button>
-                        ) : (
-                          <button className="btn btn-sm btn-red btn-icon" onClick={() => remove(s.id)} title="Deactivate"><FiTrash2 /></button>
-                        )}
-                      </div>
+              {sections.map(section => (
+                <tbody key={section.id}>
+                  <tr>
+                    <td colSpan={9} style={{
+                      background: section.id === 'queue' ? 'var(--amber-bg)' : 'var(--slate-50)',
+                      fontWeight: 700, fontSize: '0.8rem', padding: '0.5rem 0.75rem',
+                    }}>
+                      {section.name} <span className="badge slate" style={{ marginLeft: 6 }}>{section.students.length}</span>
                     </td>
                   </tr>
-                );})}
-              </tbody>
+                  {section.students.map(s => {
+                    const sev = paymentSeverity(s);
+                    return (
+                    <tr key={s.id} style={
+                      sev.level === 'critical' ? { background: 'var(--red-bg)' }
+                      : sev.level === 'late' ? { background: 'var(--amber-bg)' }
+                      : undefined
+                    }>
+                      <td style={{ color: 'var(--slate-400)' }}>{++seq}</td>
+                      <td>
+                        <button type="button" className="link-btn" onClick={() => openHistory(s)} title="View payment records" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', font: 'inherit', color: 'var(--primary, #4f46e5)' }}>
+                          <strong>{s.name} {s.surname}</strong>
+                        </button>
+                        <br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span>
+                      </td>
+                      <td><span className="badge blue">{levelLabel(s.level)}</span></td>
+                      <td>{ratingCell(s)}</td>
+                      <td>{s.fide_rating != null ? s.fide_rating : '—'}</td>
+                      <td>{s.monthly_fee != null ? `${s.monthly_fee} AZN` : <span style={{ color: 'var(--slate-300)' }}>—</span>}</td>
+                      <td>
+                        {paymentBadge(s)}
+                        {sev.level !== 'ok' && (
+                          <>
+                            <br />
+                            <button className="btn btn-sm btn-outline" style={{ marginTop: 4, fontSize: '0.7rem' }} onClick={() => openReason(s)}>
+                              {sev.hasReason ? t('students.editReason') : t('students.addReason')}
+                            </button>
+                          </>
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <button className="btn btn-sm btn-outline btn-icon" title={t('students.decLesson')}
+                            disabled={adjustingId === s.id || s.lessons_since_payment <= 0}
+                            onClick={() => adjustLessons(s, -1)}>−</button>
+                          <strong style={{ minWidth: 18, textAlign: 'center' }}>{s.lessons_since_payment}</strong>
+                          <button className="btn btn-sm btn-outline btn-icon" title={t('students.incLesson')}
+                            disabled={adjustingId === s.id}
+                            onClick={() => adjustLessons(s, 1)}>+</button>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                          <button className="btn btn-sm btn-outline btn-icon" onClick={() => setCalendarStudent(s)} title="Attendance calendar"><FiCalendar /></button>
+                          <button className="btn btn-sm btn-outline btn-icon" onClick={() => openEdit(s)} title="Edit"><FiEdit2 /></button>
+                          {s.chess_username && (
+                            <button className="btn btn-sm btn-outline btn-icon" disabled={refreshingId === s.id} onClick={() => doRefreshRatings(s)} title="Refresh online ratings"><FiRefreshCw /></button>
+                          )}
+                          <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
+                          {sev.level === 'critical' ? (
+                            <button className="btn btn-sm btn-red" onClick={() => setRemoveFor(s)} title="Remove from student list"><FiUserX /> {t('ui.remove')}</button>
+                          ) : (
+                            <button className="btn btn-sm btn-red btn-icon" onClick={() => remove(s.id)} title="Deactivate"><FiTrash2 /></button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );})}
+                </tbody>
+              ))}
             </table>
           </div>
         </div>
@@ -274,6 +310,11 @@ export default function Students() {
                 <div className="form-row">
                   <div className="form-group"><label>{t('ui.level')}</label><select className="form-input" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}>{LEVELS.map(l => <option key={l} value={l}>{levelLabel(l)}</option>)}</select></div>
                   <div className="form-group"><label>{t('ui.group')}</label><select className="form-input" value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: e.target.value }))}><option value="">{t('ui.none')}</option>{groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}</select></div>
+                </div>
+                <div className="form-group">
+                  <label>{t('students.monthlyFee')}</label>
+                  <input className="form-input" type="number" min="0" step="0.01" value={form.monthly_fee} onChange={e => setForm(f => ({ ...f, monthly_fee: e.target.value }))} placeholder="e.g. 150" />
+                  <span style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{t('students.monthlyFeeHint')}</span>
                 </div>
                 <div className="form-row">
                   <div className="form-group"><label>{t('ui.date_of_birth')}</label><input className="form-input" type="date" value={form.birth_date || ''} onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))} /></div>

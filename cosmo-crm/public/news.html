@@ -71,40 +71,84 @@
   <nav class="page-nav">
     <span class="brand">Cosmo Chess</span>
     <span class="sep">›</span>
-    <a href="index.html">Home</a>
+    <a href="index.html" id="txtHome">Home</a>
     <span class="sep">›</span>
-    <span>News &amp; Achievements</span>
+    <span id="txtCrumb">News &amp; Achievements</span>
   </nav>
 
   <div class="hero">
-    <div class="hero-tag">Academy News</div>
-    <h1>News &amp; Achievements</h1>
-    <p>The latest from Cosmo Chess Academy — student milestones, upcoming events, and academy announcements.</p>
+    <div class="hero-tag" id="txtHeroTag">Academy News</div>
+    <h1 id="txtHeroTitle">News &amp; Achievements</h1>
+    <p id="txtHeroDesc">The latest from Cosmo Chess Academy — student milestones, upcoming events, and academy announcements.</p>
   </div>
 
   <div class="container">
     <div class="filters" id="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="Achievement">Achievements</button>
-      <button class="filter-btn" data-filter="News">News</button>
+      <button class="filter-btn active" data-filter="all" id="txtFilterAll">All</button>
+      <button class="filter-btn" data-filter="Achievement" id="txtFilterAch">Achievements</button>
+      <button class="filter-btn" data-filter="News" id="txtFilterNews">News</button>
     </div>
     <div class="news-grid" id="newsGrid">
-      <div class="empty">Loading…</div>
+      <div class="empty" id="txtLoading">Loading…</div>
     </div>
   </div>
 
-  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html">Back to Home</a></footer>
+  <footer>&copy; 2026 Cosmo Chess Academy &mdash; <a href="index.html" id="txtBackHome">Back to Home</a></footer>
 
   <script src="/news-data.js"></script>
   <script>
+    // Standalone page (no language switcher of its own) — just render in
+    // whatever language was last picked on the homepage.
+    var lang = 'en';
+    try { lang = localStorage.getItem('cosmo-lang') || 'en'; } catch (e) {}
+
+    var UI = {
+      en: { home: 'Home', tag: 'Academy News', title: 'News &amp; Achievements',
+        desc: 'The latest from Cosmo Chess Academy — student milestones, upcoming events, and academy announcements.',
+        all: 'All', achievements: 'Achievements', news: 'News', loading: 'Loading…',
+        empty: 'No articles in this category yet.', backHome: 'Back to Home' },
+      az: { home: 'Ana səhifə', tag: 'Akademiya Xəbərləri', title: 'Xəbərlər və Nailiyyətlər',
+        desc: 'Cosmo Chess Academy-dən son xəbərlər — şagird nailiyyətləri, gələcək tədbirlər və akademiya elanları.',
+        all: 'Hamısı', achievements: 'Nailiyyətlər', news: 'Xəbərlər', loading: 'Yüklənir…',
+        empty: 'Bu kateqoriyada hələ məqalə yoxdur.', backHome: 'Ana səhifəyə qayıt' },
+      ru: { home: 'Главная', tag: 'Новости академии', title: 'Новости и достижения',
+        desc: 'Последние новости Cosmo Chess Academy — успехи учеников, предстоящие события и объявления академии.',
+        all: 'Все', achievements: 'Достижения', news: 'Новости', loading: 'Загрузка…',
+        empty: 'В этой категории пока нет статей.', backHome: 'Вернуться на главную' }
+    };
+    var CAT = { en: { Achievement: 'Achievement', News: 'News' },
+      az: { Achievement: 'Nailiyyət', News: 'Xəbər' },
+      ru: { Achievement: 'Достижение', News: 'Новость' } };
+    (function(){
+      var t = UI[lang] || UI.en;
+      document.documentElement.lang = lang;
+      document.getElementById('txtHome').textContent = t.home;
+      document.getElementById('txtCrumb').innerHTML = t.title;
+      document.getElementById('txtHeroTag').textContent = t.tag;
+      document.getElementById('txtHeroTitle').innerHTML = t.title;
+      document.getElementById('txtHeroDesc').textContent = t.desc;
+      document.getElementById('txtFilterAll').textContent = t.all;
+      document.getElementById('txtFilterAch').textContent = t.achievements;
+      document.getElementById('txtFilterNews').textContent = t.news;
+      document.getElementById('txtLoading').textContent = t.loading;
+      document.getElementById('txtBackHome').textContent = t.backHome;
+      document.title = t.title.replace(/&amp;/g, '&') + ' — Cosmo Chess Academy';
+    })();
+
+    function pickLang(field) {
+      if (field && typeof field === 'object') return field[lang] || field.en || Object.values(field)[0] || '';
+      return field || '';
+    }
+    var DATE_LOCALE = { en: 'en-GB', az: 'az-Latn', ru: 'ru-RU' };
+
     var grid = document.getElementById('newsGrid');
     var currentFilter = 'all';
 
     function render() {
       grid.innerHTML = '';
-      var filtered = currentFilter === 'all' ? NEWS : NEWS.filter(function(n){ return n.category === currentFilter; });
+      var filtered = currentFilter === 'all' ? NEWS : NEWS.filter(function(n){ return pickLang(n.category) === (CAT[lang] || CAT.en)[currentFilter]; });
       if (!filtered.length) {
-        grid.innerHTML = '<div class="empty">No articles in this category yet.</div>';
+        grid.innerHTML = '<div class="empty">' + (UI[lang] || UI.en).empty + '</div>';
         return;
       }
       filtered.forEach(function(item) {
@@ -112,14 +156,15 @@
         a.className = 'news-card';
         a.href = 'news-article.html?slug=' + item.slug;
         var d = new Date(item.date);
-        var dateStr = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+        var dateStr = d.toLocaleDateString(DATE_LOCALE[lang] || 'en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+        var title = pickLang(item.title);
         var imgHtml = item.image
-          ? '<img src="' + item.image + '" alt="' + (item.imageAlt || item.title) + '" loading="lazy" />'
+          ? '<img src="' + item.image + '" alt="' + (item.imageAlt || title) + '" loading="lazy" />'
           : '<span aria-hidden="true">' + (item.imageEmoji || '♟') + '</span>';
         a.innerHTML = '<div class="news-card-img">' + imgHtml + '</div>'
           + '<div class="news-card-body">'
-          + '<div class="news-card-meta"><span class="news-card-cat">' + item.category + '</span><span class="news-card-date">' + dateStr + '</span></div>'
-          + '<h3>' + item.title + '</h3><p>' + item.excerpt + '</p>'
+          + '<div class="news-card-meta"><span class="news-card-cat">' + pickLang(item.category) + '</span><span class="news-card-date">' + dateStr + '</span></div>'
+          + '<h3>' + title + '</h3><p>' + pickLang(item.excerpt) + '</p>'
           + '</div>';
         grid.appendChild(a);
       });

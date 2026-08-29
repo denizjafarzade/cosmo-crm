@@ -94,6 +94,12 @@ app.get('/news-data.js', (req, res) => {
   res.sendFile(path.join(publicDir, 'news-data.js'));
 });
 
+// The homepage's own links point at real filenames (news.html,
+// news-article.html?slug=...) rather than the clean /news /news-article
+// routes above — only /img was served statically, so those links 404'd.
+// This serves every other file in public/ (including those two) by name.
+app.use(express.static(publicDir));
+
 // CRM dashboard at /crm (React SPA — static assets then SPA fallback)
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 // Build assets carry a content hash, so they can be cached hard. The SPA shell

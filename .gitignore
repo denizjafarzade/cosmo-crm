@@ -8,6 +8,8 @@ dist/
 data/
 uploads/homeworks/*
 !uploads/homeworks/.gitkeep
+uploads/content/*
+!uploads/content/.gitkeep
 client/dist/
 *.db
 *.db-journal

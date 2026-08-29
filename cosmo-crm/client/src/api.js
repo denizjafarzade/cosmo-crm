@@ -89,15 +89,13 @@ const api = {
   },
   getLessonStats: () => request('/lessons/stats'),
 
-  // Homeworks (global list)
-  getHomeworks: () => request('/homeworks'),
-  getHomeworksForGroup: (groupId) => request(`/homeworks/for-group/${groupId}`),
-  uploadHomeworks: (formData) => upload('/homeworks/upload', formData),
-  addHomework: (data) => request('/homeworks/add', { method: 'POST', body: data }),
+  // Homeworks — each group owns its own queue now, built on the group's own page.
+  getGroupHomeworks: (groupId) => request(`/homeworks/group/${groupId}`),
+  uploadGroupHomeworks: (groupId, formData) => upload(`/homeworks/group/${groupId}/upload`, formData),
+  addGroupHomework: (groupId, data) => request(`/homeworks/group/${groupId}/add`, { method: 'POST', body: data }),
+  reorderGroupHomeworks: (groupId, order) => request(`/homeworks/group/${groupId}/reorder`, { method: 'PUT', body: { order } }),
   updateHomework: (id, data) => request(`/homeworks/${id}`, { method: 'PUT', body: data }),
-  reorderHomeworks: (order) => request('/homeworks/reorder', { method: 'PUT', body: { order } }),
   deleteHomework: (id) => request(`/homeworks/${id}`, { method: 'DELETE' }),
-  scheduleHomework: (data) => request('/homeworks/schedule-send', { method: 'POST', body: data }),
 
   // Payments
   getPayments: (params) => {

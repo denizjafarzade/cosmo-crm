@@ -23,6 +23,17 @@ r.get('/dashboard', (req, res) => {
   const homeworksSentThisWeek = db.prepare(`SELECT COUNT(*) as cnt FROM send_log WHERE type = 'homework' AND status = 'success' AND created_at >= datetime('now', '-7 days')`).get().cnt;
   const newRegistrations = db.prepare("SELECT COUNT(*) as cnt FROM registrations WHERE status = 'new'").get().cnt;
 
+  // Revenue actually collected this month (confirmed payments, not what's
+  // merely "due"), plus last month's total so the dashboard can show whether
+  // it's tracking up or down.
+  const revenueThisMonth = db.prepare(
+    `SELECT COALESCE(SUM(amount), 0) as total, COUNT(*) as cnt FROM payments WHERE confirmed_at >= datetime('now', 'start of month')`
+  ).get();
+  const revenueLastMonth = db.prepare(
+    `SELECT COALESCE(SUM(amount), 0) as total FROM payments
+     WHERE confirmed_at >= datetime('now', 'start of month', '-1 month') AND confirmed_at < datetime('now', 'start of month')`
+  ).get();
+
   // Attendance stats (last 30 days)
   const attendanceTotal = db.prepare(`SELECT COUNT(*) as cnt FROM lessons WHERE occurred_at >= datetime('now', '-30 days')`).get().cnt;
   const attendancePresent = db.prepare(`SELECT COUNT(*) as cnt FROM lessons WHERE occurred_at >= datetime('now', '-30 days') AND is_excused = 0`).get().cnt;
@@ -65,6 +76,9 @@ r.get('/dashboard', (req, res) => {
     new_students_this_month: newStudentsThisMonth,
     homeworks_sent_this_week: homeworksSentThisWeek,
     new_registrations: newRegistrations,
+    revenue_this_month: revenueThisMonth.total,
+    payments_this_month: revenueThisMonth.cnt,
+    revenue_last_month: revenueLastMonth.total,
     attendance_rate: attendanceRate,
     top_groups: topGroups,
     recent_activity: recentSends,

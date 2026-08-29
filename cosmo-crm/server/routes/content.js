@@ -73,32 +73,39 @@ r.get('/news', (req, res) => {
 });
 
 r.post('/news', (req, res) => {
-  const { slug, category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published } = req.body;
+  const { slug, category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published,
+    title_az, title_ru, excerpt_az, excerpt_ru, category_az, category_ru } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
   let s = slugify(slug || title) || `article-${Date.now()}`;
   if (db.prepare('SELECT 1 FROM news_articles WHERE slug = ?').get(s)) s = `${s}-${Date.now()}`;
   const max = db.prepare('SELECT MAX(sort_order) AS m FROM news_articles').get();
   const info = db.prepare(`INSERT INTO news_articles
-    (slug, category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    (slug, category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published, sort_order,
+     title_az, title_ru, excerpt_az, excerpt_ru, category_az, category_ru)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     s, category || '', date || new Date().toISOString().slice(0, 10), title,
     excerpt || '', image_path || null, image_alt || '', body || '',
-    related_gallery_filter || null, published === false ? 0 : 1, (max?.m || 0) + 1);
+    related_gallery_filter || null, published === false ? 0 : 1, (max?.m || 0) + 1,
+    title_az || null, title_ru || null, excerpt_az || null, excerpt_ru || null, category_az || null, category_ru || null);
   res.status(201).json({ id: info.lastInsertRowid, slug: s });
 });
 
 r.put('/news/:id', (req, res) => {
-  const { category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published, sort_order } = req.body;
+  const { category, date, title, excerpt, image_path, image_alt, body, related_gallery_filter, published, sort_order,
+    title_az, title_ru, excerpt_az, excerpt_ru, category_az, category_ru } = req.body;
   db.prepare(`UPDATE news_articles SET
     category = COALESCE(?, category), date = COALESCE(?, date), title = COALESCE(?, title),
     excerpt = COALESCE(?, excerpt), image_path = COALESCE(?, image_path),
     image_alt = COALESCE(?, image_alt), body = COALESCE(?, body),
     related_gallery_filter = COALESCE(?, related_gallery_filter),
     published = COALESCE(?, published), sort_order = COALESCE(?, sort_order),
+    title_az = ?, title_ru = ?, excerpt_az = ?, excerpt_ru = ?, category_az = ?, category_ru = ?,
     updated_at = datetime('now') WHERE id = ?`)
     .run(category ?? null, date ?? null, title ?? null, excerpt ?? null, image_path ?? null,
       image_alt ?? null, body ?? null, related_gallery_filter ?? null,
-      published === undefined ? null : (published ? 1 : 0), sort_order ?? null, req.params.id);
+      published === undefined ? null : (published ? 1 : 0), sort_order ?? null,
+      title_az || null, title_ru || null, excerpt_az || null, excerpt_ru || null, category_az || null, category_ru || null,
+      req.params.id);
   res.json({ ok: true });
 });
 
@@ -111,16 +118,28 @@ module.exports = r;
 
 // ─── Public news-data.js generation ─────────────────────────────
 // Mirrors the shape the landing page already expects: var NEWS = [...]; var GALLERY = [...];
+//
+// title/excerpt/category stay plain English text — that's what the Content
+// page's fields show and save, unchanged. title_az/title_ru etc. are the
+// optional translations; when set, the landing page's pickLang() picks the
+// visitor's language from the resulting { en, az, ru } object, and when
+// blank it just falls back to the English text, so ordinary entries typed
+// in the CRM with no translations still work exactly as before.
+function langObj(en, az, ru) {
+  if (!az && !ru) return en || '';
+  return { en: en || '', az: az || en || '', ru: ru || en || '' };
+}
+
 function buildNewsDataJs() {
   const news = db.prepare('SELECT * FROM news_articles WHERE published = 1 ORDER BY sort_order, date DESC, id DESC').all();
   const gallery = db.prepare('SELECT * FROM gallery_items WHERE active = 1 ORDER BY sort_order, id').all();
 
   const NEWS = news.map(n => ({
     slug: n.slug,
-    category: n.category || '',
+    category: langObj(n.category, n.category_az, n.category_ru),
     date: n.date || '',
-    title: n.title || '',
-    excerpt: n.excerpt || '',
+    title: langObj(n.title, n.title_az, n.title_ru),
+    excerpt: langObj(n.excerpt, n.excerpt_az, n.excerpt_ru),
     image: n.image_path || '',
     imageAlt: n.image_alt || '',
     relatedGalleryFilter: n.related_gallery_filter || undefined,

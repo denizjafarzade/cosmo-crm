@@ -5,7 +5,13 @@ import { t } from '../i18n';
 
 const CATEGORIES = ['training', 'tournaments', 'awards', 'camps'];
 const EMPTY_G = { category: 'training', title: '', caption: '', image_path: '', alt: '', active: true };
-const EMPTY_N = { title: '', category: '', date: new Date().toISOString().slice(0, 10), excerpt: '', image_path: '', image_alt: '', body: '', related_gallery_filter: '', published: true };
+const EMPTY_N = {
+  title: '', title_az: '', title_ru: '',
+  category: '', category_az: '', category_ru: '',
+  date: new Date().toISOString().slice(0, 10),
+  excerpt: '', excerpt_az: '', excerpt_ru: '',
+  image_path: '', image_alt: '', body: '', related_gallery_filter: '', published: true,
+};
 
 // Shared image picker: uploads immediately and stores the returned path.
 function ImageField({ value, onChange }) {
@@ -231,16 +237,26 @@ export default function Content() {
             </div>
             <div className="modal-body">
               <form onSubmit={saveNews}>
-                <div className="form-group"><label>{t('content.title')} *</label><input className="form-input" required value={nForm.title} onChange={e => setNForm(f => ({ ...f, title: e.target.value }))} /></div>
+                <div className="form-group"><label>{t('content.title')} * (EN)</label><input className="form-input" required value={nForm.title} onChange={e => setNForm(f => ({ ...f, title: e.target.value }))} /></div>
                 <div className="form-row">
-                  <div className="form-group"><label>{t('content.category')}</label><input className="form-input" value={nForm.category} onChange={e => setNForm(f => ({ ...f, category: e.target.value }))} placeholder="Tournament" /></div>
+                  <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.title')} (AZ)</label><input className="form-input" value={nForm.title_az || ''} onChange={e => setNForm(f => ({ ...f, title_az: e.target.value }))} placeholder={nForm.title} /></div>
+                  <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.title')} (RU)</label><input className="form-input" value={nForm.title_ru || ''} onChange={e => setNForm(f => ({ ...f, title_ru: e.target.value }))} placeholder={nForm.title} /></div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group"><label>{t('content.category')} (EN)</label><input className="form-input" value={nForm.category} onChange={e => setNForm(f => ({ ...f, category: e.target.value }))} placeholder="Tournament" /></div>
                   <div className="form-group"><label>{t('content.date')}</label><input className="form-input" type="date" value={nForm.date || ''} onChange={e => setNForm(f => ({ ...f, date: e.target.value }))} /></div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.category')} (AZ)</label><input className="form-input" value={nForm.category_az || ''} onChange={e => setNForm(f => ({ ...f, category_az: e.target.value }))} placeholder={nForm.category} /></div>
+                  <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.category')} (RU)</label><input className="form-input" value={nForm.category_ru || ''} onChange={e => setNForm(f => ({ ...f, category_ru: e.target.value }))} placeholder={nForm.category} /></div>
                 </div>
                 <div className="form-group">
                   <label>{t('content.image')}</label>
                   <ImageField value={nForm.image_path} onChange={v => setNForm(f => ({ ...f, image_path: v }))} />
                 </div>
-                <div className="form-group"><label>{t('content.excerpt')}</label><textarea className="form-input" value={nForm.excerpt} onChange={e => setNForm(f => ({ ...f, excerpt: e.target.value }))} /></div>
+                <div className="form-group"><label>{t('content.excerpt')} (EN)</label><textarea className="form-input" value={nForm.excerpt} onChange={e => setNForm(f => ({ ...f, excerpt: e.target.value }))} /></div>
+                <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.excerpt')} (AZ)</label><textarea className="form-input" value={nForm.excerpt_az || ''} onChange={e => setNForm(f => ({ ...f, excerpt_az: e.target.value }))} placeholder={nForm.excerpt} /></div>
+                <div className="form-group"><label style={{ color: 'var(--slate-400)' }}>{t('content.excerpt')} (RU)</label><textarea className="form-input" value={nForm.excerpt_ru || ''} onChange={e => setNForm(f => ({ ...f, excerpt_ru: e.target.value }))} placeholder={nForm.excerpt} /></div>
                 <div className="form-group">
                   <label>{t('content.body')}</label>
                   <textarea className="form-input" style={{ minHeight: 160, fontFamily: 'monospace', fontSize: '0.8rem' }}

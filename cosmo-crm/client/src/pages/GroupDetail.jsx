@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiArrowLeft, FiCheck, FiPlus, FiTrash2, FiX, FiChevronRight, FiPause, FiPlay } from 'react-icons/fi';
+import { FiArrowLeft, FiCheck, FiPlus, FiTrash2, FiX, FiPause, FiPlay, FiUpload, FiType, FiLink, FiArrowUp, FiArrowDown, FiMenu } from 'react-icons/fi';
 import api from '../api';
 import { t } from '../i18n';
+
+const HW_TYPE_COLORS = { file: 'blue', image: 'green', text: 'amber', link: 'slate' };
+const hwSubtitle = (hw) => {
+  if (hw.type === 'text') return (hw.content || '').substring(0, 60) + ((hw.content || '').length > 60 ? '…' : '');
+  if (hw.type === 'link') return hw.content;
+  return (hw.original_name || hw.filename || '').replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+};
 
 function ConfirmModal({ message, onConfirm, onCancel }) {
   return (
@@ -37,6 +44,11 @@ export default function GroupDetail() {
   const [suspendModal, setSuspendModal] = useState(null); // { student }
   const [suspendLessons, setSuspendLessons] = useState(4);
   const [absentModal, setAbsentModal] = useState(null); // { student }
+  const [hwModal, setHwModal] = useState(null); // 'text' | 'link' | null
+  const [hwForm, setHwForm] = useState({ content: '', caption: '' });
+  const [hwConfirmDelete, setHwConfirmDelete] = useState(null);
+  const hwDragItem = useRef(null);
+  const hwDragOver = useRef(null);
 
   const load = useCallback(() => {
     api.getGroup(id).then(g => {
@@ -98,6 +110,53 @@ export default function GroupDetail() {
   const recordAbsence = async (opts) => {
     await api.recordAbsence(id, absentModal.id, opts);
     setAbsentModal(null);
+    load();
+  };
+
+  // ── Homework queue (built directly on this group's page) ──────────
+  const uploadHwFiles = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+    const fd = new FormData();
+    for (const f of files) fd.append('files', f);
+    await api.uploadGroupHomeworks(id, fd);
+    e.target.value = '';
+    load();
+  };
+
+  const addHwTextOrLink = async (e) => {
+    e.preventDefault();
+    await api.addGroupHomework(id, { type: hwModal, content: hwForm.content, caption: hwForm.caption });
+    setHwModal(null);
+    setHwForm({ content: '', caption: '' });
+    load();
+  };
+
+  const deleteHwConfirmed = async () => {
+    await api.deleteHomework(hwConfirmDelete);
+    setHwConfirmDelete(null);
+    load();
+  };
+
+  const moveHw = async (idx, dir) => {
+    const items = [...(group.homeworks || [])];
+    const target = idx + dir;
+    if (target < 0 || target >= items.length) return;
+    [items[idx], items[target]] = [items[target], items[idx]];
+    await api.reorderGroupHomeworks(id, items.map(h => h.id));
+    load();
+  };
+
+  const hwDragEnd = async () => {
+    if (hwDragItem.current === null || hwDragOver.current === null || hwDragItem.current === hwDragOver.current) {
+      hwDragItem.current = null; hwDragOver.current = null;
+      return;
+    }
+    const items = [...(group.homeworks || [])];
+    const dragged = items.splice(hwDragItem.current, 1)[0];
+    items.splice(hwDragOver.current, 0, dragged);
+    hwDragItem.current = null; hwDragOver.current = null;
+    await api.reorderGroupHomeworks(id, items.map(h => h.id));
     load();
   };
 
@@ -209,7 +268,6 @@ export default function GroupDetail() {
                   <p><strong>Coach:</strong> {group.coach_name || 'None'}</p>
                   <p><strong>Mode:</strong> {group.auto_increment_lessons ? 'Auto' : 'Manual'}</p>
                   <p><strong>Lesson duration:</strong> {group.lesson_duration_minutes || 60} min</p>
-                  <p><strong>Homework starts from:</strong> #{group.homework_start_from || 1}</p>
                 </div>
               )}
             </div>
@@ -333,19 +391,16 @@ export default function GroupDetail() {
           </div>
         </div>
 
-        {/* Homeworks */}
+        {/* Homework queue — built here, one list per group */}
         <div className="card" style={{ marginTop: '1.5rem' }}>
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h2>Homeworks</h2>
+              <h2>Homework Queue</h2>
               {group.homework_enabled ? <span className="badge green">Active</span> : <span className="badge red">Disabled</span>}
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button className={`btn btn-sm ${group.homework_enabled ? 'btn-red' : 'btn-green'}`} onClick={async () => { await api.updateGroup(id, { homework_enabled: !group.homework_enabled }); load(); }}>
-                {group.homework_enabled ? 'Disable' : 'Enable'}
-              </button>
-              <Link to="/homeworks" className="btn btn-sm btn-primary">Manage <FiChevronRight /></Link>
-            </div>
+            <button className={`btn btn-sm ${group.homework_enabled ? 'btn-red' : 'btn-green'}`} onClick={async () => { await api.updateGroup(id, { homework_enabled: !group.homework_enabled }); load(); }}>
+              {group.homework_enabled ? 'Disable' : 'Enable'}
+            </button>
           </div>
           <div className="card-body">
             {!group.homework_enabled && (
@@ -353,26 +408,116 @@ export default function GroupDetail() {
                 Homework auto-send is disabled for this group.
               </div>
             )}
-            <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginBottom: '0.75rem' }}>
-              Starts from Homework #{group.homework_start_from || 1} · Lesson {group.current_lesson_number} completed
+            <div style={{ fontSize: '0.85rem', color: 'var(--slate-500)', marginBottom: '1rem' }}>
+              Lesson {group.current_lesson_number} completed — each finished lesson auto-sends this queue's matching homework to WhatsApp a little later.
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <label className="btn btn-sm btn-primary" style={{ cursor: 'pointer' }}>
+                <FiUpload /> {t('ui.upload_files')}
+                <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp" multiple onChange={uploadHwFiles} style={{ display: 'none' }} />
+              </label>
+              <button className="btn btn-sm btn-outline" onClick={() => { setHwForm({ content: '', caption: '' }); setHwModal('text'); }}>
+                <FiType /> {t('ui.add_text')}
+              </button>
+              <button className="btn btn-sm btn-outline" onClick={() => { setHwForm({ content: '', caption: '' }); setHwModal('link'); }}>
+                <FiLink /> {t('ui.add_link')}
+              </button>
             </div>
             {group.homeworks?.length ? (
-              <ul className="hw-list">
-                {group.homeworks.map(hw => (
-                  <li key={hw.id} className={`hw-item ${hw.sent_to_group ? 'sent' : ''}`} style={hw.is_next && !hw.sent_to_group ? { border: '1px solid var(--primary)', background: '#EEF2FF' } : {}}>
-                    <span className="hw-num" style={hw.is_next && !hw.sent_to_group ? { background: 'var(--primary)' } : {}}>{hw.group_lesson}</span>
-                    <span className="hw-name">
-                      <span className={`badge ${hw.type === 'file' ? 'blue' : hw.type === 'image' ? 'green' : hw.type === 'link' ? 'slate' : 'amber'}`} style={{ fontSize: '0.65rem', marginRight: 6 }}>{hw.type}</span>
-                      {hw.type === 'text' ? hw.content?.substring(0, 50) : hw.type === 'link' ? hw.content : (hw.original_name || '').replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')}
-                    </span>
-                    {hw.sent_to_group ? <span className="badge green">{t('ui.sent')}</span> : hw.is_next ? <span className="badge blue">Next</span> : <span className="badge slate">Queued</span>}
-                  </li>
+              <div>
+                {group.homeworks.map((hw, idx) => (
+                  <div
+                    key={hw.id}
+                    draggable
+                    onDragStart={() => { hwDragItem.current = idx; }}
+                    onDragEnter={() => { hwDragOver.current = idx; }}
+                    onDragEnd={hwDragEnd}
+                    onDragOver={e => e.preventDefault()}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '0.75rem',
+                      padding: '0.6rem 0.75rem', marginBottom: '0.5rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: hw.is_next && !hw.sent_to_group ? '2px solid var(--primary)' : '1px solid var(--slate-200)',
+                      background: hw.sent_to_group ? 'var(--green-bg)' : hw.is_next ? '#EEF2FF' : 'var(--white)',
+                      cursor: 'grab',
+                    }}
+                  >
+                    <FiMenu style={{ color: 'var(--slate-300)', flexShrink: 0 }} />
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                      background: hw.sent_to_group ? 'var(--green)' : hw.is_next ? 'var(--primary)' : 'var(--slate-700)',
+                      color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.78rem', fontWeight: 700,
+                    }}>{hw.homework_number}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {hwSubtitle(hw)}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', marginTop: 2 }}>
+                        <span className={`badge ${HW_TYPE_COLORS[hw.type]}`} style={{ fontSize: '0.62rem' }}>{hw.type}</span>
+                        {hw.sent_to_group ? <span className="badge green" style={{ fontSize: '0.62rem' }}>{t('ui.sent')}</span>
+                          : hw.is_next ? <span className="badge blue" style={{ fontSize: '0.62rem' }}>Next</span>
+                          : <span className="badge slate" style={{ fontSize: '0.62rem' }}>Queued</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+                      <button className="btn btn-sm btn-icon btn-outline" onClick={() => moveHw(idx, -1)} disabled={idx === 0} title="Move up"><FiArrowUp /></button>
+                      <button className="btn btn-sm btn-icon btn-outline" onClick={() => moveHw(idx, 1)} disabled={idx === group.homeworks.length - 1} title="Move down"><FiArrowDown /></button>
+                      <button className="btn btn-sm btn-icon" style={{ color: 'var(--red)' }} onClick={() => setHwConfirmDelete(hw.id)} title={t('ui.delete')}><FiTrash2 /></button>
+                    </div>
+                  </div>
                 ))}
-              </ul>
-            ) : <div className="empty-state"><p>No homeworks mapped. <Link to="/homeworks">Add them here</Link></p></div>}
+              </div>
+            ) : <div className="empty-state"><p>No homeworks queued yet. Upload files, add text, or paste a link above.</p></div>}
           </div>
         </div>
       </div>
+
+      {hwConfirmDelete && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <div className="modal-header"><h3>{t('ui.delete')}</h3><button className="modal-close" onClick={() => setHwConfirmDelete(null)}><FiX /></button></div>
+            <div className="modal-body">
+              <p>Delete this homework? The rest of the queue will renumber.</p>
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setHwConfirmDelete(null)}>{t('ui.cancel')}</button>
+                <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={deleteHwConfirmed}>{t('ui.delete')}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hwModal && (
+        <div className="modal-overlay" onClick={() => setHwModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{hwModal === 'text' ? 'Add Text Homework' : 'Add Link Homework'}</h3>
+              <button className="modal-close" onClick={() => setHwModal(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={addHwTextOrLink}>
+                <div className="form-group">
+                  <label>{hwModal === 'text' ? 'Message *' : 'URL *'}</label>
+                  {hwModal === 'text' ? (
+                    <textarea className="form-input" value={hwForm.content} onChange={e => setHwForm(f => ({ ...f, content: e.target.value }))} placeholder="Write the homework instructions..." required style={{ minHeight: 120 }} />
+                  ) : (
+                    <input className="form-input" value={hwForm.content} onChange={e => setHwForm(f => ({ ...f, content: e.target.value }))} placeholder="https://lichess.org/training/..." required />
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>Caption (optional — sent along with the homework)</label>
+                  <input className="form-input" value={hwForm.caption} onChange={e => setHwForm(f => ({ ...f, caption: e.target.value }))} placeholder={hwModal === 'text' ? 'e.g. Practice these positions' : 'e.g. Solve these 10 puzzles'} />
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn btn-outline" onClick={() => setHwModal(null)}>{t('ui.cancel')}</button>
+                  <button className="btn btn-primary" type="submit"><FiPlus /> Add to Queue</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
