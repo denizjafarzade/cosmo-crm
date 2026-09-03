@@ -307,16 +307,23 @@ r.post('/:id/restore-lesson', (req, res) => {
   res.json({ ok: true });
 });
 
-// Suspend a student for N lessons
+// An "indefinite" pause has no known return date, so it's stored as a lesson
+// number far beyond anything a group will ever reach instead of a real target
+// — everywhere else that checks suspended_until_lesson keeps working as-is,
+// and the student stays paused until someone resumes them manually.
+const INDEFINITE_SUSPEND_LESSON = 999999999;
+
+// Suspend a student for N lessons, or indefinitely (resumed manually)
 r.post('/:id/suspend-student', (req, res) => {
   const groupId = req.params.id;
-  const { student_id, lessons } = req.body;
-  if (!student_id || !lessons || lessons < 1) return res.status(400).json({ error: 'student_id and lessons (≥1) required' });
+  const { student_id, lessons, indefinite } = req.body;
+  if (!student_id) return res.status(400).json({ error: 'student_id required' });
+  if (!indefinite && (!lessons || lessons < 1)) return res.status(400).json({ error: 'student_id and lessons (≥1) required' });
 
   const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(groupId);
   if (!group) return res.status(404).json({ error: 'Group not found' });
 
-  const suspendUntil = group.current_lesson_number + Number(lessons);
+  const suspendUntil = indefinite ? INDEFINITE_SUSPEND_LESSON : group.current_lesson_number + Number(lessons);
   db.prepare(`UPDATE students SET suspended_until_lesson = ?, updated_at = datetime('now') WHERE id = ? AND group_id = ?`)
     .run(suspendUntil, student_id, groupId);
 

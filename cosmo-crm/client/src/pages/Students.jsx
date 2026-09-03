@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar, FiRefreshCw, FiUserX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar, FiRefreshCw, FiUserX, FiSearch } from 'react-icons/fi';
 import { t } from '../i18n';
 import api from '../api';
 import AttendanceCalendar from './AttendanceCalendar';
@@ -28,6 +28,7 @@ export default function Students() {
   const [groups, setGroups] = useState([]);
   const [coaches, setCoaches] = useState([]);
   const [filters, setFilters] = useState({ level: '', group_id: '', payment_status: '' });
+  const [search, setSearch] = useState('');
   const [modal, setModal] = useState(null); // null | 'add' | 'edit' | 'pay'
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -167,7 +168,11 @@ export default function Students() {
     groupBuckets.push(bucket);
   }
   const queueBucket = { id: 'queue', name: t('students.queue'), students: [] };
-  for (const s of students) {
+  const query = search.trim().toLowerCase();
+  const visibleStudents = query
+    ? students.filter(s => `${s.name} ${s.surname}`.toLowerCase().includes(query) || (s.whatsapp_number || '').includes(query))
+    : students;
+  for (const s of visibleStudents) {
     const bucket = s.group_id != null ? byGroupId.get(s.group_id) : null;
     (bucket || queueBucket).students.push(s);
   }
@@ -196,8 +201,19 @@ export default function Students() {
             <option value="due">Due</option>
             <option value="overdue">{t('ui.overdue')}</option>
           </select>
+          <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 160, maxWidth: 260 }}>
+            <FiSearch style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)', pointerEvents: 'none' }} />
+            <input
+              className="form-input"
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('students.search')}
+              style={{ width: '100%', paddingLeft: '2rem' }}
+            />
+          </div>
           <span style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>
-            {students.length} {t('students.count')} · {groupBuckets.filter(b => b.students.length > 0).length} {t('students.groupsCount')}
+            {visibleStudents.length} {t('students.count')} · {groupBuckets.filter(b => b.students.length > 0).length} {t('students.groupsCount')}
             {queueBucket.students.length > 0 && <> · <strong style={{ color: 'var(--amber)' }}>{queueBucket.students.length} {t('students.queue')}</strong></>}
           </span>
         </div>

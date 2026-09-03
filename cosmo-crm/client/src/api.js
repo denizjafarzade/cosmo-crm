@@ -79,7 +79,7 @@ const api = {
   cancelDay: (data) => request('/groups/cancel-day', { method: 'POST', body: data }),
   recordAbsence: (groupId, studentId, { excused, present, lesson_number } = {}) =>
     request(`/groups/${groupId}/record-absence`, { method: 'POST', body: { student_id: studentId, excused, present, lesson_number } }),
-  suspendStudent: (groupId, studentId, lessons) => request(`/groups/${groupId}/suspend-student`, { method: 'POST', body: { student_id: studentId, lessons } }),
+  suspendStudent: (groupId, studentId, lessons, indefinite) => request(`/groups/${groupId}/suspend-student`, { method: 'POST', body: { student_id: studentId, lessons, indefinite } }),
   unsuspendStudent: (groupId, studentId) => request(`/groups/${groupId}/unsuspend-student`, { method: 'POST', body: { student_id: studentId } }),
 
   // Lessons

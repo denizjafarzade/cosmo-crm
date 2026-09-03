@@ -43,6 +43,7 @@ export default function GroupDetail() {
   const [confirm, setConfirm] = useState(null); // { message, onConfirm }
   const [suspendModal, setSuspendModal] = useState(null); // { student }
   const [suspendLessons, setSuspendLessons] = useState(4);
+  const [suspendIndefinite, setSuspendIndefinite] = useState(false);
   const [absentModal, setAbsentModal] = useState(null); // { student }
   const [hwModal, setHwModal] = useState(null); // 'text' | 'link' | null
   const [hwForm, setHwForm] = useState({ content: '', caption: '' });
@@ -94,10 +95,10 @@ export default function GroupDetail() {
     setConfirm({ message: 'Remove student from this group?', onConfirm: async () => { setConfirm(null); await api.updateStudent(studentId, { group_id: null }); load(); api.getStudents({}).then(setAllStudents); } });
   };
 
-  const openSuspend = (student) => { setSuspendLessons(4); setSuspendModal(student); };
+  const openSuspend = (student) => { setSuspendLessons(4); setSuspendIndefinite(false); setSuspendModal(student); };
 
   const doSuspend = async () => {
-    await api.suspendStudent(id, suspendModal.id, suspendLessons);
+    await api.suspendStudent(id, suspendModal.id, suspendLessons, suspendIndefinite);
     setSuspendModal(null);
     load();
   };
@@ -183,26 +184,44 @@ export default function GroupDetail() {
               <button className="modal-close" onClick={() => setSuspendModal(null)}><FiX /></button>
             </div>
             <div className="modal-body">
-              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1.25rem' }}>
-                The student will be automatically skipped (excused) for the next <strong>{suspendLessons}</strong> lesson{suspendLessons !== 1 ? 's' : ''} of this group. Lessons will not count toward their payment cycle. They resume automatically after.
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1rem' }}>
+                The student will be automatically skipped (excused) while paused. Lessons will not count toward their payment cycle.
               </p>
-              <div className="form-group">
-                <label className="form-label">{t('ui.number_of_lessons_to_suspend')}</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  min={1}
-                  max={52}
-                  value={suspendLessons}
-                  onChange={e => setSuspendLessons(Math.max(1, parseInt(e.target.value) || 1))}
-                />
-                <div className="form-hint">
-                  Will resume automatically after lesson #{group.current_lesson_number + suspendLessons} of this group.
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input type="radio" checked={!suspendIndefinite} onChange={() => setSuspendIndefinite(false)} />
+                  For a fixed number of lessons
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input type="radio" checked={suspendIndefinite} onChange={() => setSuspendIndefinite(true)} />
+                  Until I resume it — I'm not sure yet how long
+                </label>
               </div>
+              {suspendIndefinite ? (
+                <p className="form-hint" style={{ marginBottom: '1.25rem' }}>
+                  The student stays paused with no end date. Come back to this student's row and press Resume whenever they're ready.
+                </p>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">{t('ui.number_of_lessons_to_suspend')}</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    min={1}
+                    max={52}
+                    value={suspendLessons}
+                    onChange={e => setSuspendLessons(Math.max(1, parseInt(e.target.value) || 1))}
+                  />
+                  <div className="form-hint">
+                    Will resume automatically after lesson #{group.current_lesson_number + suspendLessons} of this group.
+                  </div>
+                </div>
+              )}
               <div className="form-actions">
                 <button className="btn btn-outline" onClick={() => setSuspendModal(null)}>{t('ui.cancel')}</button>
-                <button className="btn btn-amber" onClick={doSuspend}><FiPause /> Suspend {suspendLessons} lesson{suspendLessons !== 1 ? 's' : ''}</button>
+                <button className="btn btn-amber" onClick={doSuspend}>
+                  <FiPause /> {suspendIndefinite ? 'Pause indefinitely' : `Suspend ${suspendLessons} lesson${suspendLessons !== 1 ? 's' : ''}`}
+                </button>
               </div>
             </div>
           </div>
@@ -342,7 +361,8 @@ export default function GroupDetail() {
                   <tbody>
                     {group.students.map(s => {
                       const isSuspended = s.suspended_until_lesson != null && group.current_lesson_number < s.suspended_until_lesson;
-                      const lessonsLeft = isSuspended ? s.suspended_until_lesson - group.current_lesson_number : 0;
+                      const isIndefinitePause = isSuspended && s.suspended_until_lesson >= 900000000;
+                      const lessonsLeft = isSuspended && !isIndefinitePause ? s.suspended_until_lesson - group.current_lesson_number : 0;
                       return (
                         <tr key={s.id} style={isSuspended ? { background: 'var(--amber-bg)' } : {}}>
                           <td>
@@ -370,7 +390,7 @@ export default function GroupDetail() {
                           </td>
                           <td>
                             {isSuspended
-                              ? <span className="badge amber"><FiPause style={{ marginRight: 3 }} />{lessonsLeft} lesson{lessonsLeft !== 1 ? 's' : ''} left</span>
+                              ? <span className="badge amber"><FiPause style={{ marginRight: 3 }} />{isIndefinitePause ? 'Paused' : `${lessonsLeft} lesson${lessonsLeft !== 1 ? 's' : ''} left`}</span>
                               : <span className="badge green"><FiPlay style={{ marginRight: 3 }} />Active</span>
                             }
                           </td>
