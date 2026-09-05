@@ -230,7 +230,6 @@ r.post('/:id/record-absence', (req, res) => {
     'SELECT * FROM lessons WHERE group_id = ? AND student_id = ? AND lesson_number = ?'
   ).get(groupId, student_id, ln);
 
-  const wasCounting = existing ? existing.counts_toward_payment === 1 : true; // no row = treated as present (auto)
   const nowCounts = present ? 1 : (excused ? 0 : 1);
   const nowAbsent = present ? 0 : 1;
   const nowExcused = present ? 0 : (excused ? 1 : 0);
@@ -246,16 +245,10 @@ r.post('/:id/record-absence', (req, res) => {
          VALUES (?, ?, ?, ?, ?, ?, ?)`
       ).run(groupId, student_id, ln, new Date().toISOString(), nowExcused, nowCounts, nowAbsent);
     }
-    // Keep lessons_since_payment in sync when the "counts" flag flips.
-    if (wasCounting && nowCounts === 0) {
-      db.prepare(
-        "UPDATE students SET lessons_since_payment = MAX(lessons_since_payment - 1, 0), updated_at = datetime('now') WHERE id = ?"
-      ).run(student_id);
-    } else if (!wasCounting && nowCounts === 1) {
-      db.prepare(
-        "UPDATE students SET lessons_since_payment = lessons_since_payment + 1, updated_at = datetime('now') WHERE id = ?"
-      ).run(student_id);
-    }
+    // Re-derive from the lesson rows rather than nudging the counter by ±1 —
+    // deriving is idempotent (re-submitting the same edit twice can't double
+    // count), where an increment/decrement can drift out of sync over time.
+    db.recomputeLessonsSincePayment(student_id);
   })();
 
   res.json({ ok: true, lesson_number: ln, absent: nowAbsent === 1, excused: nowExcused === 1 });

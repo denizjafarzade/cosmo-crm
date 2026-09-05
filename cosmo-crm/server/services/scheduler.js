@@ -9,6 +9,28 @@ function getSetting(key) {
   return row?.value;
 }
 
+// ─── Timezone-aware "now" ────────────────────────────────────────
+// The server's OS clock/timezone (often UTC on a VPS) is not the academy's
+// timezone, so schedule matching must localize explicitly rather than use
+// Date#getDay()/getHours() directly — those read the SERVER's local time,
+// which silently shifts (or entirely skips) every scheduled slot.
+const DOW_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+function getZonedNow(tz) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false,
+    }).formatToParts(new Date());
+    const get = (type) => parts.find(p => p.type === type)?.value;
+    const dayOfWeek = DOW_SHORT.indexOf(get('weekday'));
+    const hour = parseInt(get('hour'), 10) % 24; // ICU can report "24" at midnight
+    const minute = parseInt(get('minute'), 10);
+    return { dayOfWeek, hour, minute, minutesOfDay: hour * 60 + minute };
+  } catch (e) {
+    const now = new Date();
+    return { dayOfWeek: now.getDay(), hour: now.getHours(), minute: now.getMinutes(), minutesOfDay: now.getHours() * 60 + now.getMinutes() };
+  }
+}
+
 // ─── Human-behaviour send window ────────────────────────────────
 // Only send automated messages during daytime hours (in the configured
 // timezone). Anything triggered outside the window is deferred until it opens.
@@ -16,12 +38,7 @@ function withinSendWindow() {
   const tz = getSetting('timezone') || 'Asia/Baku';
   const startH = parseInt(getSetting('send_window_start') || '9', 10);
   const endH = parseInt(getSetting('send_window_end') || '21', 10);
-  let hour;
-  try {
-    hour = parseInt(new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: tz }).format(new Date()), 10) % 24;
-  } catch (e) {
-    hour = new Date().getHours();
-  }
+  const { hour } = getZonedNow(tz);
   return hour >= startH && hour < endH;
 }
 
@@ -29,8 +46,8 @@ function withinSendWindow() {
 // For groups with auto_increment_lessons, mark lesson done at scheduled time
 function checkAutoLessons() {
   const now = new Date();
-  const currentDay = now.getDay();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const tz = getSetting('timezone') || 'Asia/Baku';
+  const { dayOfWeek: currentDay, minutesOfDay: currentMinutes } = getZonedNow(tz);
 
   const schedules = db.prepare(`
     SELECT gs.*, g.id as gid, g.name as group_name, g.current_lesson_number, g.auto_increment_lessons,
@@ -42,12 +59,13 @@ function checkAutoLessons() {
 
   for (const sched of schedules) {
     const [h, m] = sched.time.split(':').map(Number);
-    // The lesson is recorded when it FINISHES, not when it starts, so a student's
-    // attendance calendar only fills in once the lesson has actually happened.
-    // Catching up on any already-finished slot also means a restart (or downtime)
-    // no longer silently skips a lesson.
-    const endMinutes = h * 60 + m + (sched.lesson_duration_minutes || 60);
-    if (currentMinutes < endMinutes) continue;
+    // The lesson is recorded as soon as its scheduled start time arrives — the
+    // student list is filled in present-by-default, and the teacher's later
+    // attendance edit (record-absence) reconciles individual students against
+    // that same row. Catching up on any already-started slot also means a
+    // restart (or downtime) no longer silently skips a lesson.
+    const startMinutes = h * 60 + m;
+    if (currentMinutes < startMinutes) continue;
 
     const idempKey = `autolesson-${sched.gid}-${now.toISOString().slice(0, 10)}-${sched.time}`;
     const existing = db.prepare('SELECT id FROM scheduled_sends WHERE idempotency_key = ?').get(idempKey);
