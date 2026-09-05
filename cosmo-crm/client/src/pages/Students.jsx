@@ -8,7 +8,12 @@ import AttendanceCalendar from './AttendanceCalendar';
 // original values kept as-is for backward compatibility with existing student records.
 const LEVELS = ['new_to_chess', 'beginner', 'intermediate', 'advanced', 'expert', 'not_sure'];
 const levelLabel = (level) => t(`lvl.${level}`) || level;
-const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '', birth_date: '', sector: '', chess_platform: '', chess_username: '', monthly_fee: '' };
+// Official chess federation category/title, separate from the informal skill
+// Level above — most students have none yet and earn these through
+// tournaments, so the list is ordered low to high with an empty "none" option.
+const CHESS_CATEGORIES = ['iii', 'ii', 'i', 'candidate', 'master', 'im', 'gm'];
+const categoryLabel = (cat) => t(`cat.${cat}`) || cat;
+const EMPTY = { name: '', surname: '', whatsapp_number: '', parent_whatsapp: '', level: 'beginner', fide_rating: '', coach_id: '', group_id: '', notes: '', birth_date: '', sector: '', chess_platform: '', chess_username: '', monthly_fee: '', chess_category: '' };
 const SECTORS = () => ({ az: t('sec.az'), ru: t('sec.ru'), en: t('sec.en'), tr: t('sec.tr') });
 const PAYMENT_CYCLE = 8;
 
@@ -59,7 +64,7 @@ export default function Students() {
   useEffect(() => { load(); api.getGroups().then(setGroups); api.getCoaches().then(setCoaches); }, [load]);
 
   const openAdd = () => { setForm(EMPTY); setEditId(null); setModal('add'); };
-  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '', birth_date: s.birth_date || '', sector: s.sector || '', chess_platform: s.chess_platform || '', chess_username: s.chess_username || '', monthly_fee: s.monthly_fee ?? '' }); setEditId(s.id); setModal('edit'); };
+  const openEdit = (s) => { setForm({ name: s.name, surname: s.surname, whatsapp_number: s.whatsapp_number || '', parent_whatsapp: s.parent_whatsapp || '', level: s.level, fide_rating: s.fide_rating ?? '', coach_id: s.coach_id || '', group_id: s.group_id || '', notes: s.notes || '', birth_date: s.birth_date || '', sector: s.sector || '', chess_platform: s.chess_platform || '', chess_username: s.chess_username || '', monthly_fee: s.monthly_fee ?? '', chess_category: s.chess_category || '' }); setEditId(s.id); setModal('edit'); };
   // Pre-fill with what this student is on record to pay, so staff don't have
   // to remember or retype it every cycle — still editable if it's different this time.
   const openPay = (s) => { setEditId(s.id); setPayForm({ amount: s.monthly_fee ?? '', notes: '' }); setModal('pay'); };
@@ -259,7 +264,10 @@ export default function Students() {
                         </button>
                         <br /><span style={{ fontSize: '0.75rem', color: 'var(--slate-400)' }}>{s.whatsapp_number}</span>
                       </td>
-                      <td><span className="badge blue">{levelLabel(s.level)}</span></td>
+                      <td>
+                        <span className="badge blue">{levelLabel(s.level)}</span>
+                        {s.chess_category && <><br /><span className="badge slate" style={{ marginTop: 3 }}>{categoryLabel(s.chess_category)}</span></>}
+                      </td>
                       <td>{ratingCell(s)}</td>
                       <td>{s.fide_rating != null ? s.fide_rating : '—'}</td>
                       <td>{s.monthly_fee != null ? `${s.monthly_fee} AZN` : <span style={{ color: 'var(--slate-300)' }}>—</span>}</td>
@@ -357,9 +365,18 @@ export default function Students() {
                       onChange={e => setForm(f => ({ ...f, chess_username: e.target.value }))} placeholder="blitz & rapid pulled automatically" />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>{t('ui.fide_rating')}</label>
-                  <input className="form-input" type="number" value={form.fide_rating} onChange={e => setForm(f => ({ ...f, fide_rating: e.target.value }))} placeholder="Empty = no official FIDE rating" />
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>{t('ui.fide_rating')}</label>
+                    <input className="form-input" type="number" value={form.fide_rating} onChange={e => setForm(f => ({ ...f, fide_rating: e.target.value }))} placeholder="Empty = no official FIDE rating" />
+                  </div>
+                  <div className="form-group">
+                    <label>{t('students.chessCategory')}</label>
+                    <select className="form-input" value={form.chess_category || ''} onChange={e => setForm(f => ({ ...f, chess_category: e.target.value }))}>
+                      <option value="">{t('ui.none')}</option>
+                      {CHESS_CATEGORIES.map(c => <option key={c} value={c}>{categoryLabel(c)}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <div className="form-group"><label>{t('ui.coach')}</label><select className="form-input" value={form.coach_id} onChange={e => setForm(f => ({ ...f, coach_id: e.target.value }))}><option value="">{t('ui.none')}</option>{coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
                 <div className="form-group"><label>{t('ui.notes')}</label><textarea className="form-input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} /></div>

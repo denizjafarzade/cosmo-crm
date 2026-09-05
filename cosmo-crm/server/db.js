@@ -386,6 +386,12 @@ if (!columnExists('students', 'lessons_adjustment')) {
 if (!columnExists('students', 'monthly_fee')) {
   db.exec('ALTER TABLE students ADD COLUMN monthly_fee REAL');
 }
+// Official chess federation category/title (III degree, II degree, ...,
+// Grandmaster) — separate from the informal `level` used at enrollment, since
+// most students start without one and earn it later through tournaments.
+if (!columnExists('students', 'chess_category')) {
+  db.exec('ALTER TABLE students ADD COLUMN chess_category TEXT');
+}
 
 // --- Cancelled lessons ---
 // A cancellation blocks one timetable slot on one date (or the whole day for a
