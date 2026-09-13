@@ -103,8 +103,14 @@ function checkAutoLessons() {
 
     db.transaction(() => {
       db.prepare("UPDATE groups SET current_lesson_number = ?, updated_at = datetime('now') WHERE id = ?").run(newLesson, sched.gid);
-      const stmtL = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, slot_time) VALUES (?, ?, ?, ?, ?)');
-      for (const s of students) stmtL.run(sched.gid, s.id, newLesson, isoNow, sched.time);
+      const stmtL = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent, slot_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+      for (const s of students) {
+        // A paused student must not accrue lessons while suspended — the
+        // manual "Lesson Done" flow already accounts for this; auto-created
+        // lessons need the same check.
+        const suspended = s.suspended_until_lesson != null && newLesson <= s.suspended_until_lesson;
+        stmtL.run(sched.gid, s.id, newLesson, isoNow, suspended ? 1 : 0, suspended ? 0 : 1, suspended ? 1 : 0, sched.time);
+      }
       // Derive counters from lesson rows (never increment) so they stay correct
       // no matter how attendance is later edited.
       for (const s of students) db.recomputeLessonsSincePayment(s.id);

@@ -174,8 +174,11 @@ r.post('/:id/attendance', (req, res) => {
     const insRow = db.prepare('INSERT INTO lessons (group_id, student_id, lesson_number, occurred_at, is_excused, counts_toward_payment, absent, slot_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 
     for (const s of students) {
-      const isAbsent = absenceMap.has(s.id);
-      const excused = isAbsent ? absenceMap.get(s.id) : false;
+      // A paused student must never accrue lessons while suspended, whether or
+      // not the teacher separately marks them absent for this slot.
+      const suspended = s.suspended_until_lesson != null && lessonNumber <= s.suspended_until_lesson;
+      const isAbsent = absenceMap.has(s.id) || suspended;
+      const excused = suspended || (absenceMap.has(s.id) ? absenceMap.get(s.id) : false);
       const desiredAbsent = isAbsent ? 1 : 0;
       const desiredExcused = isAbsent && excused ? 1 : 0;
       // An absent student is never charged for the lesson — allowed or not. The

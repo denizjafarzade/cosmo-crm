@@ -13,39 +13,39 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --primary: #4F46E5;
-      --primary-light: #6366F1;
-      --accent: #c9a84c;
+      --primary: #B8860B;
+      --primary-light: #DAA520;
+      --accent: #B8860B;
       --accent-light: #e8d5a3;
-      --text: #1E293B;
-      --text-muted: #64748B;
-      --bg: #F8FAFC;
+      --text: #1a1a1a;
+      --text-muted: #555;
+      --bg: #FFFDF7;
       --white: #FFFFFF;
       --green: #16A34A;
-      --border: #E2E8F0;
+      --border: #E8E0D0;
       --surface: #FFFFFF;
-      --hero-bg-from: #0c0f1e;
-      --hero-bg-mid: #151b3a;
-      --hero-bg-to: #0e1628;
-      --hero-glow-1: rgba(79,70,229,0.13);
-      --hero-glow-2: rgba(201,168,76,0.09);
-      --hero-gradient-mid: #EEF2FF;
-      --icon-bg: #EEF2FF;
+      --hero-bg-from: #1a0d03;
+      --hero-bg-mid: #2d1a08;
+      --hero-bg-to: #160b02;
+      --hero-glow-1: rgba(184,134,11,0.18);
+      --hero-glow-2: rgba(201,168,76,0.12);
+      --hero-gradient-mid: #FFF8E7;
+      --icon-bg: #FFF8E7;
       --card-shadow: rgba(0,0,0,0.06);
-      --primary-shadow: rgba(79,70,229,0.25);
-      --nav-bg: rgba(248,250,252,0.9);
-      --footer-bg: #1E293B;
+      --primary-shadow: rgba(184,134,11,0.25);
+      --nav-bg: rgba(255,253,247,0.9);
+      --footer-bg: #1a1a1a;
       --footer-text: rgba(255,255,255,0.6);
       --footer-link: rgba(255,255,255,0.5);
       --footer-border: rgba(255,255,255,0.08);
-      --badge-beginner-bg: #DCFCE7;
-      --badge-beginner-text: #16A34A;
+      --badge-beginner-bg: #FFF8E7;
+      --badge-beginner-text: #B8860B;
       --badge-intermediate-bg: #FEF3C7;
-      --badge-intermediate-text: #D97706;
-      --badge-advanced-bg: #DBEAFE;
-      --badge-advanced-text: #4F46E5;
+      --badge-intermediate-text: #92400E;
+      --badge-advanced-bg: #FFF1CC;
+      --badge-advanced-text: #78350F;
       --carousel-btn-bg: rgba(255,255,255,0.85);
-      --carousel-btn-active-bg: rgba(238,242,255,0.95);
+      --carousel-btn-active-bg: rgba(255,248,231,0.95);
       color-scheme: light;
     }
 
@@ -106,6 +106,13 @@
     .nav-links a:hover { color: var(--primary); }
     .nav-links a.active { color: var(--primary); }
     .nav-utility { display: flex; align-items: center; gap: 0.9rem; justify-self: end; }
+    .mode-toggle-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      font-size: 1rem; line-height: 1; transition: all 0.2s;
+    }
+    .mode-toggle-btn:hover { border-color: var(--primary); color: var(--primary); }
     .lang-dropdown { position: relative; }
     .lang-dropdown-btn {
       display: flex; align-items: center; gap: 0.35rem;
@@ -522,6 +529,23 @@
     .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 0.75rem; }
     .section-header p { color: var(--text-muted); max-width: 550px; margin: 0 auto; }
     .divider { width: 50px; height: 3px; background: var(--primary); margin: 0 auto; border: none; border-radius: 2px; }
+
+    /* One big, faint chess piece per section, sitting behind the real
+       content — alternating which side it's on from section to section
+       rather than mirroring a pair on both sides of the same one. */
+    .chess-deco-wrap { position: relative; overflow: hidden; }
+    .chess-deco-wrap > .section { position: relative; z-index: 1; }
+    .chess-figure-deco {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: clamp(16rem, 32vw, 40rem); line-height: 1;
+      color: var(--primary); opacity: 0.05; z-index: 0;
+      pointer-events: none; user-select: none;
+    }
+    .chess-figure-deco.left { left: -8rem; }
+    .chess-figure-deco.right { right: -8rem; }
+    @media (max-width: 900px) {
+      .chess-figure-deco { display: none; }
+    }
 
     /* ===== LEVELS ===== */
     .levels-grid {
@@ -1219,6 +1243,67 @@
     }
 
     /* ===== LIGHTBOX ===== */
+    /* ===== DISCOUNT OFFER POP-UP ===== */
+    .promo-overlay {
+      position: fixed; inset: 0; z-index: 250; padding: 1.25rem;
+      background: rgba(15, 23, 42, 0.6);
+      display: none; align-items: center; justify-content: center;
+    }
+    .promo-overlay.open { display: flex; }
+    .promo-modal {
+      position: relative; width: min(420px, 100%);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; padding: 2rem 1.75rem 1.75rem;
+      text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+      animation: promoPop 0.35s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes promoPop {
+      from { opacity: 0; transform: scale(0.92) translateY(10px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .promo-modal { animation: none; }
+    }
+    .promo-close {
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.95rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .promo-close:hover { border-color: var(--primary); color: var(--primary); }
+    .promo-badge {
+      display: inline-block; background: var(--icon-bg); color: var(--primary);
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      padding: 0.35rem 0.9rem; border-radius: 50px; margin-bottom: 1rem;
+    }
+    .promo-title {
+      font-family: 'Playfair Display', serif; font-size: 1.45rem;
+      color: var(--text); margin-bottom: 1.35rem; line-height: 1.3;
+    }
+    .promo-plans { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
+    .promo-plan {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 0.75rem 1rem;
+    }
+    .promo-plan-name { font-weight: 600; color: var(--text); font-size: 0.85rem; text-align: left; }
+    .promo-plan-price { display: flex; align-items: baseline; gap: 0.4rem; white-space: nowrap; }
+    .promo-was { color: var(--text-muted); text-decoration: line-through; font-size: 0.82rem; }
+    .promo-now { color: var(--primary); font-weight: 700; font-size: 1.1rem; font-family: 'Playfair Display', serif; }
+    .promo-per { color: var(--text-muted); font-size: 0.68rem; }
+    .promo-cta {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; padding: 0.9rem; border-radius: 50px;
+      background: var(--primary); color: var(--white); font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .promo-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    @media (max-width: 480px) {
+      .promo-modal { padding: 1.5rem 1.25rem 1.25rem; border-radius: 14px; }
+      .promo-title { font-size: 1.2rem; }
+      .promo-plan { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    }
+
     .lightbox {
       position: fixed; inset: 0; z-index: 300; padding: 1.5rem;
       background: rgba(15, 23, 42, 0.92);
@@ -1652,6 +1737,7 @@
     <li class="nav-mobile-cta"><a href="#contact-form" class="nav-cta" data-i18n="common.startLearning">Start Learning</a></li>
   </ul>
   <div class="nav-utility">
+    <button class="mode-toggle-btn" id="modeToggleBtn" type="button" data-mode="light" aria-label="Switch to dark mode">🌙</button>
     <div class="lang-dropdown" id="langDropdown">
       <button class="lang-dropdown-btn" id="langDropdownBtn" type="button" aria-haspopup="true" aria-expanded="false">
         <svg class="lang-dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="lang-dropdown-code" id="langCurrentCode">EN</span><span class="lang-dropdown-caret">▼</span>
@@ -1681,7 +1767,7 @@
     <div class="hero-stats">
       <div class="hero-stat"><div class="num">10+</div><div class="label" data-i18n="stats.experience">Years Coaching</div></div>
       <div class="hero-stat"><div class="num">1500+</div><div class="label" data-i18n="stats.students">Students Taught</div></div>
-      <div class="hero-stat"><div class="num">700+</div><div class="label" data-i18n="stats.tournaments">Rated Students</div></div>
+      <div class="hero-stat"><div class="num">1000+</div><div class="label" data-i18n="stats.tournaments">Rated Students</div></div>
       <div class="hero-stat"><div class="num">10+</div><div class="label" data-i18n="stats.rating">Chess Schools & Centers</div></div>
     </div>
   </div>
@@ -1790,7 +1876,7 @@
 <!-- LEVELS -->
 <div class="section-alt" id="levels">
   <div class="section">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag" data-i18n="levels.tag">Programs</span>
       <h2 data-i18n="levels.title">Levels We Teach</h2>
       <hr class="divider" />
@@ -2147,7 +2233,7 @@
 <!-- ABOUT -->
 <div id="about">
   <div class="section">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag" data-i18n="about.tag">Your Coach</span>
       <h2 data-i18n="about.title">About Me</h2>
       <hr class="divider" />
@@ -2160,7 +2246,7 @@
       <div class="about-text">
         <h3 data-i18n="about.greeting">Hi, I'm <em>Abdulla Shabanov</em></h3>
         <p class="about-role" data-i18n="about.role">Founder & Head Coach of Cosmo Chess</p>
-        <p data-i18n="about.p1">I've been coaching chess for over 10 years. In that time I've worked with more than 1,500 students from countries around the world, and over 700 of them have earned an official chess rating.</p>
+        <p data-i18n="about.p1">I've been coaching chess for over 10 years. In that time I've worked with more than 1,500 students from countries around the world, and over 1,000 of them have earned an official chess rating.</p>
         <p data-i18n="about.p2">My coaching career has taken me through more than 10 schools and education centers in Baku, Moscow, and Dubai.</p>
         <p data-i18n="about.p3">Today my students live and study across Azerbaijan, Europe, the United States, and beyond.</p>
         <p data-i18n="about.p4">I founded Cosmo Chess to bring everything I've learned over the years together under one unified, modern teaching system.</p>
@@ -2190,7 +2276,7 @@
 <!-- FEATURES -->
 <div class="section-alt" id="features">
   <div class="section">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag" data-i18n="features.tag">Why Choose Us</span>
       <h2 data-i18n="features.title">What Makes Us Different</h2>
       <hr class="divider" />
@@ -2269,7 +2355,7 @@
 <!-- TESTIMONIALS -->
 <div id="testimonials">
   <div class="section">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag" data-i18n="testimonials.tag">Your Community</span>
       <h2 data-i18n="testimonials.title">What Our Students & Parents Say</h2>
       <hr class="divider" />
@@ -2363,7 +2449,7 @@
 <!-- CONTACT -->
 <div id="contact">
   <div class="section">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-tag" data-i18n="contact.tag">Get Started</span>
       <h2 data-i18n="contact.title">Contact Us</h2>
       <hr class="divider" />
@@ -2621,84 +2707,33 @@
   <div class="footer-bottom" data-i18n="footer.copyright">&copy; 2026 Cosmo Chess Academy. All rights reserved.</div>
 </footer>
 
-<!--
-  ============================================================
-  TEMPORARY DEV THEME SWITCHER — Remove before production.
-  Delete everything between "THEME SWITCHER START" and
-  "THEME SWITCHER END" comments, plus the <script id="theme-switcher-js">
-  block at the bottom. No other files need to change.
-  ============================================================
--->
-<!-- THEME SWITCHER START -->
-<style id="theme-switcher-css">
-  .theme-switcher-btn {
-    position: fixed; bottom: 2rem; left: 2rem; z-index: 200;
-    width: auto; padding: 0.5rem 1rem; border-radius: 50px;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); font-size: 0.85rem; font-weight: 600;
-    font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;
-    box-shadow: 0 4px 15px var(--card-shadow);
-    transition: all 0.2s;
-  }
-  .theme-switcher-btn:hover { box-shadow: 0 6px 20px var(--card-shadow); transform: translateY(-1px); }
-  .theme-panel {
-    position: fixed; bottom: 5rem; left: 2rem; z-index: 200;
-    width: 260px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 1.25rem; box-shadow: 0 12px 40px var(--card-shadow);
-    display: none; font-family: 'Inter', sans-serif;
-    transition: opacity 0.2s, transform 0.2s;
-  }
-  .theme-panel.open { display: block; }
-  .theme-panel-title {
-    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 0.75rem;
-  }
-  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
-  .theme-swatch {
-    aspect-ratio: 1; border-radius: 10px; border: 2px solid var(--border);
-    cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s;
-    display: flex; flex-direction: column;
-  }
-  .theme-swatch:hover { transform: scale(1.05); }
-  .theme-swatch.active { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
-  .theme-swatch-top { flex: 1; }
-  .theme-swatch-bot { height: 35%; }
-  .theme-swatch-label {
-    position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;
-    font-size: 0.55rem; font-weight: 600; color: inherit; opacity: 0.8;
-  }
-  .theme-mode-toggle {
-    display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
-    margin-bottom: 0.75rem;
-  }
-  .theme-mode-btn {
-    flex: 1; padding: 0.4rem; text-align: center; font-size: 0.8rem; font-weight: 500;
-    font-family: inherit; cursor: pointer; border: none; background: transparent;
-    color: var(--text-muted); transition: all 0.2s;
-  }
-  .theme-mode-btn.active { background: var(--primary); color: var(--white); }
-  .theme-reset {
-    width: 100%; padding: 0.4rem; border-radius: 8px; border: 1px solid var(--border);
-    background: transparent; color: var(--text-muted); font-size: 0.75rem;
-    font-family: inherit; cursor: pointer; transition: all 0.2s;
-  }
-  .theme-reset:hover { border-color: var(--primary); color: var(--primary); }
-</style>
-
-<div id="themeSwitcher">
-  <button class="theme-switcher-btn" id="themeToggleBtn" data-i18n="theme.toggleBtn">🎨 Themes</button>
-  <div class="theme-panel" id="themePanel">
-    <div class="theme-panel-title" data-i18n="theme.colorTheme">Color Theme</div>
-    <div class="theme-grid" id="themeGrid"></div>
-    <div class="theme-panel-title" data-i18n="theme.mode">Mode</div>
-    <div class="theme-mode-toggle">
-      <button class="theme-mode-btn active" data-mode="light" data-i18n="theme.light">☀️ Light</button>
-      <button class="theme-mode-btn" data-mode="dark" data-i18n="theme.dark">🌙 Dark</button>
+<!-- Discount offer pop-up -->
+<div class="promo-overlay" id="promoOverlay">
+  <div class="promo-modal" role="dialog" aria-modal="true" aria-label="Special offer">
+    <button class="promo-close" id="promoClose" type="button" aria-label="Close">✕</button>
+    <div class="promo-badge" data-i18n="promo.badge">Limited-Time Offer</div>
+    <h3 class="promo-title" data-i18n="promo.title">Start Your Chess Journey Today</h3>
+    <div class="promo-plans">
+      <div class="promo-plan">
+        <div class="promo-plan-name" data-i18n="pricing.format.individual">Individual Lessons</div>
+        <div class="promo-plan-price">
+          <span class="promo-was">180 AZN</span>
+          <span class="promo-now">150 AZN</span>
+          <span class="promo-per" data-i18n="pricing.perMonth">/ month</span>
+        </div>
+      </div>
+      <div class="promo-plan">
+        <div class="promo-plan-name" data-i18n="pricing.format.groupLessons">Group Lessons</div>
+        <div class="promo-plan-price">
+          <span class="promo-was">144 AZN</span>
+          <span class="promo-now">120 AZN</span>
+          <span class="promo-per" data-i18n="pricing.perMonth">/ month</span>
+        </div>
+      </div>
     </div>
-    <button class="theme-reset" id="themeReset" data-i18n="theme.reset">↺ Reset to Classic Light</button>
+    <a href="#contact-form" class="promo-cta" id="promoCta" data-i18n="promo.cta">Register Now</a>
   </div>
 </div>
-<!-- THEME SWITCHER END -->
 
 <!-- Gallery Lightbox -->
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Gallery image">
@@ -2863,6 +2898,9 @@
       'pricing.indiv.lessonsPerMonth': 'lessons per month',
       'pricing.indiv.note': 'Each lesson lasts 1 hour.',
       'pricing.note': "Contact us for current availability — we'll help you choose the right package.",
+      'promo.badge': 'Limited-Time Offer',
+      'promo.title': 'Start Your Chess Journey Today',
+      'promo.cta': 'Register Now',
 
       'tournament.tag': 'Free Trial Experience',
       'tournament.title': 'Free Online Tournament Every Sunday',
@@ -2895,7 +2933,7 @@
       'about.badge': 'FIDE Rated',
       'about.greeting': "Hi, I'm <em>Abdulla Shabanov</em>",
       'about.role': 'Founder & Head Coach of Cosmo Chess',
-      'about.p1': "I've been coaching chess for over 10 years. In that time I've worked with more than 1,500 students from countries around the world, and over 700 of them have earned an official chess rating.",
+      'about.p1': "I've been coaching chess for over 10 years. In that time I've worked with more than 1,500 students from countries around the world, and over 1,000 of them have earned an official chess rating.",
       'about.p2': 'My coaching career has taken me through more than 10 schools and education centers in Baku, Moscow, and Dubai.',
       'about.p3': 'Today my students live and study across Azerbaijan, Europe, the United States, and beyond.',
       'about.p4': "I founded Cosmo Chess to bring everything I've learned over the years together under one unified, modern teaching system.",
@@ -3021,13 +3059,6 @@
       'footer.contactTitle': 'Contact',
       'footer.emailLink': 'Email',
       'footer.copyright': '&copy; 2026 Cosmo Chess Academy. All rights reserved.',
-
-      'theme.toggleBtn': '🎨 Themes',
-      'theme.colorTheme': 'Color Theme',
-      'theme.mode': 'Mode',
-      'theme.light': '☀️ Light',
-      'theme.dark': '🌙 Dark',
-      'theme.reset': '↺ Reset to Classic Light'
     },
 
     az: {
@@ -3151,6 +3182,9 @@
       'pricing.indiv.lessonsPerMonth': 'dərs / ay',
       'pricing.indiv.note': 'Hər dərs 1 saat davam edir.',
       'pricing.note': 'Mövcud yerlər haqqında məlumat almaq üçün bizimlə əlaqə saxlayın — sizə uyğun variantı seçməyə kömək edəcəyik.',
+      'promo.badge': 'Məhdud Müddətli Təklif',
+      'promo.title': 'Şahmat Səyahətinizə Bu Gün Başlayın',
+      'promo.cta': 'İndi Qeydiyyatdan Keç',
 
       'tournament.tag': 'Ödənişsiz tanışlıq imkanı',
       'tournament.title': 'Hər Bazar Günü Ödənişsiz Onlayn Turnir',
@@ -3183,7 +3217,7 @@
       'about.badge': 'FIDE reytinqinə malik',
       'about.greeting': 'Salam, mən <em>Abdulla Şabanov</em>',
       'about.role': 'Cosmo Chess-in təsisçisi və baş məşqçisi',
-      'about.p1': '10 ildən artıqdır ki, şahmat tədrisi ilə məşğulam. Bu müddət ərzində dünyanın müxtəlif ölkələrindən 1 500-dən çox şagirdlə çalışmışam və 700-dən çox şagirdim şahmat dərəcəsi əldə edib.',
+      'about.p1': '10 ildən artıqdır ki, şahmat tədrisi ilə məşğulam. Bu müddət ərzində dünyanın müxtəlif ölkələrindən 1 500-dən çox şagirdlə çalışmışam və 1000-dən çox şagirdim şahmat dərəcəsi əldə edib.',
       'about.p2': 'Peşəkar fəaliyyətim ərzində Bakı, Moskva və Dubayda 10-dan çox təhsil mərkəzi və şahmat məktəbində məşqçi kimi çalışmışam.',
       'about.p3': 'Bu gün şagirdlərim Azərbaycanla yanaşı, Avropa, ABŞ və dünyanın digər ölkələrində yaşayır və təhsil alırlar.',
       'about.p4': 'Cosmo Chess-i illər ərzində topladığım təcrübəni vahid və müasir tədris sistemi altında birləşdirmək üçün yaratmışam.',
@@ -3309,13 +3343,6 @@
       'footer.contactTitle': 'Əlaqə',
       'footer.emailLink': 'E-poçt',
       'footer.copyright': '&copy; 2026 Cosmo Chess Academy. Bütün hüquqlar qorunur.',
-
-      'theme.toggleBtn': '🎨 Mövzular',
-      'theme.colorTheme': 'Rəng Mövzusu',
-      'theme.mode': 'Rejim',
-      'theme.light': '☀️ İşıqlı',
-      'theme.dark': '🌙 Tünd',
-      'theme.reset': '↺ Klassik İşıqlıya Qaytar'
     },
 
     ru: {
@@ -3439,6 +3466,9 @@
       'pricing.indiv.lessonsPerMonth': 'занятий / месяц',
       'pricing.indiv.note': 'Каждое занятие длится 1 час.',
       'pricing.note': 'Свяжитесь с нами, чтобы узнать о наличии мест, — мы поможем подобрать подходящий вариант.',
+      'promo.badge': 'Ограниченное предложение',
+      'promo.title': 'Начните свой шахматный путь сегодня',
+      'promo.cta': 'Зарегистрироваться',
 
       'tournament.tag': 'Бесплатная возможность познакомиться с академией',
       'tournament.title': 'Бесплатный онлайн-турнир каждое воскресенье',
@@ -3471,7 +3501,7 @@
       'about.badge': 'Имеет рейтинг FIDE',
       'about.greeting': 'Здравствуйте, меня зовут <em>Абдулла Шабанов</em>',
       'about.role': 'Основатель и главный тренер Cosmo Chess',
-      'about.p1': 'Я занимаюсь шахматным тренерством более 10 лет. За это время я поработал более чем с 1500 учениками из разных стран мира, и более 700 из них получили официальный шахматный рейтинг.',
+      'about.p1': 'Я занимаюсь шахматным тренерством более 10 лет. За это время я поработал более чем с 1500 учениками из разных стран мира, и более 1000 из них получили официальный шахматный рейтинг.',
       'about.p2': 'За годы профессиональной деятельности я работал тренером более чем в 10 школах и образовательных центрах в Баку, Москве и Дубае.',
       'about.p3': 'Сегодня мои ученики живут и учатся в Азербайджане, Европе, США и других странах мира.',
       'about.p4': 'Я создал Cosmo Chess, чтобы объединить накопленный за эти годы опыт в единой современной системе обучения.',
@@ -3597,13 +3627,6 @@
       'footer.contactTitle': 'Контакты',
       'footer.emailLink': 'Email',
       'footer.copyright': '&copy; 2026 Cosmo Chess Academy. Все права защищены.',
-
-      'theme.toggleBtn': '🎨 Темы',
-      'theme.colorTheme': 'Цветовая тема',
-      'theme.mode': 'Режим',
-      'theme.light': '☀️ Светлая',
-      'theme.dark': '🌙 Тёмная',
-      'theme.reset': '↺ Сбросить на классическую светлую'
     }
   };
 
@@ -4546,266 +4569,67 @@
 })();
 </script>
 
-<!-- THEME SWITCHER JS START — Remove before production -->
-<script id="theme-switcher-js">
+<script id="theme-mode-js">
 (function(){
-  var THEMES = {
-    classic: {
-      label: 'Classic', topColor: '#4F46E5', botColor: '#F8FAFC', labelColor: '#fff',
-      light: {
-        '--primary':'#4F46E5','--primary-light':'#6366F1','--accent':'#c9a84c','--accent-light':'#e8d5a3',
-        '--text':'#1E293B','--text-muted':'#64748B','--bg':'#F8FAFC','--white':'#FFFFFF','--green':'#16A34A',
-        '--border':'#E2E8F0','--surface':'#FFFFFF','--hero-gradient-mid':'#EEF2FF','--icon-bg':'#EEF2FF',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(79,70,229,0.25)',
-        '--nav-bg':'rgba(248,250,252,0.9)','--footer-bg':'#1E293B','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
-        '--badge-advanced-bg':'#DBEAFE','--badge-advanced-text':'#4F46E5',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(238,242,255,0.95)',
-        '--hero-bg-from':'#0c0f1e','--hero-bg-mid':'#151b3a','--hero-bg-to':'#0e1628',
-        '--hero-glow-1':'rgba(79,70,229,0.15)','--hero-glow-2':'rgba(201,168,76,0.09)'
-      },
-      dark: {
-        '--primary':'#818CF8','--primary-light':'#A5B4FC','--accent':'#c9a84c','--accent-light':'#e8d5a3',
-        '--text':'#E2E8F0','--text-muted':'#94A3B8','--bg':'#0F172A','--white':'#1E293B','--green':'#4ADE80',
-        '--border':'#334155','--surface':'#1E293B','--hero-gradient-mid':'#1E293B','--icon-bg':'#1E293B',
-        '--card-shadow':'rgba(0,0,0,0.3)','--primary-shadow':'rgba(129,140,248,0.25)',
-        '--nav-bg':'rgba(15,23,42,0.9)','--footer-bg':'#020617','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#064E3B','--badge-beginner-text':'#6EE7B7',
-        '--badge-intermediate-bg':'#78350F','--badge-intermediate-text':'#FCD34D',
-        '--badge-advanced-bg':'#312E81','--badge-advanced-text':'#A5B4FC',
-        '--carousel-btn-bg':'rgba(30,41,59,0.85)','--carousel-btn-active-bg':'rgba(30,41,59,0.95)',
-        '--hero-bg-from':'#060a14','--hero-bg-mid':'#0d1530','--hero-bg-to':'#06101e',
-        '--hero-glow-1':'rgba(129,140,248,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
-      }
-    },
-    royal: {
-      label: 'Royal', topColor: '#B8860B', botColor: '#1a1a1a', labelColor: '#fff',
-      light: {
-        '--primary':'#B8860B','--primary-light':'#DAA520','--accent':'#B8860B','--accent-light':'#e8d5a3',
-        '--text':'#1a1a1a','--text-muted':'#555','--bg':'#FFFDF7','--white':'#FFFFFF','--green':'#16A34A',
-        '--border':'#E8E0D0','--surface':'#FFFFFF','--hero-gradient-mid':'#FFF8E7','--icon-bg':'#FFF8E7',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(184,134,11,0.25)',
-        '--nav-bg':'rgba(255,253,247,0.9)','--footer-bg':'#1a1a1a','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#FFF8E7','--badge-beginner-text':'#B8860B',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#92400E',
-        '--badge-advanced-bg':'#FFF1CC','--badge-advanced-text':'#78350F',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,248,231,0.95)',
-        '--hero-bg-from':'#1a0d03','--hero-bg-mid':'#2d1a08','--hero-bg-to':'#160b02',
-        '--hero-glow-1':'rgba(184,134,11,0.18)','--hero-glow-2':'rgba(201,168,76,0.12)'
-      },
-      dark: {
-        '--primary':'#DAA520','--primary-light':'#F0C040','--accent':'#DAA520','--accent-light':'#e8d5a3',
-        '--text':'#F5F0E0','--text-muted':'#B0A080','--bg':'#121008','--white':'#1E1A10','--green':'#4ADE80',
-        '--border':'#3D3520','--surface':'#1E1A10','--hero-gradient-mid':'#1E1A10','--icon-bg':'#2A2418',
-        '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(218,165,32,0.25)',
-        '--nav-bg':'rgba(18,16,8,0.9)','--footer-bg':'#0A0800','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#3D3520','--badge-beginner-text':'#DAA520',
-        '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#F0C040',
-        '--badge-advanced-bg':'#3D3010','--badge-advanced-text':'#FFD700',
-        '--carousel-btn-bg':'rgba(30,26,16,0.85)','--carousel-btn-active-bg':'rgba(42,36,24,0.95)',
-        '--hero-bg-from':'#0a0700','--hero-bg-mid':'#140e03','--hero-bg-to':'#080500',
-        '--hero-glow-1':'rgba(218,165,32,0.14)','--hero-glow-2':'rgba(201,168,76,0.08)'
-      }
-    },
-    midnight: {
-      label: 'Midnight', topColor: '#C9A84C', botColor: '#0B1120', labelColor: '#C9A84C',
-      light: {
-        '--primary':'#1E3A5F','--primary-light':'#2D5A8E','--accent':'#C9A84C','--accent-light':'#e8d5a3',
-        '--text':'#0B1120','--text-muted':'#4A5568','--bg':'#F0F4F8','--white':'#FFFFFF','--green':'#16A34A',
-        '--border':'#D2D8E2','--surface':'#FFFFFF','--hero-gradient-mid':'#E2E8F0','--icon-bg':'#E2E8F0',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(30,58,95,0.25)',
-        '--nav-bg':'rgba(240,244,248,0.9)','--footer-bg':'#0B1120','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
-        '--badge-advanced-bg':'#DBEAFE','--badge-advanced-text':'#1E3A5F',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(226,232,240,0.95)',
-        '--hero-bg-from':'#07091a','--hero-bg-mid':'#0d1330','--hero-bg-to':'#060818',
-        '--hero-glow-1':'rgba(30,58,95,0.2)','--hero-glow-2':'rgba(201,168,76,0.12)'
-      },
-      dark: {
-        '--primary':'#C9A84C','--primary-light':'#E0C068','--accent':'#C9A84C','--accent-light':'#e8d5a3',
-        '--text':'#E2E8F0','--text-muted':'#8896A8','--bg':'#0B1120','--white':'#152238','--green':'#4ADE80',
-        '--border':'#1E3050','--surface':'#152238','--hero-gradient-mid':'#152238','--icon-bg':'#1E3050',
-        '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(201,168,76,0.25)',
-        '--nav-bg':'rgba(11,17,32,0.9)','--footer-bg':'#060A14','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#0A2E1A','--badge-beginner-text':'#6EE7B7',
-        '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#FCD34D',
-        '--badge-advanced-bg':'#1E3050','--badge-advanced-text':'#C9A84C',
-        '--carousel-btn-bg':'rgba(21,34,56,0.85)','--carousel-btn-active-bg':'rgba(30,48,80,0.95)',
-        '--hero-bg-from':'#050810','--hero-bg-mid':'#0b1120','--hero-bg-to':'#040709',
-        '--hero-glow-1':'rgba(201,168,76,0.12)','--hero-glow-2':'rgba(30,58,95,0.15)'
-      }
-    },
-    emerald: {
-      label: 'Emerald', topColor: '#059669', botColor: '#F0FDF4', labelColor: '#fff',
-      light: {
-        '--primary':'#059669','--primary-light':'#10B981','--accent':'#059669','--accent-light':'#A7F3D0',
-        '--text':'#1E293B','--text-muted':'#64748B','--bg':'#F0FDF4','--white':'#FFFFFF','--green':'#059669',
-        '--border':'#D1FAE5','--surface':'#FFFFFF','--hero-gradient-mid':'#ECFDF5','--icon-bg':'#ECFDF5',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(5,150,105,0.25)',
-        '--nav-bg':'rgba(240,253,244,0.9)','--footer-bg':'#064E3B','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#D1FAE5','--badge-beginner-text':'#059669',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
-        '--badge-advanced-bg':'#A7F3D0','--badge-advanced-text':'#065F46',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(236,253,245,0.95)',
-        '--hero-bg-from':'#011a10','--hero-bg-mid':'#022c1c','--hero-bg-to':'#010e0a',
-        '--hero-glow-1':'rgba(5,150,105,0.18)','--hero-glow-2':'rgba(201,168,76,0.09)'
-      },
-      dark: {
-        '--primary':'#34D399','--primary-light':'#6EE7B7','--accent':'#34D399','--accent-light':'#A7F3D0',
-        '--text':'#E2E8F0','--text-muted':'#94A3B8','--bg':'#022C22','--white':'#064E3B','--green':'#34D399',
-        '--border':'#065F46','--surface':'#064E3B','--hero-gradient-mid':'#064E3B','--icon-bg':'#065F46',
-        '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(52,211,153,0.25)',
-        '--nav-bg':'rgba(2,44,34,0.9)','--footer-bg':'#011D17','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#065F46','--badge-beginner-text':'#6EE7B7',
-        '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#FCD34D',
-        '--badge-advanced-bg':'#064E3B','--badge-advanced-text':'#34D399',
-        '--carousel-btn-bg':'rgba(6,78,59,0.85)','--carousel-btn-active-bg':'rgba(6,95,70,0.95)',
-        '--hero-bg-from':'#010e08','--hero-bg-mid':'#011a0e','--hero-bg-to':'#010a06',
-        '--hero-glow-1':'rgba(52,211,153,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
-      }
-    },
-    ocean: {
-      label: 'Ocean', topColor: '#0284C7', botColor: '#F0F9FF', labelColor: '#fff',
-      light: {
-        '--primary':'#0284C7','--primary-light':'#0EA5E9','--accent':'#0284C7','--accent-light':'#BAE6FD',
-        '--text':'#0C4A6E','--text-muted':'#64748B','--bg':'#F0F9FF','--white':'#FFFFFF','--green':'#16A34A',
-        '--border':'#BAE6FD','--surface':'#FFFFFF','--hero-gradient-mid':'#E0F2FE','--icon-bg':'#E0F2FE',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(2,132,199,0.25)',
-        '--nav-bg':'rgba(240,249,255,0.9)','--footer-bg':'#0C4A6E','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#DCFCE7','--badge-beginner-text':'#16A34A',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#D97706',
-        '--badge-advanced-bg':'#E0F2FE','--badge-advanced-text':'#0284C7',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(224,242,254,0.95)',
-        '--hero-bg-from':'#050e1c','--hero-bg-mid':'#0a1e38','--hero-bg-to':'#040c14',
-        '--hero-glow-1':'rgba(2,132,199,0.18)','--hero-glow-2':'rgba(201,168,76,0.09)'
-      },
-      dark: {
-        '--primary':'#38BDF8','--primary-light':'#7DD3FC','--accent':'#38BDF8','--accent-light':'#BAE6FD',
-        '--text':'#E2E8F0','--text-muted':'#94A3B8','--bg':'#0C1929','--white':'#172A3E','--green':'#4ADE80',
-        '--border':'#1E3A5F','--surface':'#172A3E','--hero-gradient-mid':'#172A3E','--icon-bg':'#1E3A5F',
-        '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(56,189,248,0.25)',
-        '--nav-bg':'rgba(12,25,41,0.9)','--footer-bg':'#060E18','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#064E3B','--badge-beginner-text':'#6EE7B7',
-        '--badge-intermediate-bg':'#78350F','--badge-intermediate-text':'#FCD34D',
-        '--badge-advanced-bg':'#1E3A5F','--badge-advanced-text':'#38BDF8',
-        '--carousel-btn-bg':'rgba(23,42,62,0.85)','--carousel-btn-active-bg':'rgba(30,58,95,0.95)',
-        '--hero-bg-from':'#04090f','--hero-bg-mid':'#081422','--hero-bg-to':'#03060c',
-        '--hero-glow-1':'rgba(56,189,248,0.12)','--hero-glow-2':'rgba(201,168,76,0.07)'
-      }
-    },
-    chessboard: {
-      label: 'Chess', topColor: '#8B6F47', botColor: '#FFFBF0', labelColor: '#fff',
-      light: {
-        '--primary':'#8B6F47','--primary-light':'#A0845C','--accent':'#C9A84C','--accent-light':'#e8d5a3',
-        '--text':'#3E2C1C','--text-muted':'#7A6A5A','--bg':'#FFFBF0','--white':'#FFFFFF','--green':'#16A34A',
-        '--border':'#E8DCC8','--surface':'#FFFFFF','--hero-gradient-mid':'#FFF5E0','--icon-bg':'#FFF5E0',
-        '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(139,111,71,0.25)',
-        '--nav-bg':'rgba(255,251,240,0.9)','--footer-bg':'#3E2C1C','--footer-text':'rgba(255,255,255,0.6)',
-        '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
-        '--badge-beginner-bg':'#FFF5E0','--badge-beginner-text':'#8B6F47',
-        '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#92400E',
-        '--badge-advanced-bg':'#F3E8D0','--badge-advanced-text':'#5C4033',
-        '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,245,224,0.95)',
-        '--hero-bg-from':'#180c04','--hero-bg-mid':'#2c1808','--hero-bg-to':'#140a03',
-        '--hero-glow-1':'rgba(139,111,71,0.2)','--hero-glow-2':'rgba(201,168,76,0.14)'
-      },
-      dark: {
-        '--primary':'#C9A84C','--primary-light':'#DAB960','--accent':'#C9A84C','--accent-light':'#e8d5a3',
-        '--text':'#F0E6D0','--text-muted':'#A0906A','--bg':'#1A140C','--white':'#2A2018','--green':'#4ADE80',
-        '--border':'#3E3020','--surface':'#2A2018','--hero-gradient-mid':'#2A2018','--icon-bg':'#3E3020',
-        '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(201,168,76,0.25)',
-        '--nav-bg':'rgba(26,20,12,0.9)','--footer-bg':'#100C06','--footer-text':'rgba(255,255,255,0.5)',
-        '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
-        '--badge-beginner-bg':'#3E3020','--badge-beginner-text':'#C9A84C',
-        '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#DAB960',
-        '--badge-advanced-bg':'#3E3020','--badge-advanced-text':'#E0C068',
-        '--carousel-btn-bg':'rgba(42,32,24,0.85)','--carousel-btn-active-bg':'rgba(62,48,32,0.95)',
-        '--hero-bg-from':'#0e0805','--hero-bg-mid':'#1a1008','--hero-bg-to':'#0a0603',
-        '--hero-glow-1':'rgba(201,168,76,0.14)','--hero-glow-2':'rgba(139,111,71,0.1)'
-      }
-    }
+  // Single fixed color theme (Royal) with a light/dark mode toggle, controlled
+  // from the navbar. :root above already holds the Royal light palette, so
+  // this only needs to know the dark variant to switch to.
+  var ROYAL_DARK = {
+    '--primary':'#DAA520','--primary-light':'#F0C040','--accent':'#DAA520','--accent-light':'#e8d5a3',
+    '--text':'#F5F0E0','--text-muted':'#B0A080','--bg':'#121008','--white':'#1E1A10','--green':'#4ADE80',
+    '--border':'#3D3520','--surface':'#1E1A10','--hero-gradient-mid':'#1E1A10','--icon-bg':'#2A2418',
+    '--card-shadow':'rgba(0,0,0,0.4)','--primary-shadow':'rgba(218,165,32,0.25)',
+    '--nav-bg':'rgba(18,16,8,0.9)','--footer-bg':'#0A0800','--footer-text':'rgba(255,255,255,0.5)',
+    '--footer-link':'rgba(255,255,255,0.4)','--footer-border':'rgba(255,255,255,0.06)',
+    '--badge-beginner-bg':'#3D3520','--badge-beginner-text':'#DAA520',
+    '--badge-intermediate-bg':'#3D2E10','--badge-intermediate-text':'#F0C040',
+    '--badge-advanced-bg':'#3D3010','--badge-advanced-text':'#FFD700',
+    '--carousel-btn-bg':'rgba(30,26,16,0.85)','--carousel-btn-active-bg':'rgba(42,36,24,0.95)',
+    '--hero-bg-from':'#0a0700','--hero-bg-mid':'#140e03','--hero-bg-to':'#080500',
+    '--hero-glow-1':'rgba(218,165,32,0.14)','--hero-glow-2':'rgba(201,168,76,0.08)'
   };
+  var ROYAL_LIGHT = {
+    '--primary':'#B8860B','--primary-light':'#DAA520','--accent':'#B8860B','--accent-light':'#e8d5a3',
+    '--text':'#1a1a1a','--text-muted':'#555','--bg':'#FFFDF7','--white':'#FFFFFF','--green':'#16A34A',
+    '--border':'#E8E0D0','--surface':'#FFFFFF','--hero-gradient-mid':'#FFF8E7','--icon-bg':'#FFF8E7',
+    '--card-shadow':'rgba(0,0,0,0.06)','--primary-shadow':'rgba(184,134,11,0.25)',
+    '--nav-bg':'rgba(255,253,247,0.9)','--footer-bg':'#1a1a1a','--footer-text':'rgba(255,255,255,0.6)',
+    '--footer-link':'rgba(255,255,255,0.5)','--footer-border':'rgba(255,255,255,0.08)',
+    '--badge-beginner-bg':'#FFF8E7','--badge-beginner-text':'#B8860B',
+    '--badge-intermediate-bg':'#FEF3C7','--badge-intermediate-text':'#92400E',
+    '--badge-advanced-bg':'#FFF1CC','--badge-advanced-text':'#78350F',
+    '--carousel-btn-bg':'rgba(255,255,255,0.85)','--carousel-btn-active-bg':'rgba(255,248,231,0.95)',
+    '--hero-bg-from':'#1a0d03','--hero-bg-mid':'#2d1a08','--hero-bg-to':'#160b02',
+    '--hero-glow-1':'rgba(184,134,11,0.18)','--hero-glow-2':'rgba(201,168,76,0.12)'
+  };
+  var MODES = { light: ROYAL_LIGHT, dark: ROYAL_DARK };
 
-  var currentTheme = 'classic';
-  var currentMode = 'light';
   var root = document.documentElement;
-  var panel = document.getElementById('themePanel');
-  var grid = document.getElementById('themeGrid');
-  var toggleBtn = document.getElementById('themeToggleBtn');
+  var btn = document.getElementById('modeToggleBtn');
 
-  // Build swatches
-  Object.keys(THEMES).forEach(function(key) {
-    var t = THEMES[key];
-    var el = document.createElement('div');
-    el.className = 'theme-swatch' + (key === currentTheme ? ' active' : '');
-    el.dataset.theme = key;
-    el.innerHTML = '<div class="theme-swatch-top" style="background:'+t.topColor+'"></div>' +
-      '<div class="theme-swatch-bot" style="background:'+t.botColor+'"></div>' +
-      '<span class="theme-swatch-label" style="color:'+t.labelColor+'">'+t.label+'</span>';
-    el.addEventListener('click', function(){ applyTheme(key, currentMode); });
-    grid.appendChild(el);
-  });
-
-  function applyTheme(theme, mode) {
-    currentTheme = theme;
-    currentMode = mode;
-    var vars = THEMES[theme][mode];
+  function applyMode(mode) {
+    var vars = MODES[mode];
     Object.keys(vars).forEach(function(k) { root.style.setProperty(k, vars[k]); });
     root.style.colorScheme = mode;
-
-    // Update swatch active states
-    grid.querySelectorAll('.theme-swatch').forEach(function(s) {
-      s.classList.toggle('active', s.dataset.theme === theme);
-    });
-
-    // Update mode buttons
-    panel.querySelectorAll('.theme-mode-btn').forEach(function(b) {
-      b.classList.toggle('active', b.dataset.mode === mode);
-    });
-
-    // Persist
-    try { localStorage.setItem('cosmo-theme', JSON.stringify({theme:theme,mode:mode})); } catch(e){}
+    if (btn) {
+      btn.textContent = mode === 'dark' ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.dataset.mode = mode;
+    }
+    try { localStorage.setItem('cosmo-mode', mode); } catch(e){}
   }
 
-  // Mode buttons
-  panel.querySelectorAll('.theme-mode-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(){ applyTheme(currentTheme, btn.dataset.mode); });
-  });
+  if (btn) {
+    btn.addEventListener('click', function(){
+      applyMode(btn.dataset.mode === 'dark' ? 'light' : 'dark');
+    });
+  }
 
-  // Reset
-  document.getElementById('themeReset').addEventListener('click', function(){
-    applyTheme('classic','light');
-  });
-
-  // Toggle panel
-  toggleBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    panel.classList.toggle('open');
-  });
-  document.addEventListener('click', function(e) {
-    if (!panel.contains(e.target) && e.target !== toggleBtn) panel.classList.remove('open');
-  });
-
-  // Restore from localStorage
-  try {
-    var saved = JSON.parse(localStorage.getItem('cosmo-theme'));
-    if (saved && THEMES[saved.theme]) applyTheme(saved.theme, saved.mode);
-  } catch(e){}
+  var saved = 'light';
+  try { saved = localStorage.getItem('cosmo-mode') || 'light'; } catch(e){}
+  applyMode(saved === 'dark' ? 'dark' : 'light');
 })();
 </script>
-<!-- THEME SWITCHER JS END -->
 
 <script>
 (function(){
@@ -5572,6 +5396,60 @@
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+})();
+
+/* ---- Big flanking chess figures: one large, faint piece per section,
+   alternating which side it sits on as you scroll down the page ---- */
+(function(){
+  var TARGETS = [
+    { id: 'levels', glyph: '♞', side: 'right' },
+    { id: 'about', glyph: '♝', side: 'left' },
+    { id: 'how', glyph: '♜', side: 'right' },
+    { id: 'features', glyph: '♛', side: 'left' },
+    { id: 'testimonials', glyph: '♚', side: 'right' },
+    { id: 'faq', glyph: '♟', side: 'left' },
+  ];
+  TARGETS.forEach(function(t){
+    var wrap = document.getElementById(t.id);
+    if (!wrap) return;
+    wrap.classList.add('chess-deco-wrap');
+    var fig = document.createElement('span');
+    fig.className = 'chess-figure-deco ' + t.side;
+    fig.setAttribute('aria-hidden', 'true');
+    fig.textContent = t.glyph;
+    wrap.insertBefore(fig, wrap.firstChild);
+  });
+})();
+
+/* ---- Discount offer pop-up: first appears 8s after load, then re-appears
+   every 2 minutes for the rest of the visit ---- */
+(function(){
+  var overlay = document.getElementById('promoOverlay');
+  if (!overlay) return;
+  var closeBtn = document.getElementById('promoClose');
+  var cta = document.getElementById('promoCta');
+
+  function show() {
+    if (overlay.classList.contains('open')) return; // don't stack re-triggers
+    overlay.classList.add('open');
+  }
+  function hide() {
+    overlay.classList.remove('open');
+  }
+
+  closeBtn.addEventListener('click', hide);
+  cta.addEventListener('click', hide);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) hide();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hide();
+  });
+
+  setTimeout(function () {
+    show();
+    setInterval(show, 2 * 60 * 1000);
+  }, 8000);
 })();
 
 /* ---- Scroll progress: knight rides the reading progress under the navbar ---- */
