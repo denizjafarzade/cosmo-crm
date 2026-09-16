@@ -7,6 +7,33 @@ r.get('/weekly', (req, res) => {
   res.json(rows.map(r => ({ ...r, report: JSON.parse(r.report_json) })));
 });
 
+// Revenue per calendar month, oldest first, so the CRM can chart/compare
+// income month over month rather than just this-month-vs-last-month.
+r.get('/revenue-monthly', (req, res) => {
+  const months = Math.min(parseInt(req.query.months, 10) || 12, 36);
+  const rows = db.prepare(`
+    SELECT strftime('%Y-%m', confirmed_at) as month, COALESCE(SUM(amount), 0) as total, COUNT(*) as cnt
+    FROM payments
+    WHERE confirmed_at >= datetime('now', 'start of month', '-' || ? || ' months')
+    GROUP BY month
+    ORDER BY month ASC
+  `).all(months - 1);
+
+  // Fill in any month with no payments as a 0 bar, so gaps don't look like
+  // missing data on the chart.
+  const byMonth = new Map(rows.map(r => [r.month, r]));
+  const out = [];
+  const cursor = new Date();
+  cursor.setDate(1);
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    const row = byMonth.get(key);
+    out.push({ month: key, total: row ? row.total : 0, count: row ? row.cnt : 0 });
+  }
+  res.json(out);
+});
+
 r.get('/dashboard', (req, res) => {
   const totalStudents = db.prepare("SELECT COUNT(*) as cnt FROM students WHERE active = 1").get().cnt;
   const paymentSummary = {

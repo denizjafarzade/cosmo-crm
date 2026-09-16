@@ -132,6 +132,7 @@ const api = {
 
   // Reports
   getWeeklyReports: () => request('/reports/weekly'),
+  getMonthlyRevenue: (months) => request(`/reports/revenue-monthly${months ? `?months=${months}` : ''}`),
 
   // WhatsApp
   waStatus: () => request('/whatsapp/status'),

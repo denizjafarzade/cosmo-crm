@@ -4,7 +4,7 @@ const r = Router();
 
 r.get('/', (req, res) => {
   const { level, group_id, coach_id, payment_status, active } = req.query;
-  let sql = `SELECT s.*, g.name as group_name, c.name as coach_name
+  let sql = `SELECT s.*, g.name as group_name, g.current_lesson_number as group_current_lesson, c.name as coach_name
     FROM students s
     LEFT JOIN groups g ON s.group_id = g.id
     LEFT JOIN coaches c ON s.coach_id = c.id WHERE 1=1`;
@@ -109,8 +109,12 @@ r.put('/:id', (req, res) => {
   res.json({ ok: true, updated: info.changes });
 });
 
+// Soft-delete: keeps the student's record (name, contact, payment/lesson
+// history) but detaches them from any group and pause state, so they never
+// factor into future lessons, payments, or reminders again.
 r.delete('/:id', (req, res) => {
-  db.prepare('UPDATE students SET active = 0, updated_at = datetime(\'now\') WHERE id = ?').run(req.params.id);
+  db.prepare(`UPDATE students SET active = 0, group_id = NULL, coach_id = NULL,
+    suspended_until_lesson = NULL, updated_at = datetime('now') WHERE id = ?`).run(req.params.id);
   res.json({ ok: true });
 });
 

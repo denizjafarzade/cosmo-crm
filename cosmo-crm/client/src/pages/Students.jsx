@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar, FiRefreshCw, FiUserX, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiX, FiCalendar, FiRefreshCw, FiUserX, FiSearch, FiPause, FiPlay } from 'react-icons/fi';
 import { t } from '../i18n';
 import api from '../api';
 import AttendanceCalendar from './AttendanceCalendar';
@@ -45,6 +45,23 @@ export default function Students() {
   const [removeFor, setRemoveFor] = useState(null);
   const [refreshingId, setRefreshingId] = useState(null);
   const [adjustingId, setAdjustingId] = useState(null);
+  const [suspendFor, setSuspendFor] = useState(null);
+  const [suspendLessons, setSuspendLessons] = useState(4);
+  const [suspendIndefinite, setSuspendIndefinite] = useState(false);
+
+  // Suspension is tracked against the STUDENT's own group, so pausing only
+  // makes sense for a student who's actually placed in one.
+  const isPaused = (s) => s.suspended_until_lesson != null && s.group_current_lesson != null && s.group_current_lesson < s.suspended_until_lesson;
+  const openSuspend = (s) => { setSuspendLessons(4); setSuspendIndefinite(false); setSuspendFor(s); };
+  const doSuspend = async () => {
+    await api.suspendStudent(suspendFor.group_id, suspendFor.id, suspendLessons, suspendIndefinite);
+    setSuspendFor(null);
+    load();
+  };
+  const doUnsuspend = async (s) => {
+    await api.unsuspendStudent(s.group_id, s.id);
+    load();
+  };
 
   const adjustLessons = async (s, delta) => {
     setAdjustingId(s.id);
@@ -283,6 +300,14 @@ export default function Students() {
                         )}
                       </td>
                       <td>
+                        {isPaused(s) && (
+                          <div style={{ marginBottom: 4 }}>
+                            <span className="badge amber" style={{ fontSize: '0.65rem' }}>
+                              <FiPause style={{ marginRight: 3 }} />
+                              {s.suspended_until_lesson >= 900000000 ? 'Paused' : `${s.suspended_until_lesson - s.group_current_lesson} left`}
+                            </span>
+                          </div>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                           <button className="btn btn-sm btn-outline btn-icon" title={t('students.decLesson')}
                             disabled={adjustingId === s.id || s.lessons_since_payment <= 0}
@@ -299,6 +324,11 @@ export default function Students() {
                           <button className="btn btn-sm btn-outline btn-icon" onClick={() => openEdit(s)} title="Edit"><FiEdit2 /></button>
                           {s.chess_username && (
                             <button className="btn btn-sm btn-outline btn-icon" disabled={refreshingId === s.id} onClick={() => doRefreshRatings(s)} title="Refresh online ratings"><FiRefreshCw /></button>
+                          )}
+                          {s.group_id != null && (
+                            isPaused(s)
+                              ? <button className="btn btn-sm btn-outline btn-icon" style={{ color: 'var(--green)' }} onClick={() => doUnsuspend(s)} title="Resume now"><FiPlay /></button>
+                              : <button className="btn btn-sm btn-outline btn-icon" style={{ color: 'var(--amber)' }} onClick={() => openSuspend(s)} title="Pause lessons"><FiPause /></button>
                           )}
                           <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
                           {sev.level === 'critical' ? (
@@ -435,6 +465,55 @@ export default function Students() {
                 <button className="btn btn-outline" onClick={() => setRemoveFor(null)}>{t('ui.cancel')}</button>
                 <button className="btn btn-outline" onClick={() => { const s = removeFor; setRemoveFor(null); openReason(s); }}>{t('students.addReasonInstead')}</button>
                 <button className="btn" style={{ background: 'var(--red)', color: '#fff' }} onClick={doRemove}>{t('ui.remove')}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {suspendFor && (
+        <div className="modal-overlay" onClick={() => setSuspendFor(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <div className="modal-header">
+              <h3>Pause Lessons — {suspendFor.name} {suspendFor.surname}</h3>
+              <button className="modal-close" onClick={() => setSuspendFor(null)}><FiX /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1rem' }}>
+                The student will be automatically skipped (excused) while paused. Lessons will not count toward their payment cycle.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input type="radio" checked={!suspendIndefinite} onChange={() => setSuspendIndefinite(false)} />
+                  For a fixed number of lessons
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  <input type="radio" checked={suspendIndefinite} onChange={() => setSuspendIndefinite(true)} />
+                  Until I resume it — I'm not sure yet how long
+                </label>
+              </div>
+              {suspendIndefinite ? (
+                <p className="form-hint" style={{ marginBottom: '1.25rem' }}>
+                  The student stays paused with no end date. Come back to this student's row and press Resume whenever they're ready.
+                </p>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Number of lessons to pause</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    min={1}
+                    max={52}
+                    value={suspendLessons}
+                    onChange={e => setSuspendLessons(Math.max(1, parseInt(e.target.value) || 1))}
+                  />
+                </div>
+              )}
+              <div className="form-actions">
+                <button className="btn btn-outline" onClick={() => setSuspendFor(null)}>{t('ui.cancel')}</button>
+                <button className="btn btn-amber" onClick={doSuspend}>
+                  <FiPause /> {suspendIndefinite ? 'Pause indefinitely' : `Pause ${suspendLessons} lesson${suspendLessons !== 1 ? 's' : ''}`}
+                </button>
               </div>
             </div>
           </div>
