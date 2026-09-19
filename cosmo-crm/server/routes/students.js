@@ -177,30 +177,22 @@ r.post('/:id/pay', (req, res) => {
   if (!student) return res.status(404).json({ error: 'Not found' });
 
   const cycle = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'payment_cycle_lessons'").get()?.value || '8', 10);
-  const lastPayment = db.prepare('SELECT MAX(confirmed_at) AS t FROM payments WHERE student_id = ?').get(studentId);
-  const since = lastPayment && lastPayment.t ? lastPayment.t : null;
-  // Lessons counted toward payment since the last payment, oldest first.
-  const countingLessons = db.prepare(`
-    SELECT occurred_at FROM lessons
-    WHERE student_id = ? AND counts_toward_payment = 1
-      AND (? IS NULL OR datetime(occurred_at) > datetime(?))
-    ORDER BY datetime(occurred_at) ASC
-  `).all(studentId, since, since);
-
-  // A payment covers exactly one cycle. If more lessons than that already
-  // happened (a late payment, or the start of a new month), anchor to the
-  // lesson that COMPLETED the cycle instead of "now" — anything after it
-  // rolls into the next cycle rather than being wiped for free.
-  const confirmedAt = countingLessons.length >= cycle
-    ? countingLessons[cycle - 1].occurred_at
-    : new Date().toISOString();
-  const lessonsCovered = Math.min(student.lessons_since_payment, cycle);
+  const total = student.lessons_since_payment;
+  const lessonsCovered = Math.min(total, cycle);
+  // A payment covers exactly one cycle. Anything beyond that (a late
+  // payment, or lessons already attended into the new month) rolls into
+  // the next cycle as a manual adjustment rather than being wiped for
+  // free — this works whether the extra lessons came from real attendance
+  // rows or from the manual +/- adjustment, since it's computed from the
+  // total either way instead of trying to locate a specific lesson row.
+  const remainder = Math.max(0, total - cycle);
+  const confirmedAt = new Date().toISOString();
 
   db.transaction(() => {
     db.prepare(`INSERT INTO payments (student_id, amount, lessons_covered, confirmed_at, notes) VALUES (?, ?, ?, ?, ?)`)
       .run(studentId, amount || 0, lessonsCovered, confirmedAt, notes || '');
-    db.prepare(`UPDATE students SET lessons_adjustment = 0, payment_status = 'paid', payment_excuse_reason = NULL, overdue_warned_at_lessons = NULL, updated_at = datetime('now') WHERE id = ?`)
-      .run(studentId);
+    db.prepare(`UPDATE students SET lessons_adjustment = ?, payment_status = 'paid', payment_excuse_reason = NULL, overdue_warned_at_lessons = NULL, updated_at = datetime('now') WHERE id = ?`)
+      .run(remainder, studentId);
     db.recomputeLessonsSincePayment(studentId);
   })();
   // Clear pending reminders
