@@ -268,9 +268,11 @@ export default function Students() {
                   </tr>
                   {section.students.map(s => {
                     const sev = paymentSeverity(s);
+                    const paused = isPaused(s);
                     return (
                     <tr key={s.id} style={
-                      sev.level === 'critical' ? { background: 'var(--red-bg)' }
+                      paused ? { background: 'var(--blue-bg)' }
+                      : sev.level === 'critical' ? { background: 'var(--red-bg)' }
                       : sev.level === 'late' ? { background: 'var(--amber-bg)' }
                       : undefined
                     }>
@@ -300,9 +302,9 @@ export default function Students() {
                         )}
                       </td>
                       <td>
-                        {isPaused(s) && (
+                        {paused && (
                           <div style={{ marginBottom: 4 }}>
-                            <span className="badge amber" style={{ fontSize: '0.65rem' }}>
+                            <span className="badge blue" style={{ fontSize: '0.65rem' }}>
                               <FiPause style={{ marginRight: 3 }} />
                               {s.suspended_until_lesson >= 900000000 ? 'Paused' : `${s.suspended_until_lesson - s.group_current_lesson} left`}
                             </span>
@@ -326,9 +328,9 @@ export default function Students() {
                             <button className="btn btn-sm btn-outline btn-icon" disabled={refreshingId === s.id} onClick={() => doRefreshRatings(s)} title="Refresh online ratings"><FiRefreshCw /></button>
                           )}
                           {s.group_id != null && (
-                            isPaused(s)
+                            paused
                               ? <button className="btn btn-sm btn-outline btn-icon" style={{ color: 'var(--green)' }} onClick={() => doUnsuspend(s)} title="Resume now"><FiPlay /></button>
-                              : <button className="btn btn-sm btn-outline btn-icon" style={{ color: 'var(--amber)' }} onClick={() => openSuspend(s)} title="Pause lessons"><FiPause /></button>
+                              : <button className="btn btn-sm btn-outline btn-icon" style={{ color: 'var(--blue)' }} onClick={() => openSuspend(s)} title="Pause lessons"><FiPause /></button>
                           )}
                           <button className="btn btn-sm btn-green btn-icon" onClick={() => openPay(s)} title="Confirm Payment"><FiDollarSign /></button>
                           {sev.level === 'critical' ? (

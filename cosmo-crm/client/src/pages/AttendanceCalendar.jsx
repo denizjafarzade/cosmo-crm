@@ -5,6 +5,9 @@ import { t } from '../i18n';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// Matches the server's own payment-cycle length (see Students.jsx's
+// PAYMENT_CYCLE) — not fetched from Settings since nothing else here does.
+const PAYMENT_CYCLE = 8;
 
 function ymd(date) {
   const y = date.getFullYear();
@@ -15,20 +18,51 @@ function ymd(date) {
 
 export default function AttendanceCalendar({ student, onClose }) {
   const [lessons, setLessons] = useState(null);
+  const [payments, setPayments] = useState(null);
   const now = new Date();
   const [view, setView] = useState({ year: now.getFullYear(), month: now.getMonth() });
 
   useEffect(() => {
     api.getLessons({ student_id: student.id }).then(setLessons).catch(() => setLessons([]));
+    api.getPayments({ student_id: student.id }).then(setPayments).catch(() => setPayments([]));
   }, [student.id]);
 
-  // Map date-string -> { attended, excused, unexcused }
+  // Every date where a payment cycle (PAYMENT_CYCLE counted lessons) was
+  // completed — the count resets right after each confirmed payment, same
+  // as the server's own recomputeLessonsSincePayment, so these line up with
+  // when payment was actually due, not just a naive every-8th lesson.
+  const cycleCompleteDays = useMemo(() => {
+    if (!lessons || !payments) return new Set();
+    const counting = lessons
+      .filter(l => l.counts_toward_payment === 1)
+      .slice()
+      .sort((a, b) => new Date(a.occurred_at) - new Date(b.occurred_at));
+    const sortedPayments = payments
+      .slice()
+      .sort((a, b) => new Date(a.confirmed_at) - new Date(b.confirmed_at));
+
+    const days = new Set();
+    let segCount = 0;
+    let payIdx = 0;
+    for (const l of counting) {
+      const occurredAt = new Date(l.occurred_at).getTime();
+      while (payIdx < sortedPayments.length && new Date(sortedPayments[payIdx].confirmed_at).getTime() <= occurredAt) {
+        segCount = 0;
+        payIdx++;
+      }
+      segCount++;
+      if (segCount % PAYMENT_CYCLE === 0) days.add((l.occurred_at || '').slice(0, 10));
+    }
+    return days;
+  }, [lessons, payments]);
+
+  // Map date-string -> { attended, excused, unexcused, cycleComplete }
   const dayMap = useMemo(() => {
     const map = {};
     for (const l of lessons || []) {
       const day = (l.occurred_at || '').slice(0, 10);
       if (!day) continue;
-      if (!map[day]) map[day] = { attended: false, excused: false, unexcused: false };
+      if (!map[day]) map[day] = { attended: false, excused: false, unexcused: false, cycleComplete: false };
       if (l.absent) {
         if (l.is_excused) map[day].excused = true;
         else map[day].unexcused = true;
@@ -36,8 +70,12 @@ export default function AttendanceCalendar({ student, onClose }) {
         map[day].attended = true;
       }
     }
+    for (const day of cycleCompleteDays) {
+      if (!map[day]) map[day] = { attended: false, excused: false, unexcused: false, cycleComplete: false };
+      map[day].cycleComplete = true;
+    }
     return map;
-  }, [lessons]);
+  }, [lessons, cycleCompleteDays]);
 
   const changeMonth = (delta) => {
     setView(v => {
@@ -121,6 +159,13 @@ export default function AttendanceCalendar({ student, onClose }) {
         }
         ctx.font = '600 16px Arial';
         ctx.fillText(String(cell), cx, cy);
+        if (info && info.cycleComplete) {
+          ctx.beginPath();
+          ctx.arc(cx + 15, cy - 19, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#dc2626';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
       }
       col++;
       if (col === 7) { col = 0; row++; }
@@ -137,6 +182,9 @@ export default function AttendanceCalendar({ student, onClose }) {
     ctx.beginPath(); ctx.arc(gridX + 360, ly, 8, 0, Math.PI * 2); ctx.fillStyle = '#ef4444'; ctx.fill();
     ctx.fillStyle = '#475569';
     ctx.fillText('Unexcused', gridX + 376, ly + 4);
+    ctx.beginPath(); ctx.arc(gridX + 490, ly, 6, 0, Math.PI * 2); ctx.fillStyle = '#dc2626'; ctx.fill();
+    ctx.fillStyle = '#475569';
+    ctx.fillText('8 lessons completed', gridX + 504, ly + 4);
 
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
@@ -179,22 +227,31 @@ export default function AttendanceCalendar({ student, onClose }) {
                   const unexcused = info && info.unexcused;
                   const excused = info && info.excused && !unexcused;
                   const attended = info && info.attended && !unexcused && !excused;
+                  const cycleComplete = info && info.cycleComplete;
                   return (
                     <div key={i} style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{
-                        width: 34, height: 34, borderRadius: '50%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.85rem', fontWeight: attended ? 700 : 500,
-                        background: attended ? '#22c55e' : unexcused ? '#ef4444' : 'transparent',
-                        color: attended || unexcused ? '#fff' : excused ? '#f59e0b' : 'var(--text, #334155)',
-                        border: excused ? '2px solid #f59e0b' : 'none',
-                      }}>{cell}</div>
+                      <div style={{ position: 'relative', width: 34, height: 34 }} title={cycleComplete ? '8 lessons completed here' : undefined}>
+                        <div style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.85rem', fontWeight: attended ? 700 : 500,
+                          background: attended ? '#22c55e' : unexcused ? '#ef4444' : 'transparent',
+                          color: attended || unexcused ? '#fff' : excused ? '#f59e0b' : 'var(--text, #334155)',
+                          border: excused ? '2px solid #f59e0b' : 'none',
+                        }}>{cell}</div>
+                        {cycleComplete && (
+                          <span style={{
+                            position: 'absolute', top: -2, right: -2, width: 10, height: 10,
+                            borderRadius: '50%', background: '#dc2626', border: '2px solid var(--surface, #fff)',
+                          }} />
+                        )}
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div style={{ display: 'flex', gap: 16, marginTop: 14, fontSize: '0.78rem', color: 'var(--slate-400)' }}>
+              <div style={{ display: 'flex', gap: 16, marginTop: 14, fontSize: '0.78rem', color: 'var(--slate-400)', flexWrap: 'wrap' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} /> {t('ui.attended')}
                 </span>
@@ -203,6 +260,9 @@ export default function AttendanceCalendar({ student, onClose }) {
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} /> {t('ui.unexcused')}
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#dc2626', display: 'inline-block' }} /> {t('ui.cycleComplete')}
                 </span>
               </div>
 
