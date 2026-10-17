@@ -537,7 +537,21 @@ function recomputeLessonsSincePayment(studentId) {
   return total;
 }
 
+// Records the payment a new student already handed over before their first
+// lesson — the academy collects one cycle up front, so by the time they're
+// added to the CRM the money's already in hand. Student rows default to
+// lessons_since_payment = 0 and payment_status = 'paid', so there's nothing
+// to reset here; this just makes sure that collected payment shows up in
+// revenue stats instead of being invisible until their *second* payment.
+function recordInitialPayment(studentId, amount) {
+  if (!amount || amount <= 0) return;
+  const cycle = parseInt(getSetting('payment_cycle_lessons') || '8', 10);
+  db.prepare(`INSERT INTO payments (student_id, amount, lessons_covered, confirmed_at, notes)
+    VALUES (?, ?, ?, datetime('now'), 'Initial payment on enrollment')`).run(studentId, amount, cycle);
+}
+
 module.exports = db;
 module.exports.getSetting = getSetting;
 module.exports.setSetting = setSetting;
 module.exports.recomputeLessonsSincePayment = recomputeLessonsSincePayment;
+module.exports.recordInitialPayment = recordInitialPayment;

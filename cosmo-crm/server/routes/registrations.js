@@ -102,8 +102,9 @@ r.post('/:id/enroll', (req, res) => {
   const reg = db.prepare('SELECT * FROM registrations WHERE id = ?').get(req.params.id);
   if (!reg) return res.status(404).json({ error: 'Inquiry not found' });
 
-  const { group_id, new_group } = req.body || {};
+  const { group_id, new_group, monthly_fee } = req.body || {};
   if (!group_id && !new_group) return res.status(400).json({ error: 'Choose a group or provide a new one' });
+  const fee = monthly_fee === '' || monthly_fee == null ? null : Number(monthly_fee);
 
   // Map the public form's level wording onto the students table's values.
   const LEVELS = {
@@ -137,13 +138,14 @@ r.post('/:id/enroll', (req, res) => {
 
     const ins = db.prepare(`INSERT INTO students
       (name, surname, whatsapp_number, level, fide_rating, group_id, birth_date, sector,
-       chess_platform, chess_username, blitz_rating, rapid_rating, blitz_games, rapid_games, ratings_updated_at, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+       chess_platform, chess_username, blitz_rating, rapid_rating, blitz_games, rapid_games, ratings_updated_at, notes, monthly_fee)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .run(name || reg.name, surname, reg.phone || null, level, reg.fide_rating ?? null, groupId,
         reg.birth_date || null, reg.sector || null, reg.chess_platform || null, reg.chess_username || null,
         reg.blitz_rating ?? null, reg.rapid_rating ?? null, reg.blitz_games ?? null, reg.rapid_games ?? null,
-        reg.ratings_updated_at || null, reg.notes || '');
+        reg.ratings_updated_at || null, reg.notes || '', fee);
     studentId = ins.lastInsertRowid;
+    db.recordInitialPayment(studentId, fee);
 
     db.prepare("UPDATE registrations SET status = 'enrolled', updated_at = datetime('now') WHERE id = ?").run(req.params.id);
   });

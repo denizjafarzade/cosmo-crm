@@ -370,7 +370,9 @@ export default function Students() {
                 <div className="form-group">
                   <label>{t('students.monthlyFee')}</label>
                   <input className="form-input" type="number" min="0" step="0.01" value={form.monthly_fee} onChange={e => setForm(f => ({ ...f, monthly_fee: e.target.value }))} placeholder="e.g. 150" />
-                  <span style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{t('students.monthlyFeeHint')}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>
+                    {editId ? t('students.monthlyFeeHint') : t('students.monthlyFeeHintAdd')}
+                  </span>
                 </div>
                 <div className="form-row">
                   <div className="form-group"><label>{t('ui.date_of_birth')}</label><input className="form-input" type="date" value={form.birth_date || ''} onChange={e => setForm(f => ({ ...f, birth_date: e.target.value }))} /></div>

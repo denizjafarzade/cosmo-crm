@@ -110,8 +110,8 @@ export default function Registrations() {
     setEnrollError('');
     try {
       const payload = enroll.mode === 'existing'
-        ? { group_id: enroll.group_id }
-        : { new_group: enroll.newGroup };
+        ? { group_id: enroll.group_id, monthly_fee: enroll.monthly_fee }
+        : { new_group: enroll.newGroup, monthly_fee: enroll.monthly_fee };
       if (enroll.mode === 'existing' && !enroll.group_id) throw new Error(t('reg.pickGroup'));
       if (enroll.mode === 'new' && !enroll.newGroup.name.trim()) throw new Error(t('reg.groupNameRequired'));
       await api.enrollRegistration(enroll.reg.id, payload);
@@ -149,7 +149,7 @@ export default function Registrations() {
       api.getGroups().then(g => setGroups(Array.isArray(g) ? g : [])).catch(() => setGroups([]));
       // Close the detail dialog first — two stacked overlays left this one behind.
       setSelected(null);
-      setEnroll({ reg, mode: 'existing', group_id: '', newGroup: { name: '', lesson_duration_minutes: 60, schedules: [] } });
+      setEnroll({ reg, mode: 'existing', group_id: '', monthly_fee: reg.quoted_price ?? '', newGroup: { name: '', lesson_duration_minutes: 60, schedules: [] } });
       return;
     }
     setSaving(true);
@@ -230,6 +230,13 @@ export default function Registrations() {
                   onClick={() => setEnroll(en => ({ ...en, mode: 'existing' }))}>{t('reg.existingGroup')}</button>
                 <button className={`btn btn-sm ${enroll.mode === 'new' ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setEnroll(en => ({ ...en, mode: 'new' }))}>{t('reg.newGroup')}</button>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('students.monthlyFee')}</label>
+                <input className="form-input" type="number" min="0" step="0.01" value={enroll.monthly_fee}
+                  onChange={e => setEnroll(en => ({ ...en, monthly_fee: e.target.value }))} placeholder="e.g. 150" />
+                <span style={{ fontSize: '0.72rem', color: 'var(--slate-400)' }}>{t('reg.monthlyFeeHint')}</span>
               </div>
 
               {enroll.mode === 'existing' ? (

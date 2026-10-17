@@ -42,9 +42,11 @@ r.post('/', (req, res) => {
   const { name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes,
     birth_date, sector, chess_platform, chess_username, monthly_fee, chess_category } = req.body;
   if (!name) return res.status(400).json({ error: 'Name required' });
+  const fee = monthly_fee === '' || monthly_fee == null ? null : Number(monthly_fee);
   const result = db.prepare(`INSERT INTO students (name, surname, whatsapp_number, parent_whatsapp, level, fide_rating, coach_id, group_id, notes, birth_date, sector, chess_platform, chess_username, monthly_fee, chess_category)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(name, surname || '', whatsapp_number || null, parent_whatsapp || null, level || 'beginner', parseFideRating(fide_rating), coach_id || null, group_id || null, notes || '',
-    birth_date || null, sector || null, chess_platform || null, chess_username || null, monthly_fee === '' || monthly_fee == null ? null : Number(monthly_fee), chess_category || null);
+    birth_date || null, sector || null, chess_platform || null, chess_username || null, fee, chess_category || null);
+  db.recordInitialPayment(result.lastInsertRowid, fee);
   if (chess_platform && chess_username) {
     require('../services/chessRatings').updateRatingsFor('students', result.lastInsertRowid, chess_platform, chess_username).catch(() => {});
   }
