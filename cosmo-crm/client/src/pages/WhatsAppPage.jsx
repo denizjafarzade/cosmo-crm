@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { FiRefreshCw, FiSend, FiWifi, FiWifiOff, FiAlertTriangle, FiCopy, FiCheck } from 'react-icons/fi';
 import { t } from '../i18n';
 import api from '../api';
+import WhatsAppCloud from './WhatsAppCloud';
 
 export default function WhatsAppPage() {
+  // The official bot is the primary channel now, so it opens first.
+  const [tab, setTab] = useState('cloud');
   const [wa, setWa] = useState({ status: 'disconnected', qr: null, groups: [], error: null });
   const [testChat, setTestChat] = useState('');
   const [testMsg, setTestMsg] = useState('');
@@ -54,6 +57,37 @@ export default function WhatsAppPage() {
   };
   const sc = statusConfig[wa.status] || statusConfig.disconnected;
 
+  // Two channels share this page: the official Cloud API bot handles 1:1
+  // conversations, while the Baileys link below stays responsible for class
+  // group messages, which the official Groups API cannot cover.
+  const TabButton = ({ id, label, hint }) => (
+    <button type="button" onClick={() => setTab(id)} style={{
+      flex: '1 1 160px', cursor: 'pointer', textAlign: 'left',
+      padding: '0.7rem 1rem', borderRadius: 10,
+      border: `1.5px solid ${tab === id ? 'var(--primary)' : 'var(--slate-200)'}`,
+      background: tab === id ? 'var(--primary)' : 'transparent',
+      color: tab === id ? '#fff' : 'var(--slate-600)',
+    }}>
+      <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{label}</div>
+      <div style={{ fontSize: '0.72rem', opacity: tab === id ? 0.85 : 0.6, marginTop: 2 }}>{hint}</div>
+    </button>
+  );
+
+  if (tab === 'cloud') {
+    return (
+      <>
+        <div className="page-header"><h1>{t('whatsapp.title')}</h1></div>
+        <div className="page-body" style={{ paddingBottom: 0 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <TabButton id="cloud" label={t('whatsapp.tabCloud')} hint={t('whatsapp.tabCloudHint')} />
+            <TabButton id="groups" label={t('whatsapp.tabGroups')} hint={t('whatsapp.tabGroupsHint')} />
+          </div>
+        </div>
+        <WhatsAppCloud />
+      </>
+    );
+  }
+
   return (
     <>
       <div className="page-header">
@@ -70,6 +104,10 @@ export default function WhatsAppPage() {
         </div>
       </div>
       <div className="page-body">
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+          <TabButton id="cloud" label={t('whatsapp.tabCloud')} hint={t('whatsapp.tabCloudHint')} />
+          <TabButton id="groups" label={t('whatsapp.tabGroups')} hint={t('whatsapp.tabGroupsHint')} />
+        </div>
         {/* Status banner */}
         <div className="card" style={{ marginBottom: '1.5rem', border: `1px solid ${sc.color}20` }}>
           <div className="card-body" style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: sc.bg, borderRadius: 'var(--radius)' }}>

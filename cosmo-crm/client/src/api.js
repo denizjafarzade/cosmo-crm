@@ -140,6 +140,14 @@ const api = {
   waReconnect: () => request('/whatsapp/reconnect', { method: 'POST' }),
   waDisconnect: () => request('/whatsapp/disconnect', { method: 'POST' }),
   waSendTest: (data) => request('/whatsapp/send-test', { method: 'POST', body: data }),
+
+  // Official Cloud API bot
+  waCloudStatus: () => request('/whatsapp-cloud/status'),
+  waCloudSaveSettings: (data) => request('/whatsapp-cloud/settings', { method: 'PUT', body: data }),
+  waCloudTemplates: () => request('/whatsapp-cloud/templates'),
+  waCloudSend: (data) => request('/whatsapp-cloud/send', { method: 'POST', body: data }),
+  waCloudConversations: () => request('/whatsapp-cloud/conversations'),
+  waCloudConversation: (waId) => request(`/whatsapp-cloud/conversations/${waId}`),
 };
 
 export default api;
