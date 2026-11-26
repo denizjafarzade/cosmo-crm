@@ -1,6 +1,34 @@
 const cron = require('node-cron');
 const db = require('../db');
 const wa = require('./whatsapp');
+const cloud = require('./whatsappCloud');
+
+// One-to-one notifications to parents go out over the official Cloud API when
+// it is configured: it carries the verified badge and carries no ban risk.
+// Baileys stays as the fallback so nothing stops working before the Cloud API
+// is live, and remains the only channel for class *group* messages.
+async function notifyPerson(number, text, { template, params = [] } = {}) {
+  if (cloud.isConfigured()) {
+    try {
+      const tplName = template ? db.getSetting(template) : null;
+      await cloud.sendSmart(number, {
+        text,
+        template: tplName ? { name: tplName, bodyParams: params } : null,
+      });
+      return 'cloud';
+    } catch (e) {
+      // Outside the 24h window with no approved template is the common case;
+      // log it plainly rather than retrying through an unofficial channel
+      // that Meta could flag.
+      console.error(`[Notify] Cloud API send to ${number} failed (${e.code || 'error'}): ${e.message}`);
+    }
+  }
+  if (wa.getStatus().status === 'ready') {
+    await wa.sendToNumber(number, text);
+    return 'baileys';
+  }
+  throw new Error('No WhatsApp channel available');
+}
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -284,10 +312,12 @@ async function checkOverdueWarnings() {
       `Əgər növbəti 2 dərs ərzində ödəniş tamamlanmasa və ya keçərli bir səbəb bildirilməsə, ` +
       `dərsləriniz müvəqqəti dayandırılacaq.\n\nAnlayışınız üçün təşəkkür edirik.`;
     const target = s.parent_whatsapp || s.whatsapp_number;
-    if (target && withinSendWindow() && wa.getStatus().status === 'ready') {
+    if (target && withinSendWindow() && (cloud.isConfigured() || wa.getStatus().status === 'ready')) {
       try {
-        await wa.sendToNumber(target, message);
-        wa.logSend('payment', `student:${s.id}`, `${s.name} ${s.surname}`, message, 'success', null);
+        const via = await notifyPerson(target, message, {
+          template: 'wa_tpl_payment_reminder', params: [`${s.name} ${s.surname}`, String(over)],
+        });
+        wa.logSend('payment', `student:${s.id}`, `${s.name} ${s.surname}`, `[${via}] ${message}`, 'success', null);
         db.prepare('UPDATE students SET overdue_warned_at_lessons = ? WHERE id = ?').run(s.lessons_since_payment, s.id);
       } catch (e) {
         wa.logSend('payment', `student:${s.id}`, `${s.name} ${s.surname}`, message, 'failed', e.message);
@@ -353,11 +383,14 @@ async function _sendPaymentReminder(student, reminderNumber) {
     VALUES ('payment', ?, ?, datetime('now'), 0, ?)`).run(student.id, message, idempKey);
 
   const target = student.parent_whatsapp || student.whatsapp_number;
-  if (target && wa.getStatus().status === 'ready') {
+  if (target && (cloud.isConfigured() || wa.getStatus().status === 'ready')) {
     try {
-      await wa.sendToNumber(target, message);
+      const via = await notifyPerson(target, message, {
+        template: 'wa_tpl_payment_reminder',
+        params: [`${student.name} ${student.surname}`, String(student.lessons_since_payment)],
+      });
       db.prepare("UPDATE scheduled_sends SET sent = 1, sent_at = datetime('now') WHERE idempotency_key = ?").run(idempKey);
-      wa.logSend('payment', `student:${student.id}`, `${student.name} ${student.surname}`, message, 'success', null);
+      wa.logSend('payment', `student:${student.id}`, `${student.name} ${student.surname}`, `[${via}] ${message}`, 'success', null);
     } catch (e) {
       db.prepare("UPDATE scheduled_sends SET error = ? WHERE idempotency_key = ?").run(e.message, idempKey);
       wa.logSend('payment', `student:${student.id}`, `${student.name} ${student.surname}`, message, 'failed', e.message);

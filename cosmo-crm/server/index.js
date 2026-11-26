@@ -52,8 +52,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
+// Keep the exact bytes of each request: Meta signs its webhook payloads, and
+// the signature has to be checked against the raw body, not a re-serialised
+// copy of the parsed object.
+app.use(express.json({
+  verify: (req, _res, buf) => { req.rawBody = buf; },
+}));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
+// The WhatsApp Cloud API webhook is mounted before requireAuth on purpose:
+// Meta calls it without any token of ours, and it authenticates each request
+// by verifying Meta's SHA-256 signature instead.
+app.use('/webhook/whatsapp', require('./routes/whatsappWebhook'));
 
 // Auth (login is public; everything else under /api requires a valid token)
 const { router: authRouter, requireAuth } = require('./auth');
@@ -70,6 +80,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
+app.use('/api/whatsapp-cloud', require('./routes/whatsappCloud'));
 app.use('/api/registrations', require('./routes/registrations'));
 app.use('/api/content', require('./routes/content'));
 

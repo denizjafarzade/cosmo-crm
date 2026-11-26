@@ -550,7 +550,82 @@ function recordInitialPayment(studentId, amount) {
     VALUES (?, ?, ?, datetime('now'), 'Initial payment on enrollment')`).run(studentId, amount, cycle);
 }
 
+// --- WhatsApp Cloud API (official bot) ---
+// Separate from the Baileys tables: the Cloud API addresses people by their
+// wa_id (phone number in international format, no +), keeps a 24-hour window
+// in which free-form replies are allowed, and re-delivers webhooks until it
+// gets a 200, so inbound messages have to be de-duplicated by their id.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS wa_contacts (
+    wa_id TEXT PRIMARY KEY,
+    profile_name TEXT DEFAULT '',
+    student_id INTEGER REFERENCES students(id) ON DELETE SET NULL,
+    registration_id INTEGER REFERENCES registrations(id) ON DELETE SET NULL,
+    role TEXT CHECK(role IN ('admin','parent','student','unknown')) DEFAULT 'unknown',
+    -- last inbound drives the 24h free-form window
+    last_inbound_at TEXT,
+    last_outbound_at TEXT,
+    blocked INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- One row per conversation in progress (registration wizard, payment entry…).
+  CREATE TABLE IF NOT EXISTS wa_state (
+    wa_id TEXT PRIMARY KEY REFERENCES wa_contacts(wa_id) ON DELETE CASCADE,
+    flow TEXT NOT NULL,
+    step TEXT NOT NULL,
+    data TEXT NOT NULL DEFAULT '{}',
+    expires_at TEXT,
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- Idempotency + audit for everything Meta delivers to the webhook.
+  CREATE TABLE IF NOT EXISTS wa_inbox (
+    message_id TEXT PRIMARY KEY,
+    wa_id TEXT,
+    type TEXT,
+    body TEXT,
+    payload TEXT,
+    handled INTEGER DEFAULT 0,
+    error TEXT,
+    received_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- Delivery status per outbound message (sent → delivered → read, or failed).
+  CREATE TABLE IF NOT EXISTS wa_outbox (
+    message_id TEXT PRIMARY KEY,
+    wa_id TEXT,
+    kind TEXT,
+    body TEXT,
+    status TEXT DEFAULT 'accepted',
+    error_code INTEGER,
+    error_title TEXT,
+    conversation_id TEXT,
+    pricing_category TEXT,
+    sent_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_wa_inbox_wa ON wa_inbox(wa_id, received_at);
+  CREATE INDEX IF NOT EXISTS idx_wa_outbox_wa ON wa_outbox(wa_id, sent_at);
+  CREATE INDEX IF NOT EXISTS idx_wa_contacts_student ON wa_contacts(student_id);
+`);
+
+// A free-form reply is only allowed within 24h of the person's last message;
+// outside it, Meta requires an approved template. Everything that sends a
+// message checks this first.
+function withinServiceWindow(waId) {
+  const row = db.prepare(`SELECT last_inbound_at FROM wa_contacts WHERE wa_id = ?`).get(waId);
+  if (!row || !row.last_inbound_at) return false;
+  const seen = db.prepare(
+    `SELECT (julianday('now') - julianday(?)) * 24 AS hours`
+  ).get(row.last_inbound_at);
+  return seen.hours < 24;
+}
+
 module.exports = db;
+module.exports.withinServiceWindow = withinServiceWindow;
 module.exports.getSetting = getSetting;
 module.exports.setSetting = setSetting;
 module.exports.recomputeLessonsSincePayment = recomputeLessonsSincePayment;
